@@ -28,7 +28,7 @@ public class ItemDataBuilder<U extends Item, P> extends EntryDataBuilder<Item, U
 
     @Override
     public IItemDataBuilder<U, P> model(Consumer<IEntryDataContext<Item, U, ItemModelProvider>> cons) {
-        this.model = cons;
+        model = cons;
         return self();
     }
 

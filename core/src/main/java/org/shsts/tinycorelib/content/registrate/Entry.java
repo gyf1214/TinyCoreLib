@@ -44,8 +44,8 @@ public class Entry<U> implements IEntry<U> {
         return object;
     }
 
-    public void setObject(U val) {
-        object = val;
+    public void setObject(U value) {
+        object = value;
         supplier = null;
     }
 }

@@ -5,8 +5,10 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.IEntry;
+import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 
 import java.util.List;
@@ -16,6 +18,10 @@ import java.util.function.Supplier;
 @MethodsReturnNonnullByDefault
 public interface IDataGen {
     String modid();
+
+    <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item);
+
+    <U extends Block> IBlockDataBuilder<U, IDataGen> block(IEntry<U> block);
 
     <U extends Item> IItemDataBuilder<U, IDataGen> item(ResourceLocation loc, Supplier<U> item);
 

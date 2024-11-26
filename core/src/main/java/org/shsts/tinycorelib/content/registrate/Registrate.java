@@ -5,15 +5,20 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
+import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
+import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
+import org.shsts.tinycorelib.content.registrate.handler.RenderTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
@@ -30,10 +35,11 @@ public class Registrate implements IRegistrate {
     private final Map<ResourceKey<?>, EntryHandler<?>> entryHandlers = new HashMap<>();
 
     // registry entries
-    public final EntryHandler<Item> itemHandler;
     public final EntryHandler<Block> blockHandler;
+    public final EntryHandler<Item> itemHandler;
 
     // client only
+    public final RenderTypeHandler renderTypeHandler;
     public final TintHandler tintHandler;
 
     private final TrackedObjects trackedObjects;
@@ -44,6 +50,7 @@ public class Registrate implements IRegistrate {
         this.itemHandler = createEntryHandler(ForgeRegistries.ITEMS);
         this.blockHandler = createEntryHandler(ForgeRegistries.BLOCKS);
 
+        this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
 
         this.trackedObjects = new TrackedObjects();
@@ -69,10 +76,15 @@ public class Registrate implements IRegistrate {
         }
     }
 
+    private void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(renderTypeHandler::onClientSetup);
+    }
+
     @Override
     public void registerClient(IEventBus modEventBus) {
         modEventBus.addListener(tintHandler::onRegisterBlockColors);
         modEventBus.addListener(tintHandler::onRegisterItemColors);
+        modEventBus.addListener(this::onClientSetup);
     }
 
     @Override
@@ -85,6 +97,12 @@ public class Registrate implements IRegistrate {
     @Override
     public <P> IItemBuilder<Item, P> item(P parent, String id) {
         return item(parent, id, Item::new);
+    }
+
+    @Override
+    public <U extends Block, P> IBlockBuilder<U, P> block(P parent, String id,
+        Function<BlockBehaviour.Properties, U> factory) {
+        return new BlockBuilder<>(this, parent, id, factory);
     }
 
     public void trackTranslation(String key) {

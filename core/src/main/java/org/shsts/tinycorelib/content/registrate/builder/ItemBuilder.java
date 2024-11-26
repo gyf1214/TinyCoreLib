@@ -22,7 +22,7 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
     private final Function<Item.Properties, U> factory;
     private Transformer<Item.Properties> properties = $ -> $.tab(CreativeModeTab.TAB_MISC);
     @Nullable
-    private DistLazy<ItemColor> tint = null;
+    protected DistLazy<ItemColor> tint = null;
 
     public ItemBuilder(Registrate registrate, P parent, String id,
         Function<Item.Properties, U> factory) {

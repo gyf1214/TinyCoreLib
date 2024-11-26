@@ -4,8 +4,11 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 
 import java.util.function.Function;
@@ -31,5 +34,13 @@ public interface IRegistrate {
 
     default IItemBuilder<Item, IRegistrate> item(String id) {
         return item(this, id);
+    }
+
+    <U extends Block, P> IBlockBuilder<U, P> block(P parent, String id,
+        Function<BlockBehaviour.Properties, U> factory);
+
+    default <U extends Block> IBlockBuilder<U, IRegistrate> block(String id,
+        Function<BlockBehaviour.Properties, U> factory) {
+        return block(this, id, factory);
     }
 }

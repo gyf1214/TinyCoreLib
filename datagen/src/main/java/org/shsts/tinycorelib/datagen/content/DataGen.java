@@ -9,14 +9,18 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
+import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
+import org.shsts.tinycorelib.datagen.content.builder.BlockDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
+import org.shsts.tinycorelib.datagen.content.handler.BlockStateHandler;
 import org.shsts.tinycorelib.datagen.content.handler.DataHandler;
 import org.shsts.tinycorelib.datagen.content.handler.ItemModelHandler;
 import org.shsts.tinycorelib.datagen.content.handler.TagsHandler;
@@ -33,8 +37,10 @@ import java.util.function.Supplier;
 public class DataGen implements IDataGen {
     public final String modid;
 
+    public final BlockStateHandler blockStateHandler;
     public final ItemModelHandler itemModelHandler;
 
+    public final TrackedContext<Block> blockTrackedContext;
     public final TrackedContext<Item> itemTrackedContext;
     public final TrackedContext<String> langTrackedContext;
 
@@ -52,10 +58,12 @@ public class DataGen implements IDataGen {
         this.tagsHandlers = new HashMap<>();
         this.trackedContexts = new ArrayList<>();
 
+        this.blockStateHandler = createHandler(BlockStateHandler::new);
+        this.itemModelHandler = createHandler(ItemModelHandler::new);
         createTagsHandler(Registry.BLOCK);
         createTagsHandler(Registry.ITEM);
-        this.itemModelHandler = createHandler(ItemModelHandler::new);
 
+        this.blockTrackedContext = createTrackedContext(TrackedType.BLOCK);
         this.itemTrackedContext = createTrackedContext(TrackedType.ITEM);
         this.langTrackedContext = createTrackedContext(TrackedType.LANG);
     }
@@ -86,6 +94,16 @@ public class DataGen implements IDataGen {
     @Override
     public String modid() {
         return modid;
+    }
+
+    @Override
+    public <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item) {
+        return new BlockDataBuilder<>(this, this, loc, item);
+    }
+
+    @Override
+    public <U extends Block> IBlockDataBuilder<U, IDataGen> block(IEntry<U> block) {
+        return new BlockDataBuilder<>(this, this, block.loc(), block);
     }
 
     @Override
