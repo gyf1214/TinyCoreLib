@@ -17,14 +17,13 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class ItemDataBuilder<U extends Item, P> extends EntryDataBuilder<U, P, IItemDataBuilder<U, P>>
+public class ItemDataBuilder<U extends Item, P> extends EntryDataBuilder<Item, U, P, IItemDataBuilder<U, P>>
     implements IItemDataBuilder<U, P> {
     @Nullable
     private Consumer<IEntryDataContext<Item, U, ItemModelProvider>> model = null;
 
-    public ItemDataBuilder(DataGen dataGen, P parent,
-        ResourceLocation loc, Supplier<U> object) {
-        super(dataGen, parent, loc, object);
+    public ItemDataBuilder(DataGen dataGen, P parent, ResourceLocation loc, Supplier<U> object) {
+        super(dataGen, parent, loc, dataGen.itemTrackedContext, object);
     }
 
     @Override

@@ -3,6 +3,8 @@ package org.shsts.tinycorelib.datagen.content;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.data.DataProvider;
+import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -10,9 +12,11 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
+import org.shsts.tinycorelib.content.tracking.TrackedType;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;
+import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
 import org.shsts.tinycorelib.datagen.content.handler.DataHandler;
 import org.shsts.tinycorelib.datagen.content.handler.ItemModelHandler;
 import org.shsts.tinycorelib.datagen.content.handler.TagsHandler;
@@ -31,9 +35,13 @@ public class DataGen implements IDataGen {
 
     public final ItemModelHandler itemModelHandler;
 
+    public final TrackedContext<Item> itemTrackedContext;
+    public final TrackedContext<String> langTrackedContext;
+
     private final Registrate registrate;
     private final List<DataHandler<?>> dataHandlers;
     private final Map<ResourceKey<? extends Registry<?>>, TagsHandler<?>> tagsHandlers;
+    private final List<TrackedContext<?>> trackedContexts;
 
     @SuppressWarnings("deprecation")
     public DataGen(Registrate registrate) {
@@ -42,21 +50,31 @@ public class DataGen implements IDataGen {
 
         this.dataHandlers = new ArrayList<>();
         this.tagsHandlers = new HashMap<>();
+        this.trackedContexts = new ArrayList<>();
 
         createTagsHandler(Registry.BLOCK);
         createTagsHandler(Registry.ITEM);
-        this.itemModelHandler = handler(ItemModelHandler::new);
+        this.itemModelHandler = createHandler(ItemModelHandler::new);
+
+        this.itemTrackedContext = createTrackedContext(TrackedType.ITEM);
+        this.langTrackedContext = createTrackedContext(TrackedType.LANG);
     }
 
-    private <T extends DataHandler<?>> T handler(Function<DataGen, T> factory) {
-        var handler = factory.apply(this);
-        dataHandlers.add(handler);
-        return handler;
+    private <T extends DataHandler<?>> T createHandler(Function<DataGen, T> factory) {
+        var ret = factory.apply(this);
+        dataHandlers.add(ret);
+        return ret;
     }
 
     private <T> void createTagsHandler(Registry<T> registry) {
-        var ret = handler($ -> new TagsHandler<>($, registry));
+        var ret = createHandler($ -> new TagsHandler<>($, registry));
         tagsHandlers.put(registry.key(), ret);
+    }
+
+    private <V> TrackedContext<V> createTrackedContext(TrackedType<V> type) {
+        var ret = new TrackedContext<>(registrate, type);
+        trackedContexts.add(ret);
+        return ret;
     }
 
     @SuppressWarnings("unchecked")
@@ -98,5 +116,18 @@ public class DataGen implements IDataGen {
         for (var handler : dataHandlers) {
             handler.onGatherData(event);
         }
+        event.getGenerator().addProvider(new DataProvider() {
+            @Override
+            public void run(HashCache cache) {
+                for (var trackedCtx : trackedContexts) {
+                    trackedCtx.postValidate();
+                }
+            }
+
+            @Override
+            public String getName() {
+                return "Validation: " + modid;
+            }
+        });
     }
 }

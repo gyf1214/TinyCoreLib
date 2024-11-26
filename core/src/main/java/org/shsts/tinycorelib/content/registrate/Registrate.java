@@ -15,6 +15,8 @@ import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
+import org.shsts.tinycorelib.content.tracking.TrackedObjects;
+import org.shsts.tinycorelib.content.tracking.TrackedType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +33,8 @@ public class Registrate implements IRegistrate {
     public final EntryHandler<Block> blockHandler;
     public final TintHandler tintHandler;
 
+    private final TrackedObjects trackedObjects;
+
     public Registrate(String modid) {
         this.modid = modid;
 
@@ -38,6 +42,8 @@ public class Registrate implements IRegistrate {
         this.blockHandler = createEntryHandler(ForgeRegistries.BLOCKS);
 
         this.tintHandler = new TintHandler();
+
+        this.trackedObjects = new TrackedObjects();
     }
 
     @SuppressWarnings("unchecked")
@@ -67,13 +73,36 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <U extends Item> IItemBuilder<U, IRegistrate> item(String id,
+    public <U extends Item, P> IItemBuilder<U, P> item(P parent, String id,
         Function<Item.Properties, U> factory) {
-        return new ItemBuilder<>(this, this, id, factory);
+        return (new ItemBuilder<>(this, parent, id, factory))
+            .onCreateObject(this::trackItem);
     }
 
     @Override
-    public IItemBuilder<Item, IRegistrate> item(String id) {
-        return item(id, Item::new);
+    public <P> IItemBuilder<Item, P> item(P parent, String id) {
+        return item(parent, id, Item::new);
+    }
+
+    public void trackTranslation(String key) {
+        trackedObjects.put(TrackedType.LANG, key, key);
+    }
+
+    public void trackBlock(Block block) {
+        var loc = block.getRegistryName();
+        assert loc != null;
+        trackedObjects.put(TrackedType.BLOCK, block, loc.toString());
+        trackTranslation(block.getDescriptionId());
+    }
+
+    public void trackItem(Item item) {
+        var loc = item.getRegistryName();
+        assert loc != null;
+        trackedObjects.put(TrackedType.ITEM, item, loc.toString());
+        trackTranslation(item.getDescriptionId());
+    }
+
+    public <V> Map<V, String> getTracked(TrackedType<V> type) {
+        return trackedObjects.getObjects(type);
     }
 }
