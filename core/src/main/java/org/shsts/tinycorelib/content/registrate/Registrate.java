@@ -15,8 +15,8 @@ import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
-import org.shsts.tinycorelib.content.tracking.TrackedObjects;
-import org.shsts.tinycorelib.content.tracking.TrackedType;
+import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
+import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +29,11 @@ public class Registrate implements IRegistrate {
 
     private final Map<ResourceKey<?>, EntryHandler<?>> entryHandlers = new HashMap<>();
 
+    // registry entries
     public final EntryHandler<Item> itemHandler;
     public final EntryHandler<Block> blockHandler;
+
+    // client only
     public final TintHandler tintHandler;
 
     private final TrackedObjects trackedObjects;

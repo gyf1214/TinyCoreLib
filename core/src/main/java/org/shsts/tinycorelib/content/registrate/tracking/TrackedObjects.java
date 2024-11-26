@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.content.tracking;
+package org.shsts.tinycorelib.content.registrate.tracking;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;

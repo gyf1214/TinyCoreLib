@@ -12,7 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
-import org.shsts.tinycorelib.content.tracking.TrackedType;
+import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;

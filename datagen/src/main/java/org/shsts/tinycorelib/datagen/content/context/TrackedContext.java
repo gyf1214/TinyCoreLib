@@ -5,7 +5,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraftforge.common.util.Lazy;
 import org.shsts.tinycorelib.content.registrate.Registrate;
-import org.shsts.tinycorelib.content.tracking.TrackedType;
+import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
