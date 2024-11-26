@@ -6,7 +6,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -38,7 +37,7 @@ public class TinyCoreLibTest {
     }
 
     private void onConstruct() {
-        CORE = (ITinyCoreLib) ModList.get().getModObjectById(ITinyCoreLib.ID).orElseThrow();
+        CORE = ITinyCoreLib.get();
         REGISTRATE = CORE.registrate(ID);
 
         All.init();

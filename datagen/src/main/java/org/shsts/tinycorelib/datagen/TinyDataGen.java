@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.common.Mod;
+import org.shsts.tinycorelib.api.registrate.IRegistrate;
+import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.ITinyDataGen;
 import org.shsts.tinycorelib.datagen.content.DataGen;
@@ -20,7 +22,7 @@ public class TinyDataGen implements ITinyDataGen {
     }
 
     @Override
-    public IDataGen dataGen(String modid) {
-        return new DataGen(modid);
+    public IDataGen dataGen(IRegistrate registrate) {
+        return new DataGen((Registrate) registrate);
     }
 }

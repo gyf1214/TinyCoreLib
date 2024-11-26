@@ -9,6 +9,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.IEntry;
+import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;
@@ -30,12 +31,14 @@ public class DataGen implements IDataGen {
 
     public final ItemModelHandler itemModelHandler;
 
+    private final Registrate registrate;
     private final List<DataHandler<?>> dataHandlers;
     private final Map<ResourceKey<? extends Registry<?>>, TagsHandler<?>> tagsHandlers;
 
     @SuppressWarnings("deprecation")
-    public DataGen(String modid) {
-        this.modid = modid;
+    public DataGen(Registrate registrate) {
+        this.registrate = registrate;
+        this.modid = registrate.modid;
 
         this.dataHandlers = new ArrayList<>();
         this.tagsHandlers = new HashMap<>();
