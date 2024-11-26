@@ -1,0 +1,86 @@
+archivesBaseName = "tinycorelib_test"
+
+minecraft {
+    runs {
+        client {
+            workingDirectory project.file('run/client')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            jvmArgs '-ea'
+
+            mods {
+                tinycorelib_test {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run/server')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            jvmArgs '-ea'
+
+            mods {
+                tinycorelib_test {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            jvmArgs '-ea'
+
+            mods {
+                tinycorelib_test {
+                    source sourceSets.main
+                }
+
+                tinydatagen_test {
+                    source sourceSets.test
+                }
+            }
+
+            workingDirectory project.file('run/data')
+            args '--mod', 'tinydatagen_test', '--all', '--output', file('src/generated/resources/')
+            args '--existing', file('src/test/resources/')
+            args '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    exclude '.cache/'
+}
+
+repositories {
+    flatDir {
+        dir "${rootProject.childProjects.core.buildDir}/libs"
+    }
+    flatDir {
+        dir "${rootProject.childProjects.datagen.buildDir}/libs"
+    }
+}
+
+dependencies {
+    compileOnly project(path: ':core', configuration: 'api')
+    runtimeOnly fg.deobf("tiny:tinycorelib:${version}")
+
+    testCompileOnly project(path: ':core', configuration: 'api')
+    testCompileOnly project(path: ':datagen', configuration: 'api')
+    testRuntimeOnly fg.deobf("tiny:tinycorelib:${version}")
+    testRuntimeOnly fg.deobf("tiny:tinydatagen:${version}")
+}
+
+compileJava {
+    dependsOn ':core:jar'
+}
+
+compileTestJava {
+    dependsOn ':datagen:jar'
+}

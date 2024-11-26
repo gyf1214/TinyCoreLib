@@ -1,0 +1,19 @@
+archivesBaseName = "tinydatagen"
+
+configurations {
+    api
+}
+
+task apiJar(type: Jar) {
+    classifier = 'api'
+    include "org/shsts/tinycorelib/datagen/api/**"
+    from sourceSets.main.output
+}
+
+artifacts {
+    api apiJar
+}
+
+dependencies {
+    compileOnly project(path: ':core')
+}

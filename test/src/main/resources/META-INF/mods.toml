@@ -1,0 +1,36 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+license = "All rights reserved"
+#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+
+[[mods]]
+modId = "tinycorelib_test"
+version = "${mod_version}"
+displayName = "Tiny Core Lib test"
+#updateJSONURL="https://change.me.example.invalid/updates.json" #optional
+#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
+#logoFile="tinycorelib.png" #optional
+#credits="Thanks for this example mod goes to Java" #optional
+authors = "Tiny"
+
+[[dependencies.tinycorelib_test]]
+modId = "forge"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.tinycorelib_test]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.2,1.19)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.tinycorelib_test]]
+modId = "tinycorelib"
+mandatory = true
+versionRange = "${mod_version}"
+ordering = "NONE"
+side = "BOTH"
+

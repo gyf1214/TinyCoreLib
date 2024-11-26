@@ -1,0 +1,15 @@
+archivesBaseName = "tinycorelib"
+
+configurations {
+    api
+}
+
+task apiJar(type: Jar) {
+    classifier = 'api'
+    include "org/shsts/tinycorelib/api/**"
+    from sourceSets.main.output
+}
+
+artifacts {
+    api apiJar
+}
