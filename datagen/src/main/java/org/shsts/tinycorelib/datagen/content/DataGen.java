@@ -26,6 +26,7 @@ import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
 import org.shsts.tinycorelib.datagen.content.handler.BlockStateHandler;
 import org.shsts.tinycorelib.datagen.content.handler.DataHandler;
 import org.shsts.tinycorelib.datagen.content.handler.ItemModelHandler;
+import org.shsts.tinycorelib.datagen.content.handler.LootTableHandler;
 import org.shsts.tinycorelib.datagen.content.handler.TagsHandler;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class DataGen implements IDataGen {
 
     public final BlockStateHandler blockStateHandler;
     public final ItemModelHandler itemModelHandler;
+    public final LootTableHandler lootTableHandler;
 
     public final TrackedContext<Block> blockTrackedContext;
     public final TrackedContext<Item> itemTrackedContext;
@@ -64,6 +66,7 @@ public class DataGen implements IDataGen {
 
         this.blockStateHandler = createHandler(BlockStateHandler::new);
         this.itemModelHandler = createHandler(ItemModelHandler::new);
+        this.lootTableHandler = createHandler(LootTableHandler::new);
         createTagsHandler(Registry.BLOCK);
         createTagsHandler(Registry.ITEM);
 

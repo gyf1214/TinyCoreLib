@@ -23,7 +23,7 @@ public final class All {
             .register();
 
         TEST_BLOCK2 = REGISTRATE.block("test_block2", TestBlock::new)
-            .properties(p -> p.strength(5f))
+            .properties(p -> p.strength(5f).requiresCorrectToolForDrops())
             .tint(0xFF00FFFF)
             .translucent()
             .blockItem()

@@ -23,6 +23,6 @@ public class TestBlock extends Block {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         return defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING,
-            ctx.getNearestLookingDirection().getOpposite());
+            ctx.getHorizontalDirection().getOpposite());
     }
 }

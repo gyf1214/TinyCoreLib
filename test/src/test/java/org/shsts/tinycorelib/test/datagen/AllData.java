@@ -5,13 +5,17 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.test.All;
 import org.shsts.tinycorelib.test.TinyCoreLibTest;
+
+import java.util.List;
 
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
@@ -34,6 +38,7 @@ public final class AllData {
                 prov.simpleBlock(ctx.object(), models.cubeAll(
                     ctx.id(), mcLoc("block/birch_planks")));
             }).tag(blockTag("test_block_tag"))
+            .drop(() -> Items.BIRCH_PLANKS)
             .build()
             .block(All.TEST_BLOCK2)
             .blockState(ctx -> {
@@ -43,6 +48,7 @@ public final class AllData {
                     models.getExistingFile(modLoc("block/test_block_model")));
             }).itemModel(ctx -> ctx.provider()
                 .withExistingParent(ctx.id(), modLoc("block/test_block_model")))
+            .tag(List.of(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL))
             .build();
     }
 
