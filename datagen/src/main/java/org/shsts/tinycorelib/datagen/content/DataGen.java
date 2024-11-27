@@ -10,6 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.client.model.generators.BlockModelProvider;
+import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
@@ -17,6 +19,7 @@ import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
+import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.datagen.content.builder.BlockDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -126,6 +130,18 @@ public class DataGen implements IDataGen {
     @Override
     public <T> IDataGen tag(TagKey<T> object, TagKey<T> tag) {
         tagsHandler(tag.registry()).addTag(object, tag);
+        return this;
+    }
+
+    @Override
+    public IDataGen blockModel(Consumer<IDataContext<BlockModelProvider>> cons) {
+        blockStateHandler.addBlockModelCallback(cons);
+        return this;
+    }
+
+    @Override
+    public IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons) {
+        itemModelHandler.addModelCallback(cons);
         return this;
     }
 

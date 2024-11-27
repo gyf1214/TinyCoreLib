@@ -31,7 +31,7 @@ public class TinyDataGenTest {
         DATA_CORE = ITinyDataGen.get();
         DATA_GEN = DATA_CORE.dataGen(TinyCoreLibTest.REGISTRATE);
 
-        AllDataGen.init();
+        AllData.init();
 
         DATA_GEN.onGatherData(event);
     }

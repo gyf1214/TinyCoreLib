@@ -10,6 +10,7 @@ import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 import org.shsts.tinycorelib.datagen.content.context.DataContext;
@@ -75,7 +76,7 @@ public class ItemModelHandler extends DataHandler<ItemModelProvider> {
         });
     }
 
-    public void addModelCallback(Consumer<DataContext<ItemModelProvider>> cons) {
+    public void addModelCallback(Consumer<IDataContext<ItemModelProvider>> cons) {
         addCallback(prov -> cons.accept(new DataContext<>(dataGen.modid, prov)));
     }
 }
