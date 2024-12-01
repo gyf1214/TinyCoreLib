@@ -105,7 +105,6 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     public IItemBuilder<BlockItem, IBlockBuilder<U, P>> blockItem() {
         if (blockItemBuilder == null) {
             blockItemBuilder = new BlockItemBuilder();
-            onCreateObject.add($ -> blockItemBuilder.register());
         }
         return blockItemBuilder;
     }
@@ -137,6 +136,9 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
         }
         if (blockItemBuilder == null && !noBlockItem) {
             blockItem().build();
+        }
+        if (blockItemBuilder != null) {
+            blockItemBuilder.register();
         }
         return super.createEntry();
     }

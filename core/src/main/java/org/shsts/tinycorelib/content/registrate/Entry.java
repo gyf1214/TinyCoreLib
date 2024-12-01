@@ -48,4 +48,8 @@ public class Entry<U> implements IEntry<U> {
         object = value;
         supplier = null;
     }
+
+    public void setSupplier(Supplier<U> value) {
+        supplier = value;
+    }
 }

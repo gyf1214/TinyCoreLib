@@ -1,6 +1,7 @@
 package org.shsts.tinycorelib.content.registrate.handler;
 
 import com.mojang.logging.LogUtils;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
@@ -22,27 +23,32 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class EntryHandler<T extends IForgeRegistryEntry<T>> implements IEntryHandler<T> {
+public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHandler<V> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final String modid;
-    private final List<EntryBuilder<T, ?, ?, ?>> builders = new ArrayList<>();
-    private final Class<T> entryClazz;
-    private final Supplier<IForgeRegistry<T>> registry;
+    private final List<EntryBuilder<V, ?, ?, ?>> builders = new ArrayList<>();
+    private final Class<V> entryClazz;
+    @Nullable
+    private final Supplier<IForgeRegistry<V>> registrySupp;
+    @Nullable
+    private IForgeRegistry<V> registry;
 
-    public EntryHandler(Registrate registrate, IForgeRegistry<T> registry) {
+    public EntryHandler(Registrate registrate, IForgeRegistry<V> registry) {
         this.modid = registrate.modid;
-        this.registry = () -> registry;
+        this.registry = registry;
+        this.registrySupp = null;
         this.entryClazz = registry.getRegistrySuperType();
     }
 
-    public EntryHandler(Registrate registrate, Class<T> entryClazz, Supplier<IForgeRegistry<T>> registry) {
+    public EntryHandler(Registrate registrate, Class<V> entryClazz, Supplier<IForgeRegistry<V>> registry) {
         this.modid = registrate.modid;
-        this.registry = registry;
+        this.registry = null;
+        this.registrySupp = registry;
         this.entryClazz = entryClazz;
     }
 
-    private void onRegisterEvent(RegistryEvent.Register<T> event) {
+    private void onRegisterEvent(RegistryEvent.Register<V> event) {
         var registry = event.getRegistry();
         LOGGER.info("Registry {} register {} objects", registry.getRegistryName(), builders.size());
         for (var builder : builders) {
@@ -52,17 +58,26 @@ public class EntryHandler<T extends IForgeRegistryEntry<T>> implements IEntryHan
         builders.clear();
     }
 
-    @Override
-    public <U extends T> IEntry<U> getEntry(ResourceLocation loc) {
-        return new Entry<>(loc, () -> RegistryObject.<T, U>create(loc, registry.get()).get());
+    private IForgeRegistry<V> getRegistry() {
+        if (registry != null) {
+            return registry;
+        }
+        assert registrySupp != null;
+        registry = registrySupp.get();
+        return registry;
     }
 
     @Override
-    public <U extends T> IEntry<U> getEntry(String id) {
+    public <U extends V> IEntry<U> getEntry(ResourceLocation loc) {
+        return new Entry<>(loc, () -> RegistryObject.<V, U>create(loc, getRegistry()).get());
+    }
+
+    @Override
+    public <U extends V> IEntry<U> getEntry(String id) {
         return getEntry(new ResourceLocation(modid, id));
     }
 
-    public <U extends T> Entry<U> register(EntryBuilder<T, U, ?, ?> builder) {
+    public <U extends V> Entry<U> register(EntryBuilder<V, U, ?, ?> builder) {
         builders.add(builder);
         return new Entry<>(builder.loc());
     }

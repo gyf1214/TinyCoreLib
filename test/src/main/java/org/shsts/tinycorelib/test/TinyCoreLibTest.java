@@ -7,11 +7,14 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.slf4j.Logger;
+
+import static org.shsts.tinycorelib.test.All.SERVER_LOAD;
 
 @Mod(TinyCoreLibTest.ID)
 @ParametersAreNonnullByDefault
@@ -29,6 +32,7 @@ public class TinyCoreLibTest {
         LOGGER.info("Construct TinyCoreLib Test!");
         this.modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::onConstructEvent);
+        modEventBus.addListener(this::onCommonSetup);
     }
 
     private void onConstructEvent(FMLConstructModEvent event) {
@@ -47,5 +51,9 @@ public class TinyCoreLibTest {
 
     private void onConstructClient() {
         REGISTRATE.registerClient(modEventBus);
+    }
+
+    private void onCommonSetup(FMLCommonSetupEvent event) {
+        LOGGER.info("{}", SERVER_LOAD.get());
     }
 }
