@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -15,6 +16,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
+import org.shsts.tinycorelib.api.registrate.ICapability;
 import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
@@ -27,6 +29,8 @@ import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
+import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
+import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RenderTypeHandler;
@@ -54,6 +58,10 @@ public class Registrate implements IRegistrate {
     // registry entries
     public final EntryHandler<Block> blockHandler;
     public final EntryHandler<Item> itemHandler;
+    public final BlockEntityTypeHandler blockEntityTypeHandler;
+
+    // others
+    public final CapabilityHandler capabilityHandler;
 
     // client only
     public final RenderTypeHandler renderTypeHandler;
@@ -68,6 +76,10 @@ public class Registrate implements IRegistrate {
 
         this.itemHandler = createEntryHandler(ForgeRegistries.ITEMS);
         this.blockHandler = createEntryHandler(ForgeRegistries.BLOCKS);
+        this.blockEntityTypeHandler = new BlockEntityTypeHandler(this);
+        entryHandlers.put(ForgeRegistries.BLOCK_ENTITIES.getRegistryName(), blockEntityTypeHandler);
+
+        this.capabilityHandler = new CapabilityHandler(this);
 
         this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
@@ -97,11 +109,17 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
+    public <T> ICapability<T> getCapability(CapabilityToken<T> token) {
+        return new CapabilityEntry<>(modid, token);
+    }
+
+    @Override
     public void register(IEventBus modEventBus) {
         modEventBus.addListener(registryHandler::onNewRegistry);
         for (var handler : entryHandlers.values()) {
             handler.addListener(modEventBus);
         }
+        modEventBus.addListener(capabilityHandler::onRegisterEvent);
     }
 
     private void onClientSetup(FMLClientSetupEvent event) {
@@ -123,8 +141,8 @@ public class Registrate implements IRegistrate {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> genericRegistry(P parent, String id,
-        Class<?> entryClass) {
+    public <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> genericRegistry(
+        P parent, String id, Class<?> entryClass) {
         return new RegistryBuilderWrapper<>(this, parent, id, (Class<V>) entryClass);
     }
 
@@ -144,6 +162,11 @@ public class Registrate implements IRegistrate {
     @Override
     public <P> IItemBuilder<Item, P> item(P parent, String id) {
         return item(parent, id, Item::new);
+    }
+
+    @Override
+    public <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token) {
+        return capabilityHandler.register(clazz, token);
     }
 
     @Override

@@ -26,8 +26,8 @@ import java.util.function.Supplier;
 public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHandler<V> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private final String modid;
-    private final List<EntryBuilder<V, ?, ?, ?>> builders = new ArrayList<>();
+    protected final String modid;
+    protected final List<EntryBuilder<V, ?, ?, ?>> builders = new ArrayList<>();
     private final Class<V> entryClazz;
     @Nullable
     private final Supplier<IForgeRegistry<V>> registrySupp;
@@ -58,7 +58,7 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
         builders.clear();
     }
 
-    private IForgeRegistry<V> getRegistry() {
+    protected IForgeRegistry<V> getRegistry() {
         if (registry != null) {
             return registry;
         }

@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
@@ -23,6 +24,8 @@ import java.util.function.Supplier;
 public interface IRegistrate {
     <T extends IForgeRegistryEntry<T>> IEntryHandler<T> entryHandler(
         ResourceKey<Registry<T>> key, Class<?> entryClass);
+
+    <T> ICapability<T> getCapability(CapabilityToken<T> token);
 
     void register(IEventBus modEventBus);
 
@@ -65,6 +68,8 @@ public interface IRegistrate {
     default IItemBuilder<Item, IRegistrate> item(String id) {
         return item(this, id);
     }
+
+    <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token);
 
     <T extends IForgeRegistryEntry<T>, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory);

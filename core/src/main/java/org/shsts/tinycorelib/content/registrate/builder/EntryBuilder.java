@@ -22,7 +22,7 @@ public abstract class EntryBuilder<T extends IForgeRegistryEntry<T>, U extends T
     private static final Logger LOGGER = LogUtils.getLogger();
 
     protected final Registrate registrate;
-    private final EntryHandler<T> handler;
+    protected final EntryHandler<T> handler;
     protected final ResourceLocation loc;
 
     @Nullable

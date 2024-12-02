@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -12,6 +13,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.content.CoreContents;
+import org.shsts.tinycorelib.content.ForgeEvents;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.slf4j.Logger;
 
@@ -36,6 +38,7 @@ public class TinyCoreLib implements ITinyCoreLib {
 
         REGISTRATE.register(modEventBus);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::onConstructClient);
+        MinecraftForge.EVENT_BUS.register(ForgeEvents.class);
     }
 
     private void onConstructClient() {
