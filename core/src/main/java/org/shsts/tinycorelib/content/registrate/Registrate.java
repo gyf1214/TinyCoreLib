@@ -16,16 +16,19 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
+import org.shsts.tinycorelib.api.registrate.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.ICapability;
 import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 import org.shsts.tinycorelib.content.blockentity.Event;
 import org.shsts.tinycorelib.content.blockentity.ReturnEvent;
 import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
+import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
@@ -43,7 +46,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.shsts.tinycorelib.content.CoreContents.EVENT_REGISTRY;
+import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_REGISTRY_KEY;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -54,11 +57,6 @@ public class Registrate implements IRegistrate {
 
     // registry
     public final RegistryHandler registryHandler;
-
-    // registry entries
-    public final EntryHandler<Block> blockHandler;
-    public final EntryHandler<Item> itemHandler;
-    public final BlockEntityTypeHandler blockEntityTypeHandler;
 
     // others
     public final CapabilityHandler capabilityHandler;
@@ -72,26 +70,12 @@ public class Registrate implements IRegistrate {
     public Registrate(String modid) {
         this.modid = modid;
 
-        this.registryHandler = new RegistryHandler();
-
-        this.itemHandler = createEntryHandler(ForgeRegistries.ITEMS);
-        this.blockHandler = createEntryHandler(ForgeRegistries.BLOCKS);
-        this.blockEntityTypeHandler = new BlockEntityTypeHandler(this);
-        entryHandlers.put(ForgeRegistries.BLOCK_ENTITIES.getRegistryName(), blockEntityTypeHandler);
-
+        this.registryHandler = new RegistryHandler(this);
         this.capabilityHandler = new CapabilityHandler(this);
-
         this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
 
         this.trackedObjects = new TrackedObjects();
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends IForgeRegistryEntry<T>> EntryHandler<T> createEntryHandler(
-        IForgeRegistry<T> registry) {
-        return (EntryHandler<T>) entryHandlers.computeIfAbsent(registry.getRegistryName(),
-            $ -> new EntryHandler<>(this, registry));
     }
 
     public <T extends IForgeRegistryEntry<T>> void addEntryHandler(ResourceLocation loc,
@@ -99,13 +83,37 @@ public class Registrate implements IRegistrate {
         entryHandlers.put(loc, handler);
     }
 
+    public BlockEntityTypeHandler getBlockEntityTypeHandler() {
+        return (BlockEntityTypeHandler) entryHandlers.computeIfAbsent(
+            ForgeRegistries.BLOCK_ENTITIES.getRegistryName(),
+            $ -> new BlockEntityTypeHandler(this));
+    }
+
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends IForgeRegistryEntry<T>> IEntryHandler<T> entryHandler(
+    public <V extends IForgeRegistryEntry<V>> EntryHandler<V> getHandler(
+        IForgeRegistry<V> registry) {
+        return (EntryHandler<V>) entryHandlers.computeIfAbsent(registry.getRegistryName(),
+            $ -> new EntryHandler<>(this, registry));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends IForgeRegistryEntry<T>> EntryHandler<T> getHandler(
         ResourceKey<Registry<T>> key, Class<?> entryClass) {
         return (EntryHandler<T>) entryHandlers.computeIfAbsent(key.location(),
             $ -> new EntryHandler<>(this, (Class<T>) entryClass,
                 () -> registryHandler.getRegistry(key)));
+    }
+
+    @Override
+    public IBlockEntityType getBlockEntityType(ResourceLocation loc) {
+        return getBlockEntityTypeHandler().getTypeEntry(loc);
+    }
+
+    @Override
+    public IBlockEntityType getBlockEntityType(String id) {
+        return getBlockEntityTypeHandler().getTypeEntry(id);
     }
 
     @Override
@@ -165,6 +173,11 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
+    public <P> IBlockEntityTypeBuilder<P> blockEntityType(P parent, String id) {
+        return new BlockEntityTypeBuilder<>(this, parent, id);
+    }
+
+    @Override
     public <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token) {
         return capabilityHandler.register(clazz, token);
     }
@@ -176,14 +189,18 @@ public class Registrate implements IRegistrate {
             .register();
     }
 
+    private EntryHandler<IEvent<?>> getEventHandler() {
+        return getHandler(EVENT_REGISTRY_KEY, IEvent.class);
+    }
+
     @Override
     public <A> IEntry<IEvent<A>> event(String id) {
-        return registryEntry(EVENT_REGISTRY.getHandler(), id, Event::new);
+        return registryEntry(getEventHandler(), id, Event::new);
     }
 
     @Override
     public <A, R> IEntry<IReturnEvent<A, R>> returnEvent(String id, R defaultResult) {
-        return registryEntry(EVENT_REGISTRY.getHandler(), id,
+        return registryEntry(getEventHandler(), id,
             () -> new ReturnEvent<>(defaultResult));
     }
 

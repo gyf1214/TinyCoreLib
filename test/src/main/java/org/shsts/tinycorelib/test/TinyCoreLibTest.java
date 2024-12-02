@@ -14,7 +14,7 @@ import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.slf4j.Logger;
 
-import static org.shsts.tinycorelib.test.All.SERVER_LOAD;
+import static org.shsts.tinycorelib.test.All.SERVER_TICK;
 import static org.shsts.tinycorelib.test.All.SERVER_USE;
 
 @Mod(TinyCoreLibTest.ID)
@@ -55,7 +55,7 @@ public class TinyCoreLibTest {
     }
 
     private void onCommonSetup(FMLCommonSetupEvent event) {
-        LOGGER.info("Server Load Event = {}", SERVER_LOAD.get());
+        LOGGER.info("Server Load Event = {}", SERVER_TICK.get());
         LOGGER.info("Server Use Event Default Result = {}", SERVER_USE.get().defaultResult());
     }
 }

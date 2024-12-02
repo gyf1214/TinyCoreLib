@@ -13,33 +13,35 @@ import org.shsts.tinycorelib.content.registrate.BlockEntityTypeEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class BlockEntityTypeBuilder<P>
     extends EntryBuilder<BlockEntityType<?>, BlockEntityType<?>, P, IBlockEntityTypeBuilder<P>>
     implements IBlockEntityTypeBuilder<P> {
-    private final Set<Block> validBlocks = new HashSet<>();
+    private final Set<Supplier<? extends Block>> validBlocks = new HashSet<>();
     private final Map<ResourceLocation, ICapabilityFactory> capabilities = new HashMap<>();
 
     public BlockEntityTypeBuilder(Registrate registrate, P parent, String id) {
-        super(registrate, registrate.blockEntityTypeHandler, parent, id);
+        super(registrate, registrate.getBlockEntityTypeHandler(), parent, id);
     }
 
     @Override
-    public IBlockEntityTypeBuilder<P> validBlock(Block block) {
+    public IBlockEntityTypeBuilder<P> validBlock(Supplier<? extends Block> block) {
         validBlocks.add(block);
         return self();
     }
 
     @Override
-    public IBlockEntityTypeBuilder<P> validBlock(Block... blocks) {
-        validBlocks.addAll(Arrays.asList(blocks));
+    public IBlockEntityTypeBuilder<P> validBlock(List<Supplier<? extends Block>> blocks) {
+        validBlocks.addAll(blocks);
         return self();
     }
 
@@ -48,6 +50,11 @@ public class BlockEntityTypeBuilder<P>
         ResourceLocation loc, ICapabilityFactory factory) {
         capabilities.put(loc, factory);
         return self();
+    }
+
+    @Override
+    public IBlockEntityTypeBuilder<P> capability(String id, ICapabilityFactory factory) {
+        return capability(new ResourceLocation(modid(), id), factory);
     }
 
     @Override
@@ -64,6 +71,9 @@ public class BlockEntityTypeBuilder<P>
     protected BlockEntityType<?> createObject() {
         assert entry != null;
         var entry1 = (BlockEntityTypeEntry) entry;
+        var validBlocks = this.validBlocks.stream()
+            .map($ -> (Block) $.get())
+            .collect(Collectors.toSet());
         return new SmartBlockEntityType(entry1::create, validBlocks, capabilities);
     }
 }

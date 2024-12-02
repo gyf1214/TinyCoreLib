@@ -8,15 +8,20 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityFactory;
 import org.shsts.tinycorelib.api.registrate.IBlockEntityType;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IBlockEntityTypeBuilder<P>
     extends IEntryBuilder<BlockEntityType<?>, BlockEntityType<?>, P, IBlockEntityTypeBuilder<P>> {
-    IBlockEntityTypeBuilder<P> validBlock(Block block);
+    IBlockEntityTypeBuilder<P> validBlock(Supplier<? extends Block> block);
 
-    IBlockEntityTypeBuilder<P> validBlock(Block... blocks);
+    IBlockEntityTypeBuilder<P> validBlock(List<Supplier<? extends Block>> blocks);
 
     IBlockEntityTypeBuilder<P> capability(ResourceLocation loc, ICapabilityFactory factory);
+
+    IBlockEntityTypeBuilder<P> capability(String id, ICapabilityFactory factory);
 
     @Override
     IBlockEntityType register();

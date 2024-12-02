@@ -72,8 +72,8 @@ public class EventManager implements ICapabilityProvider, IEventManager {
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction direction) {
-        if (capability == EVENT_MANAGER.get()) {
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction direction) {
+        if (cap == EVENT_MANAGER.get()) {
             return myself.cast();
         }
         return LazyOptional.empty();

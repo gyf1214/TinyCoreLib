@@ -17,6 +17,7 @@ import org.shsts.tinycorelib.test.TinyCoreLibTest;
 
 import java.util.List;
 
+import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
 @ParametersAreNonnullByDefault
@@ -49,6 +50,10 @@ public final class AllData {
             }).itemModel(ctx -> ctx.provider()
                 .withExistingParent(ctx.id(), modLoc("block/test_block_model")))
             .tag(List.of(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL))
+            .build()
+            .block(TEST_BLOCK3)
+            .blockState(ctx -> ctx.provider().simpleBlock(ctx.object(),
+                ctx.provider().models().cubeAll(ctx.id(), mcLoc("block/nether_bricks"))))
             .build();
     }
 

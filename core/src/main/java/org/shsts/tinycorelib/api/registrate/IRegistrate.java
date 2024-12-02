@@ -4,15 +4,18 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 
@@ -22,10 +25,17 @@ import java.util.function.Supplier;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IRegistrate {
-    <T extends IForgeRegistryEntry<T>> IEntryHandler<T> entryHandler(
-        ResourceKey<Registry<T>> key, Class<?> entryClass);
+    <V extends IForgeRegistryEntry<V>> IEntryHandler<V> getHandler(
+        IForgeRegistry<V> registry);
+
+    <V extends IForgeRegistryEntry<V>> IEntryHandler<V> getHandler(
+        ResourceKey<Registry<V>> key, Class<?> entryClass);
 
     <T> ICapability<T> getCapability(CapabilityToken<T> token);
+
+    IBlockEntityType getBlockEntityType(ResourceLocation loc);
+
+    IBlockEntityType getBlockEntityType(String id);
 
     void register(IEventBus modEventBus);
 
@@ -67,6 +77,12 @@ public interface IRegistrate {
 
     default IItemBuilder<Item, IRegistrate> item(String id) {
         return item(this, id);
+    }
+
+    <P> IBlockEntityTypeBuilder<P> blockEntityType(P parent, String id);
+
+    default IBlockEntityTypeBuilder<IRegistrate> blockEntityType(String id) {
+        return blockEntityType(this, id);
     }
 
     <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token);

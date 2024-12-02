@@ -50,7 +50,8 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
 
     private void onRegisterEvent(RegistryEvent.Register<V> event) {
         var registry = event.getRegistry();
-        LOGGER.info("Registry {} register {} objects", registry.getRegistryName(), builders.size());
+        LOGGER.info("Mod {} registry {} register {} objects", modid,
+            registry.getRegistryName(), builders.size());
         for (var builder : builders) {
             builder.registerObject(registry);
         }

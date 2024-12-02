@@ -7,6 +7,7 @@ import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
@@ -26,7 +27,7 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
 
     public ItemBuilder(Registrate registrate, P parent, String id,
         Function<Item.Properties, U> factory) {
-        super(registrate, registrate.itemHandler, parent, id);
+        super(registrate, registrate.getHandler(ForgeRegistries.ITEMS), parent, id);
         this.factory = factory;
     }
 

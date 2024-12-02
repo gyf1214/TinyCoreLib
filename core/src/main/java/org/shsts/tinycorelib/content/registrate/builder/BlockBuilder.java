@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
@@ -37,7 +38,7 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
 
     public BlockBuilder(Registrate registrate, P parent, String id,
         Function<BlockBehaviour.Properties, U> factory) {
-        super(registrate, registrate.blockHandler, parent, id);
+        super(registrate, registrate.getHandler(ForgeRegistries.BLOCKS), parent, id);
         this.factory = factory;
         onCreateObject.add(registrate::trackBlock);
     }
