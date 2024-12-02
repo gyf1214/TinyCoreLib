@@ -7,4 +7,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 @MethodsReturnNonnullByDefault
 public interface ITestCapability {
     void foo();
+
+    int getSeconds();
 }

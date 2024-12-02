@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityFactory;
-import org.shsts.tinycorelib.api.blockentity.IEventSubscriber;
 
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +35,6 @@ public class SmartBlockEntityType extends BlockEntityType<SmartBlockEntity> {
             var provider = entry.getValue().create(be);
             e.addCapability(entry.getKey(), provider);
             eventManager.addProvider(entry.getKey(), provider);
-            if (provider instanceof IEventSubscriber subscriber) {
-                subscriber.subscribeEvents(eventManager);
-            }
         }
     }
 }
