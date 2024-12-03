@@ -10,11 +10,11 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.shsts.tinycorelib.api.core.Transformer;
-import org.shsts.tinycorelib.api.registrate.IRegistry;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
+import org.shsts.tinycorelib.api.registrate.entry.IRegistry;
 import org.shsts.tinycorelib.content.common.Builder;
 import org.shsts.tinycorelib.content.registrate.Registrate;
-import org.shsts.tinycorelib.content.registrate.SmartRegistry;
+import org.shsts.tinycorelib.content.registrate.entry.SmartRegistry;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.slf4j.Logger;
 

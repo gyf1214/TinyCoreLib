@@ -8,7 +8,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 import org.shsts.tinycorelib.api.core.IBuilder;
 import org.shsts.tinycorelib.api.core.ILoc;
 import org.shsts.tinycorelib.api.core.Transformer;
-import org.shsts.tinycorelib.api.registrate.IRegistry;
+import org.shsts.tinycorelib.api.registrate.entry.IRegistry;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault

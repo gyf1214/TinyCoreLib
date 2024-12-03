@@ -11,8 +11,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
-import org.shsts.tinycorelib.content.registrate.Entry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
+import org.shsts.tinycorelib.content.registrate.entry.Entry;
 
 import java.util.function.Function;
 

@@ -2,6 +2,7 @@ package org.shsts.tinycorelib.test;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.Level;
@@ -9,10 +10,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
-import org.shsts.tinycorelib.api.registrate.IBlockEntityType;
-import org.shsts.tinycorelib.api.registrate.ICapability;
-import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
+import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 
 import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_REGISTRY_KEY;
 import static org.shsts.tinycorelib.api.CoreLibKeys.SERVER_TICK_LOC;
@@ -26,6 +28,7 @@ public final class All {
     public static final IEntry<TestEntityBlock> TEST_BLOCK3;
     public static final IEntry<TestItem> TEST_ITEM;
     public static final IBlockEntityType TEST_BLOCK_ENTITY;
+    public static final IMenuType TEST_MENU;
 
     public static final ICapability<ITestCapability> TEST_CAPABILITY;
 
@@ -59,6 +62,11 @@ public final class All {
         TEST_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_block_entity")
             .validBlock(TEST_BLOCK3)
             .capability("test_capability", TestCapability::new)
+            .register();
+
+        TEST_MENU = REGISTRATE.menu("test_menu")
+            .title($ -> new TextComponent("Test Title"))
+            .screen(() -> () -> TestScreen::new)
             .register();
 
         TEST_CAPABILITY = REGISTRATE.capability(ITestCapability.class, new CapabilityToken<>() {});

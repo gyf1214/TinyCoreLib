@@ -7,11 +7,11 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.api.registrate.builder.IEntryBuilder;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.content.common.Builder;
-import org.shsts.tinycorelib.content.registrate.Entry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
+import org.shsts.tinycorelib.content.registrate.entry.Entry;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.slf4j.Logger;
 

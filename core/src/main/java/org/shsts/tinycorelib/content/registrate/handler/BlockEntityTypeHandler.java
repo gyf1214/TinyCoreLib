@@ -6,9 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import org.shsts.tinycorelib.content.registrate.BlockEntityTypeEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
+import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault

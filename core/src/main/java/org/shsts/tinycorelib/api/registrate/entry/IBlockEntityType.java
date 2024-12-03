@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.api.registrate;
+package org.shsts.tinycorelib.api.registrate.entry;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;

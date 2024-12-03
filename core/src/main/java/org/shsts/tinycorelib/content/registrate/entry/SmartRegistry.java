@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.content.registrate;
+package org.shsts.tinycorelib.content.registrate.entry;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
-import org.shsts.tinycorelib.api.registrate.IRegistry;
+import org.shsts.tinycorelib.api.registrate.entry.IRegistry;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 
 @ParametersAreNonnullByDefault

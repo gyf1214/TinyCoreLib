@@ -4,8 +4,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import org.shsts.tinycorelib.content.registrate.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
+import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 
 import java.util.ArrayList;
 import java.util.List;

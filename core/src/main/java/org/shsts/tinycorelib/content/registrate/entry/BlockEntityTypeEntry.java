@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.content.registrate;
+package org.shsts.tinycorelib.content.registrate.entry;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.shsts.tinycorelib.api.registrate.IBlockEntityType;
+import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 
 import java.util.Optional;

@@ -1,5 +1,6 @@
 package org.shsts.tinycorelib.content.registrate;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
@@ -16,25 +17,32 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
-import org.shsts.tinycorelib.api.registrate.IBlockEntityType;
-import org.shsts.tinycorelib.api.registrate.ICapability;
-import org.shsts.tinycorelib.api.registrate.IEntry;
+import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
+import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 import org.shsts.tinycorelib.content.blockentity.Event;
 import org.shsts.tinycorelib.content.blockentity.ReturnEvent;
 import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
+import org.shsts.tinycorelib.content.registrate.builder.MenuBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
+import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
+import org.shsts.tinycorelib.content.registrate.handler.MenuScreenHandler;
+import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RenderTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
@@ -64,8 +72,12 @@ public class Registrate implements IRegistrate {
     // client only
     public final RenderTypeHandler renderTypeHandler;
     public final TintHandler tintHandler;
+    public final MenuScreenHandler menuScreenHandler;
 
     private final TrackedObjects trackedObjects;
+
+    @Nullable
+    private IChannel defaultChannel = null;
 
     public Registrate(String modid) {
         this.modid = modid;
@@ -74,6 +86,7 @@ public class Registrate implements IRegistrate {
         this.capabilityHandler = new CapabilityHandler(this);
         this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
+        this.menuScreenHandler = new MenuScreenHandler();
 
         this.trackedObjects = new TrackedObjects();
     }
@@ -87,6 +100,12 @@ public class Registrate implements IRegistrate {
         return (BlockEntityTypeHandler) entryHandlers.computeIfAbsent(
             ForgeRegistries.BLOCK_ENTITIES.getRegistryName(),
             $ -> new BlockEntityTypeHandler(this));
+    }
+
+    public MenuTypeHandler getMenuTypeHandler() {
+        return (MenuTypeHandler) entryHandlers.computeIfAbsent(
+            ForgeRegistries.CONTAINERS.getRegistryName(),
+            $ -> new MenuTypeHandler(this));
     }
 
     @Override
@@ -117,6 +136,16 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
+    public IMenuType getMenuType(ResourceLocation loc) {
+        return getMenuTypeHandler().getTypeEntry(loc);
+    }
+
+    @Override
+    public IMenuType getMenuType(String id) {
+        return getMenuTypeHandler().getTypeEntry(id);
+    }
+
+    @Override
     public <T> ICapability<T> getCapability(CapabilityToken<T> token) {
         return new CapabilityEntry<>(modid, token);
     }
@@ -132,6 +161,7 @@ public class Registrate implements IRegistrate {
 
     private void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(renderTypeHandler::onClientSetup);
+        event.enqueueWork(menuScreenHandler::onClientSetup);
     }
 
     @Override
@@ -175,6 +205,18 @@ public class Registrate implements IRegistrate {
     @Override
     public <P> IBlockEntityTypeBuilder<P> blockEntityType(P parent, String id) {
         return new BlockEntityTypeBuilder<>(this, parent, id);
+    }
+
+    @Override
+    public <P> IMenuBuilder<P> menu(P parent, String id) {
+        var builder = new MenuBuilder<>(this, parent, id);
+        return defaultChannel == null ? builder : builder.channel(defaultChannel);
+    }
+
+    @Override
+    public IRegistrate setDefaultChannel(@Nullable IChannel value) {
+        defaultChannel = value;
+        return this;
     }
 
     @Override

@@ -5,7 +5,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.core.IBuilder;
 import org.shsts.tinycorelib.api.core.ILoc;
-import org.shsts.tinycorelib.api.registrate.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault

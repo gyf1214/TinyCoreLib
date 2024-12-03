@@ -6,9 +6,9 @@ import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IEventManager;
-import org.shsts.tinycorelib.api.registrate.ICapability;
-import org.shsts.tinycorelib.api.registrate.IEntry;
-import org.shsts.tinycorelib.api.registrate.IRegistry;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IRegistry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 
 import static org.shsts.tinycorelib.api.CoreLibKeys.CLIENT_LOAD_NAME;

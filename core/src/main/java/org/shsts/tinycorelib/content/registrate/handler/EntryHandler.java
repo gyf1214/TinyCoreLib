@@ -10,11 +10,11 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryObject;
-import org.shsts.tinycorelib.api.registrate.IEntry;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
-import org.shsts.tinycorelib.content.registrate.Entry;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.EntryBuilder;
+import org.shsts.tinycorelib.content.registrate.entry.Entry;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;

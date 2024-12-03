@@ -6,11 +6,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityFactory;
-import org.shsts.tinycorelib.api.registrate.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
+import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntityType;
-import org.shsts.tinycorelib.content.registrate.BlockEntityTypeEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
+import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 
 import java.util.HashMap;

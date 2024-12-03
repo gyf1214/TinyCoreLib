@@ -3,6 +3,7 @@ package org.shsts.tinycorelib.api.registrate;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault

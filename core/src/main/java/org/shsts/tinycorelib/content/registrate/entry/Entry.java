@@ -1,10 +1,10 @@
-package org.shsts.tinycorelib.content.registrate;
+package org.shsts.tinycorelib.content.registrate.entry;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
-import org.shsts.tinycorelib.api.registrate.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 
 import java.util.function.Supplier;
 

@@ -1,5 +1,6 @@
 package org.shsts.tinycorelib.api.registrate;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
@@ -14,10 +15,16 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
+import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
+import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -31,11 +38,15 @@ public interface IRegistrate {
     <V extends IForgeRegistryEntry<V>> IEntryHandler<V> getHandler(
         ResourceKey<Registry<V>> key, Class<?> entryClass);
 
-    <T> ICapability<T> getCapability(CapabilityToken<T> token);
-
     IBlockEntityType getBlockEntityType(ResourceLocation loc);
 
     IBlockEntityType getBlockEntityType(String id);
+
+    IMenuType getMenuType(ResourceLocation loc);
+
+    IMenuType getMenuType(String id);
+
+    <T> ICapability<T> getCapability(CapabilityToken<T> token);
 
     void register(IEventBus modEventBus);
 
@@ -84,6 +95,14 @@ public interface IRegistrate {
     default IBlockEntityTypeBuilder<IRegistrate> blockEntityType(String id) {
         return blockEntityType(this, id);
     }
+
+    <P> IMenuBuilder<P> menu(P parent, String id);
+
+    default IMenuBuilder<IRegistrate> menu(String id) {
+        return menu(this, id);
+    }
+
+    IRegistrate setDefaultChannel(@Nullable IChannel value);
 
     <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token);
 

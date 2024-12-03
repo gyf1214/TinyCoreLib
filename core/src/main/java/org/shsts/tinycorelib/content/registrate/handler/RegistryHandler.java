@@ -10,8 +10,8 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryManager;
 import org.shsts.tinycorelib.content.registrate.Registrate;
-import org.shsts.tinycorelib.content.registrate.SmartRegistry;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
+import org.shsts.tinycorelib.content.registrate.entry.SmartRegistry;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;

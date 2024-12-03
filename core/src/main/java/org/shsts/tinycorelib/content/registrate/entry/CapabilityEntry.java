@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.content.registrate;
+package org.shsts.tinycorelib.content.registrate.entry;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
-import org.shsts.tinycorelib.api.registrate.ICapability;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;

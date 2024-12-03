@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityFactory;
-import org.shsts.tinycorelib.api.registrate.IBlockEntityType;
+import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 
 import java.util.List;
 import java.util.function.Supplier;
