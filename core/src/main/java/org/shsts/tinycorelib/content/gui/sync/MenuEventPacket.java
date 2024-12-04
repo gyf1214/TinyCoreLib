@@ -3,48 +3,49 @@ package org.shsts.tinycorelib.content.gui.sync;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.FriendlyByteBuf;
+import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.content.network.Channel;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class MenuSyncPacket implements IPacket {
+public class MenuEventPacket implements IPacket {
     private final Channel channel;
     private int containerId;
-    private int index;
+    private IMenuEvent<?> event;
     private IPacket content;
 
-    public MenuSyncPacket(Channel channel) {
+    public MenuEventPacket(Channel channel) {
         this.channel = channel;
     }
 
-    public MenuSyncPacket(Channel channel, int containerId, int index, IPacket content) {
+    public MenuEventPacket(Channel channel, int containerId, IMenuEvent<?> event, IPacket content) {
         this.channel = channel;
         this.containerId = containerId;
-        this.index = index;
+        this.event = event;
         this.content = content;
     }
 
     @Override
     public void serializeToBuf(FriendlyByteBuf buf) {
         buf.writeVarInt(containerId);
-        buf.writeVarInt(index);
-        channel.syncPackets.serialize(content.getClass(), content, buf);
+        channel.eventPackets.serialize(event, content, buf);
     }
 
     @Override
     public void deserializeFromBuf(FriendlyByteBuf buf) {
         containerId = buf.readVarInt();
-        index = buf.readVarInt();
-        content = channel.syncPackets.deserialize(buf).packet();
+        var entry = channel.eventPackets.deserialize(buf);
+        event = entry.key();
+        content = entry.packet();
     }
 
     public int getContainerId() {
         return containerId;
     }
 
-    public int getIndex() {
-        return index;
+    public IMenuEvent<?> getEvent() {
+        return event;
     }
 
     public IPacket getContent() {

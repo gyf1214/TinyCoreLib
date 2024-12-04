@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
+import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
@@ -41,10 +42,14 @@ public final class All {
     public static final IEntry<IEvent<Level>> SERVER_TICK;
     public static final IEntry<IEvent<Unit>> TICK_SECOND;
 
+    public static final IMenuEvent<TestPacket> TEST_MENU_EVENT;
+
     static {
         CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
 
-        CHANNEL.registerMenuSyncPacket(TestSyncPacket.class, TestSyncPacket::new);
+        TEST_MENU_EVENT = CHANNEL
+            .registerMenuSyncPacket(TestPacket.class, TestPacket::new)
+            .registerMenuEventPacket(TestPacket.class, TestPacket::new);
 
         TEST_BLOCK1 = REGISTRATE.block("test_block1", Block::new)
             .material(Material.DIRT)
@@ -78,7 +83,8 @@ public final class All {
         TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
             .menu("test_menu")
             .title($ -> new TextComponent("Test Title"))
-            .dummyPlugin(menu -> menu.addSyncSlot("seconds", TestSyncPacket::new))
+            .dummyPlugin(menu -> menu.addSyncSlot("seconds", TestPacket::new))
+            .plugin(TestMenuPlugin::new)
             .screen(() -> () -> TestScreen::new)
             .register();
 

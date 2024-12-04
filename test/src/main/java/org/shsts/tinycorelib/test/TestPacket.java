@@ -12,27 +12,31 @@ import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class TestSyncPacket implements IPacket {
-    private int seconds;
+public class TestPacket implements IPacket {
+    private int value;
 
-    public TestSyncPacket() {}
+    public TestPacket() {}
 
-    public TestSyncPacket(BlockEntity be) {
-        this.seconds = TEST_CAPABILITY.get(be).getSeconds();
+    public TestPacket(int value) {
+        this.value = value;
+    }
+
+    public TestPacket(BlockEntity be) {
+        this.value = TEST_CAPABILITY.get(be).getSeconds();
     }
 
     @Override
     public void serializeToBuf(FriendlyByteBuf buf) {
-        buf.writeVarInt(seconds);
+        buf.writeVarInt(value);
     }
 
     @Override
     public void deserializeFromBuf(FriendlyByteBuf buf) {
-        seconds = buf.readVarInt();
+        value = buf.readVarInt();
     }
 
-    public int getSeconds() {
-        return seconds;
+    public int getValue() {
+        return value;
     }
 
     @Override
@@ -40,14 +44,14 @@ public class TestSyncPacket implements IPacket {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof TestSyncPacket that)) {
+        if (!(o instanceof TestPacket that)) {
             return false;
         }
-        return seconds == that.seconds;
+        return value == that.value;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(seconds);
+        return Objects.hashCode(value);
     }
 }

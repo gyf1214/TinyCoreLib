@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -35,15 +36,37 @@ public interface IMenu {
 
     Slot addSlot(Slot slot);
 
+    <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory);
+
     <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory);
 
     /**
-     * Called by Screen to get the latest sync packet.
+     * Called by Client to get the latest sync packet.
+     */
+    <P extends IPacket> Optional<P> getSyncPacket(int index, Class<P> clazz);
+
+    /**
+     * Called by Client to get the latest sync packet.
      */
     <P extends IPacket> Optional<P> getSyncPacket(String name, Class<P> clazz);
 
     /**
-     * Callback added by Screen.
+     * Callback added by Client.
+     */
+    <P extends IPacket> void onSyncPacket(int index, Consumer<P> cb);
+
+    /**
+     * Callback added by Client.
      */
     <P extends IPacket> void onSyncPacket(String name, Consumer<P> cb);
+
+    /**
+     * Callback added by Server.
+     */
+    <P extends IPacket> void onEventPacket(IMenuEvent<P> event, Consumer<P> cb);
+
+    /**
+     * Trigger an event from Client.
+     */
+    <P extends IPacket> void triggerEvent(IMenuEvent<P> event, Supplier<P> factory);
 }

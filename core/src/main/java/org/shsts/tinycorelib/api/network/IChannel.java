@@ -4,6 +4,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import org.shsts.tinycorelib.api.gui.IMenuEvent;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -22,4 +23,6 @@ public interface IChannel {
         BiConsumer<P, NetworkEvent.Context> handler);
 
     <P extends IPacket> IChannel registerMenuSyncPacket(Class<P> clazz, Supplier<P> constructor);
+
+    <P extends IPacket> IMenuEvent<P> registerMenuEventPacket(Class<P> clazz, Supplier<P> constructor);
 }

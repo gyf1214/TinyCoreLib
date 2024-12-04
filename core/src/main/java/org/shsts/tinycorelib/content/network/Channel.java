@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -13,17 +12,16 @@ import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.content.gui.Menu;
+import org.shsts.tinycorelib.content.gui.MenuEvent;
+import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -37,8 +35,11 @@ public class Channel implements IChannel {
     private final SimpleChannel channel;
     private int msgId = 0;
     private final Set<Class<?>> registeredPackets = new HashSet<>();
-    private final List<Supplier<? extends IPacket>> syncPacketConstructors = new ArrayList<>();
-    private final Map<Class<?>, Integer> syncPacketClasses = new HashMap<>();
+
+    public final IndexedPacketDispatcher<Class<?>> syncPackets =
+        new IndexedPacketDispatcher<>();
+    public final IndexedPacketDispatcher<IMenuEvent<?>> eventPackets =
+        new IndexedPacketDispatcher<>();
 
     public Channel(ResourceLocation loc, String version) {
         this.loc = loc;
@@ -54,17 +55,12 @@ public class Channel implements IChannel {
         }
     }
 
-    public void serializeMenuSyncPacket(IPacket content, FriendlyByteBuf buf) {
-        var typeId = syncPacketClasses.get(content.getClass());
-        buf.writeVarInt(typeId);
-        content.serializeToBuf(buf);
-    }
-
-    public IPacket deserializeMenuSyncPacket(FriendlyByteBuf buf) {
-        var typeId = buf.readVarInt();
-        var content = syncPacketConstructors.get(typeId).get();
-        content.deserializeFromBuf(buf);
-        return content;
+    private void handleMenuEventPacket(MenuEventPacket packet, NetworkEvent.Context ctx) {
+        var player = ctx.getSender();
+        if (player != null && player.containerMenu instanceof Menu menu &&
+            menu.containerId == packet.getContainerId()) {
+            menu.handleEventPacket(packet.getEvent(), packet.getContent());
+        }
     }
 
     @Override
@@ -110,11 +106,18 @@ public class Channel implements IChannel {
     @Override
     public <P extends IPacket> IChannel registerMenuSyncPacket(Class<P> clazz,
         Supplier<P> constructor) {
-        var id = syncPacketConstructors.size();
-        syncPacketConstructors.add(constructor);
-        syncPacketClasses.put(clazz, id);
+        syncPackets.register(clazz, constructor);
         return registerClientPacket(MenuSyncPacket.class, () -> new MenuSyncPacket(this),
             this::handleMenuSyncPacket);
+    }
+
+    @Override
+    public <P extends IPacket> IMenuEvent<P> registerMenuEventPacket(Class<P> clazz,
+        Supplier<P> constructor) {
+        var event = eventPackets.register(id -> new MenuEvent<>(id, clazz), constructor);
+        registerPacket(MenuEventPacket.class, () -> new MenuEventPacket(this),
+            this::handleMenuEventPacket);
+        return event;
     }
 
     @Override

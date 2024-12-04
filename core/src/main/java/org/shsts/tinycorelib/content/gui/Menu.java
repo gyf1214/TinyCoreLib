@@ -12,8 +12,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.shsts.tinycorelib.api.gui.IMenu;
+import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.gui.IMenuPlugin;
 import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
 import org.shsts.tinycorelib.content.network.Channel;
 
@@ -25,6 +27,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -73,10 +76,25 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         public void addCallback(Consumer<P> cb) {
             callbacks.add(cb);
         }
+
+        public <P1 extends IPacket> Optional<P1> getPacket(Class<P1> clazz) {
+            return clazz.isInstance(packet) ? Optional.of(clazz.cast(packet)) :
+                Optional.empty();
+        }
     }
 
     private final List<SyncSlot<?>> syncSlots = new ArrayList<>();
     private final Map<String, SyncSlot<?>> syncSlotNames = new HashMap<>();
+
+    private record EventHandler<P extends IPacket>(Class<P> clazz, Consumer<P> handler) {
+        public void handle(IPacket packet) {
+            if (clazz.isInstance(packet)) {
+                handler.accept(clazz.cast(packet));
+            }
+        }
+    }
+
+    private final Map<IMenuEvent<?>, EventHandler<?>> eventHandlers = new HashMap<>();
 
     public Menu(MenuType<?> menuType, int id, Inventory inventory, BlockEntity blockEntity,
         @Nullable Channel channel) {
@@ -153,22 +171,40 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         return super.addSlot(slot);
     }
 
-    @Override
-    public <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory) {
-        assert !syncSlotNames.containsKey(name);
+    private <P extends IPacket> SyncSlot<P> createSyncSlot(Function<BlockEntity, P> factory) {
         var index = syncSlots.size();
         var slot = new SyncSlot<>(index, factory);
         syncSlots.add(slot);
+        return slot;
+    }
+
+    @Override
+    public <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory) {
+        assert !syncSlotNames.containsKey(name);
+        var slot = createSyncSlot(factory);
         syncSlotNames.put(name, slot);
     }
 
     @Override
+    public <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory) {
+        return createSyncSlot(factory).index;
+    }
+
+    @Override
+    public <P extends IPacket> Optional<P> getSyncPacket(int index, Class<P> clazz) {
+        return syncSlots.get(index).getPacket(clazz);
+    }
+
+    @Override
     public <P extends IPacket> Optional<P> getSyncPacket(String name, Class<P> clazz) {
-        var slot = syncSlotNames.get(name);
-        if (!clazz.isInstance(slot.packet)) {
-            return Optional.empty();
-        }
-        return Optional.of(clazz.cast(slot.packet));
+        return syncSlotNames.get(name).getPacket(clazz);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <P extends IPacket> void onSyncPacket(int index, Consumer<P> cb) {
+        var slot = (SyncSlot<P>) syncSlots.get(index);
+        slot.addCallback(cb);
     }
 
     @Override
@@ -178,12 +214,29 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         slot.addCallback(cb);
     }
 
+    @Override
+    public <P extends IPacket> void onEventPacket(IMenuEvent<P> event, Consumer<P> cb) {
+        eventHandlers.put(event, new EventHandler<>(event.clazz(), cb));
+    }
+
+    @Override
+    public <P extends IPacket> void triggerEvent(IMenuEvent<P> event, Supplier<P> factory) {
+        if (channel != null) {
+            var packet = new MenuEventPacket(channel, containerId, event, factory.get());
+            channel.sendToServer(packet);
+        }
+    }
+
     public void handleSyncPacket(int index, IPacket packet) {
         var slot = syncSlots.get(index);
         if (slot == null) {
             return;
         }
         slot.setPacket(packet);
+    }
+
+    public void handleEventPacket(IMenuEvent<?> event, IPacket packet) {
+        eventHandlers.get(event).handle(packet);
     }
 
     @Override
