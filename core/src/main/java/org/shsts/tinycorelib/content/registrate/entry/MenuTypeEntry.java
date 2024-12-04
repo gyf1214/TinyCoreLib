@@ -23,12 +23,7 @@ public class MenuTypeEntry extends Entry<MenuType<?>> implements IMenuType {
     }
 
     @Override
-    public SmartMenuType get() {
-        return (SmartMenuType) super.get();
-    }
-
-    @Override
     public void open(ServerPlayer player, BlockPos pos) {
-        get().open(player, pos);
+        ((SmartMenuType) get()).open(player, pos);
     }
 }
