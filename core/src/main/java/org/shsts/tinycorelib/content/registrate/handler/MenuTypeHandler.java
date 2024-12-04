@@ -18,7 +18,7 @@ public class MenuTypeHandler extends EntryHandler<MenuType<?>> {
     }
 
     public MenuTypeEntry getTypeEntry(ResourceLocation loc) {
-        return new MenuTypeEntry(loc, () -> RegistryObject.create(loc, getRegistry()).get());
+        return new MenuTypeEntry(loc, RegistryObject.create(loc, getRegistry()));
     }
 
     public MenuTypeEntry getTypeEntry(String id) {

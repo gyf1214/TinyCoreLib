@@ -38,12 +38,24 @@ public interface IRegistrate {
     <V extends IForgeRegistryEntry<V>> IEntryHandler<V> getHandler(
         ResourceKey<Registry<V>> key, Class<?> entryClass);
 
+    /**
+     * Only use this when you are sure that the BlockEntityType is registered by this library.
+     */
     IBlockEntityType getBlockEntityType(ResourceLocation loc);
 
+    /**
+     * Only use this when you are sure that the BlockEntityType is registered by this library.
+     */
     IBlockEntityType getBlockEntityType(String id);
 
+    /**
+     * Only use this when you are sure that the MenuType is registered by this library.
+     */
     IMenuType getMenuType(ResourceLocation loc);
 
+    /**
+     * Only use this when you are sure that the MenuType is registered by this library.
+     */
     IMenuType getMenuType(String id);
 
     <T> ICapability<T> getCapability(CapabilityToken<T> token);

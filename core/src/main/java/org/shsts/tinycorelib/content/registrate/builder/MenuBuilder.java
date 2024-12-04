@@ -39,7 +39,7 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
     private final List<Function<IMenu, IMenuPlugin>> plugins = new ArrayList<>();
 
     public MenuBuilder(Registrate registrate, P parent, String id) {
-        super(registrate, registrate.getMenuTypeHandler(), parent, id);
+        super(registrate, registrate.menuTypeHandler, parent, id);
     }
 
     @Override

@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
@@ -66,6 +65,10 @@ public class Registrate implements IRegistrate {
     // registry
     public final RegistryHandler registryHandler;
 
+    // special forge registry
+    public final BlockEntityTypeHandler blockEntityTypeHandler;
+    public final MenuTypeHandler menuTypeHandler;
+
     // others
     public final CapabilityHandler capabilityHandler;
 
@@ -83,6 +86,8 @@ public class Registrate implements IRegistrate {
         this.modid = modid;
 
         this.registryHandler = new RegistryHandler(this);
+        this.blockEntityTypeHandler = createEntryHandler(BlockEntityTypeHandler::new);
+        this.menuTypeHandler = createEntryHandler(MenuTypeHandler::new);
         this.capabilityHandler = new CapabilityHandler(this);
         this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
@@ -91,21 +96,15 @@ public class Registrate implements IRegistrate {
         this.trackedObjects = new TrackedObjects();
     }
 
-    public <T extends IForgeRegistryEntry<T>> void addEntryHandler(ResourceLocation loc,
-        EntryHandler<T> handler) {
+    public <V extends IForgeRegistryEntry<V>> void addEntryHandler(ResourceLocation loc,
+        EntryHandler<V> handler) {
         entryHandlers.put(loc, handler);
     }
 
-    public BlockEntityTypeHandler getBlockEntityTypeHandler() {
-        return (BlockEntityTypeHandler) entryHandlers.computeIfAbsent(
-            ForgeRegistries.BLOCK_ENTITIES.getRegistryName(),
-            $ -> new BlockEntityTypeHandler(this));
-    }
-
-    public MenuTypeHandler getMenuTypeHandler() {
-        return (MenuTypeHandler) entryHandlers.computeIfAbsent(
-            ForgeRegistries.CONTAINERS.getRegistryName(),
-            $ -> new MenuTypeHandler(this));
+    private <H extends EntryHandler<?>> H createEntryHandler(Function<Registrate, H> factory) {
+        var handler = factory.apply(this);
+        entryHandlers.put(handler.getRegistry().getRegistryName(), handler);
+        return handler;
     }
 
     @Override
@@ -127,22 +126,22 @@ public class Registrate implements IRegistrate {
 
     @Override
     public IBlockEntityType getBlockEntityType(ResourceLocation loc) {
-        return getBlockEntityTypeHandler().getTypeEntry(loc);
+        return blockEntityTypeHandler.getTypeEntry(loc);
     }
 
     @Override
     public IBlockEntityType getBlockEntityType(String id) {
-        return getBlockEntityTypeHandler().getTypeEntry(id);
+        return blockEntityTypeHandler.getTypeEntry(id);
     }
 
     @Override
     public IMenuType getMenuType(ResourceLocation loc) {
-        return getMenuTypeHandler().getTypeEntry(loc);
+        return menuTypeHandler.getTypeEntry(loc);
     }
 
     @Override
     public IMenuType getMenuType(String id) {
-        return getMenuTypeHandler().getTypeEntry(id);
+        return menuTypeHandler.getTypeEntry(id);
     }
 
     @Override

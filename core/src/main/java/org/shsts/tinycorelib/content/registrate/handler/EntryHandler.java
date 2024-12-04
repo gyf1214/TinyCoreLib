@@ -49,6 +49,9 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
     }
 
     private void onRegisterEvent(RegistryEvent.Register<V> event) {
+        if (builders.isEmpty()) {
+            return;
+        }
         var registry = event.getRegistry();
         LOGGER.info("Mod {} registry {} register {} objects", modid,
             registry.getRegistryName(), builders.size());
@@ -59,7 +62,7 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
         builders.clear();
     }
 
-    protected IForgeRegistry<V> getRegistry() {
+    public IForgeRegistry<V> getRegistry() {
         if (registry != null) {
             return registry;
         }
@@ -70,7 +73,7 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
 
     @Override
     public <U extends V> IEntry<U> getEntry(ResourceLocation loc) {
-        return new Entry<>(loc, () -> RegistryObject.<V, U>create(loc, getRegistry()).get());
+        return new Entry<>(loc, RegistryObject.create(loc, getRegistry()));
     }
 
     @Override

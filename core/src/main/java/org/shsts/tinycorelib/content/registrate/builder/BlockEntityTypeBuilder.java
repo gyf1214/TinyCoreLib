@@ -30,7 +30,7 @@ public class BlockEntityTypeBuilder<P>
     private final Map<ResourceLocation, ICapabilityFactory> capabilities = new HashMap<>();
 
     public BlockEntityTypeBuilder(Registrate registrate, P parent, String id) {
-        super(registrate, registrate.getBlockEntityTypeHandler(), parent, id);
+        super(registrate, registrate.blockEntityTypeHandler, parent, id);
     }
 
     @Override
