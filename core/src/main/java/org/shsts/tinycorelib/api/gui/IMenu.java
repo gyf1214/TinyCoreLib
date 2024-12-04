@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.shsts.tinycorelib.api.network.IPacket;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -28,19 +29,21 @@ public interface IMenu {
 
     Inventory inventory();
 
+    List<IMenuPlugin> getPlugins();
+
     void setValidPredicate(Predicate<IMenu> pred);
 
     Slot addSlot(Slot slot);
 
-    <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory);
+    <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory);
 
     /**
      * Called by Screen to get the latest sync packet.
      */
-    <P extends IPacket> Optional<P> getSyncPacket(int index, Class<P> clazz);
+    <P extends IPacket> Optional<P> getSyncPacket(String name, Class<P> clazz);
 
     /**
      * Callback added by Screen.
      */
-    <P extends IPacket> void onSyncPacket(int index, Consumer<P> cb);
+    <P extends IPacket> void onSyncPacket(String name, Consumer<P> cb);
 }

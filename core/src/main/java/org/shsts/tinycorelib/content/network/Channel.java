@@ -110,8 +110,8 @@ public class Channel implements IChannel {
     @Override
     public <P extends IPacket> IChannel registerMenuSyncPacket(Class<P> clazz,
         Supplier<P> constructor) {
-        syncPacketConstructors.add(constructor);
         var id = syncPacketConstructors.size();
+        syncPacketConstructors.add(constructor);
         syncPacketClasses.put(clazz, id);
         return registerClientPacket(MenuSyncPacket.class, () -> new MenuSyncPacket(this),
             this::handleMenuSyncPacket);

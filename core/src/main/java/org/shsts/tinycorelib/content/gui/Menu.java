@@ -12,12 +12,15 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.shsts.tinycorelib.api.gui.IMenu;
+import org.shsts.tinycorelib.api.gui.IMenuPlugin;
 import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
 import org.shsts.tinycorelib.content.network.Channel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -32,6 +35,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     private final Inventory inventory;
     @Nullable
     private final Channel channel;
+    private final List<IMenuPlugin> plugins = new ArrayList<>();
 
     private Predicate<IMenu> isValid = $ -> true;
 
@@ -72,6 +76,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     }
 
     private final List<SyncSlot<?>> syncSlots = new ArrayList<>();
+    private final Map<String, SyncSlot<?>> syncSlotNames = new HashMap<>();
 
     public Menu(MenuType<?> menuType, int id, Inventory inventory, BlockEntity blockEntity,
         @Nullable Channel channel) {
@@ -82,6 +87,23 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         this.player = inventory.player;
         this.inventory = inventory;
         this.channel = channel;
+    }
+
+    public void addPlugin(IMenuPlugin plugin) {
+        plugins.add(plugin);
+    }
+
+    @Override
+    public List<IMenuPlugin> getPlugins() {
+        return plugins;
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        for (var plugin : plugins) {
+            plugin.onMenuRemoved(player);
+        }
     }
 
     @Override
@@ -132,15 +154,17 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     }
 
     @Override
-    public <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory) {
+    public <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory) {
+        assert !syncSlotNames.containsKey(name);
         var index = syncSlots.size();
-        syncSlots.add(new SyncSlot<>(index, factory));
-        return index;
+        var slot = new SyncSlot<>(index, factory);
+        syncSlots.add(slot);
+        syncSlotNames.put(name, slot);
     }
 
     @Override
-    public <P extends IPacket> Optional<P> getSyncPacket(int index, Class<P> clazz) {
-        var slot = syncSlots.get(index);
+    public <P extends IPacket> Optional<P> getSyncPacket(String name, Class<P> clazz) {
+        var slot = syncSlotNames.get(name);
         if (!clazz.isInstance(slot.packet)) {
             return Optional.empty();
         }
@@ -149,8 +173,8 @@ public class Menu extends AbstractContainerMenu implements IMenu {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <P extends IPacket> void onSyncPacket(int index, Consumer<P> cb) {
-        var slot = (SyncSlot<P>) syncSlots.get(index);
+    public <P extends IPacket> void onSyncPacket(String name, Consumer<P> cb) {
+        var slot = (SyncSlot<P>) syncSlotNames.get(name);
         slot.addCallback(cb);
     }
 

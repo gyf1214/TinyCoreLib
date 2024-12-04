@@ -15,10 +15,28 @@ import org.shsts.tinycorelib.api.gui.IMenu;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class MenuScreenBase extends AbstractContainerScreen<AbstractContainerMenu> {
+    protected final IMenu iMenu;
+
     public MenuScreenBase(IMenu menu, Inventory inventory, Component title) {
         super(menu.getMenu(), inventory, title);
+        this.iMenu = menu;
     }
 
     @Override
     protected void renderBg(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {}
+
+    @Override
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        renderBackground(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTick);
+        renderTooltip(poseStack, mouseX, mouseY);
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        for (var plugin : iMenu.getPlugins()) {
+            plugin.onScreenRemoved();
+        }
+    }
 }

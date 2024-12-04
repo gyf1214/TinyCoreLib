@@ -3,6 +3,7 @@ package org.shsts.tinycorelib.test;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.Level;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
+import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
@@ -18,11 +20,14 @@ import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 
 import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_REGISTRY_KEY;
 import static org.shsts.tinycorelib.api.CoreLibKeys.SERVER_TICK_LOC;
+import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
 import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public final class All {
+    public static final IChannel CHANNEL;
+
     public static final IEntry<Block> TEST_BLOCK1;
     public static final IEntry<TestBlock> TEST_BLOCK2;
     public static final IEntry<TestEntityBlock> TEST_BLOCK3;
@@ -37,6 +42,10 @@ public final class All {
     public static final IEntry<IEvent<Unit>> TICK_SECOND;
 
     static {
+        CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
+
+        CHANNEL.registerMenuSyncPacket(TestSyncPacket.class, TestSyncPacket::new);
+
         TEST_BLOCK1 = REGISTRATE.block("test_block1", Block::new)
             .material(Material.DIRT)
             .noBlockItem()
@@ -64,12 +73,14 @@ public final class All {
             .capability("test_capability", TestCapability::new)
             .register();
 
-        TEST_MENU = REGISTRATE.menu("test_menu")
+        TEST_CAPABILITY = REGISTRATE.capability(ITestCapability.class, new CapabilityToken<>() {});
+
+        TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
+            .menu("test_menu")
             .title($ -> new TextComponent("Test Title"))
+            .dummyPlugin(menu -> menu.addSyncSlot("seconds", TestSyncPacket::new))
             .screen(() -> () -> TestScreen::new)
             .register();
-
-        TEST_CAPABILITY = REGISTRATE.capability(ITestCapability.class, new CapabilityToken<>() {});
 
         EVENTS = REGISTRATE.getHandler(EVENT_REGISTRY_KEY, IEvent.class);
         SERVER_TICK = EVENTS.getEntry(SERVER_TICK_LOC);

@@ -14,7 +14,7 @@ import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IRegistry;
 import org.shsts.tinycorelib.content.common.Builder;
 import org.shsts.tinycorelib.content.registrate.Registrate;
-import org.shsts.tinycorelib.content.registrate.entry.SmartRegistry;
+import org.shsts.tinycorelib.content.registrate.entry.RegistryEntry;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.slf4j.Logger;
 
@@ -30,7 +30,7 @@ public class RegistryBuilderWrapper<V extends IForgeRegistryEntry<V>, P>
     @Nullable
     private Transformer<RegistryBuilder<V>> transformer = $ -> $;
     @Nullable
-    private SmartRegistry<V> entry = null;
+    private RegistryEntry<V> entry = null;
 
     public RegistryBuilderWrapper(Registrate registrate, P parent, String id, Class<V> entryClass) {
         super(parent);

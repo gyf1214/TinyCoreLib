@@ -12,12 +12,12 @@ import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SmartRegistry<V extends IForgeRegistryEntry<V>> extends Entry<IForgeRegistry<V>>
+public class RegistryEntry<V extends IForgeRegistryEntry<V>> extends Entry<IForgeRegistry<V>>
     implements IRegistry<V> {
     @Nullable
     private EntryHandler<V> handler;
 
-    public SmartRegistry(ResourceLocation loc) {
+    public RegistryEntry(ResourceLocation loc) {
         super(loc);
     }
 

@@ -15,8 +15,11 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkHooks;
+import org.shsts.tinycorelib.api.gui.IMenu;
+import org.shsts.tinycorelib.api.gui.IMenuPlugin;
 import org.shsts.tinycorelib.content.network.Channel;
 
+import java.util.List;
 import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
@@ -25,12 +28,15 @@ public class SmartMenuType extends MenuType<AbstractContainerMenu> {
     @Nullable
     private final Channel channel;
     private final Function<BlockEntity, Component> title;
+    private final List<Function<IMenu, IMenuPlugin>> plugins;
 
     @SuppressWarnings("DataFlowIssue")
-    public SmartMenuType(@Nullable Channel channel, Function<BlockEntity, Component> title) {
+    public SmartMenuType(@Nullable Channel channel, Function<BlockEntity, Component> title,
+        List<Function<IMenu, IMenuPlugin>> plugins) {
         super(null);
         this.channel = channel;
         this.title = title;
+        this.plugins = plugins;
     }
 
     @Override
@@ -48,7 +54,11 @@ public class SmartMenuType extends MenuType<AbstractContainerMenu> {
     }
 
     private Menu create(int containerId, Inventory inventory, BlockEntity be) {
-        return new Menu(this, containerId, inventory, be, channel);
+        var menu = new Menu(this, containerId, inventory, be, channel);
+        for (var factory : plugins) {
+            menu.addPlugin(factory.apply(menu));
+        }
+        return menu;
     }
 
     @Override

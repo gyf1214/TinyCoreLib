@@ -11,7 +11,7 @@ import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryManager;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
-import org.shsts.tinycorelib.content.registrate.entry.SmartRegistry;
+import org.shsts.tinycorelib.content.registrate.entry.RegistryEntry;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -29,10 +29,10 @@ public class RegistryHandler {
         this.modid = registrate.modid;
     }
 
-    public <V extends IForgeRegistryEntry<V>> SmartRegistry<V> register(
+    public <V extends IForgeRegistryEntry<V>> RegistryEntry<V> register(
         RegistryBuilderWrapper<V, ?> builder) {
         builders.add(builder);
-        return new SmartRegistry<>(builder.loc());
+        return new RegistryEntry<>(builder.loc());
     }
 
     public <V extends IForgeRegistryEntry<V>> IForgeRegistry<V> getRegistry(

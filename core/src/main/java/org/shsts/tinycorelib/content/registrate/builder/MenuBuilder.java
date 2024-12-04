@@ -10,6 +10,8 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.core.DistLazy;
+import org.shsts.tinycorelib.api.gui.IMenu;
+import org.shsts.tinycorelib.api.gui.IMenuPlugin;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
@@ -20,6 +22,9 @@ import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.entry.MenuTypeEntry;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
@@ -31,6 +36,7 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
     private Function<BlockEntity, Component> title = $ -> TextComponent.EMPTY;
     @Nullable
     private DistLazy<IMenuScreenFactory<?>> screenFactory = null;
+    private final List<Function<IMenu, IMenuPlugin>> plugins = new ArrayList<>();
 
     public MenuBuilder(Registrate registrate, P parent, String id) {
         super(registrate, registrate.getMenuTypeHandler(), parent, id);
@@ -62,6 +68,20 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
     }
 
     @Override
+    public IMenuBuilder<P> plugin(Function<IMenu, IMenuPlugin> factory) {
+        plugins.add(factory);
+        return self();
+    }
+
+    @Override
+    public IMenuBuilder<P> dummyPlugin(Consumer<IMenu> cons) {
+        return plugin(menu -> {
+            cons.accept(menu);
+            return IMenuPlugin.EMPTY;
+        });
+    }
+
+    @Override
     protected MenuTypeEntry createEntry() {
         return ((MenuTypeHandler) handler).registerType(this);
     }
@@ -69,9 +89,15 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
     @Override
     protected SmartMenuType createObject() {
         assert screenFactory != null;
-        var type = new SmartMenuType(channel, title);
+        var type = new SmartMenuType(channel, title, new ArrayList<>(plugins));
         screenFactory.runOnDist(Dist.CLIENT, () -> factory ->
-            registrate.menuScreenHandler.setMenuScreen(type, factory));
+            registrate.menuScreenHandler.setMenuScreen(type, (menu, inventory, title1) -> {
+                var screen = factory.create(menu, inventory, title1);
+                for (var plugin : menu.getPlugins()) {
+                    plugin.applyMenuScreen(screen);
+                }
+                return screen;
+            }));
         return type;
     }
 

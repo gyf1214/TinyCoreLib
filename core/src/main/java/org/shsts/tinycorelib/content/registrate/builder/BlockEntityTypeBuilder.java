@@ -74,6 +74,6 @@ public class BlockEntityTypeBuilder<P>
         var validBlocks = this.validBlocks.stream()
             .map($ -> (Block) $.get())
             .collect(Collectors.toSet());
-        return new SmartBlockEntityType(entry1::create, validBlocks, capabilities);
+        return new SmartBlockEntityType(entry1::create, validBlocks, new HashMap<>(capabilities));
     }
 }
