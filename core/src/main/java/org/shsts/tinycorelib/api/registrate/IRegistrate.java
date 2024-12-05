@@ -16,15 +16,19 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
+import org.shsts.tinycorelib.api.recipe.IRecipe;
+import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
+import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -124,4 +128,14 @@ public interface IRegistrate {
     <A> IEntry<IEvent<A>> event(String id);
 
     <A, R> IEntry<IReturnEvent<A, R>> returnEvent(String id, R defaultResult);
+
+    <C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>,
+        P> IRecipeTypeBuilder<R, B, P> recipeType(P parent, String id,
+        IRecipeType.BuilderFactory<B> builderFactory);
+
+    default <C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>
+        > IRecipeTypeBuilder<R, B, IRegistrate> recipeType(String id,
+        IRecipeType.BuilderFactory<B> builderFactory) {
+        return recipeType(this, id, builderFactory);
+    }
 }

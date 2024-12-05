@@ -45,4 +45,10 @@ public abstract class Builder<U, P, S extends IBuilder<U, P, S>> implements IBui
         onCreateObject.add(cons);
         return self();
     }
+
+    @Override
+    public S onBuild(Runnable callback) {
+        onBuild.add(callback);
+        return self();
+    }
 }

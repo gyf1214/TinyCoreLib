@@ -17,23 +17,28 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
+import org.shsts.tinycorelib.api.recipe.IRecipe;
+import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
+import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.content.blockentity.Event;
 import org.shsts.tinycorelib.content.blockentity.ReturnEvent;
 import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.MenuBuilder;
+import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
@@ -42,6 +47,7 @@ import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuScreenHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
+import org.shsts.tinycorelib.content.registrate.handler.RecipeTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RenderTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
@@ -68,6 +74,7 @@ public class Registrate implements IRegistrate {
     // special forge registry
     public final BlockEntityTypeHandler blockEntityTypeHandler;
     public final MenuTypeHandler menuTypeHandler;
+    public final RecipeTypeHandler recipeTypeHandler;
 
     // others
     public final CapabilityHandler capabilityHandler;
@@ -88,6 +95,7 @@ public class Registrate implements IRegistrate {
         this.registryHandler = new RegistryHandler(this);
         this.blockEntityTypeHandler = createEntryHandler(BlockEntityTypeHandler::new);
         this.menuTypeHandler = createEntryHandler(MenuTypeHandler::new);
+        this.recipeTypeHandler = new RecipeTypeHandler(this);
         this.capabilityHandler = new CapabilityHandler(this);
         this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
@@ -155,6 +163,7 @@ public class Registrate implements IRegistrate {
         for (var handler : entryHandlers.values()) {
             handler.addListener(modEventBus);
         }
+        recipeTypeHandler.addListeners(modEventBus);
         modEventBus.addListener(capabilityHandler::onRegisterEvent);
     }
 
@@ -243,6 +252,13 @@ public class Registrate implements IRegistrate {
     public <A, R> IEntry<IReturnEvent<A, R>> returnEvent(String id, R defaultResult) {
         return registryEntry(getEventHandler(), id,
             () -> new ReturnEvent<>(defaultResult));
+    }
+
+    @Override
+    public <C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>,
+        P> IRecipeTypeBuilder<R, B, P> recipeType(P parent, String id,
+        IRecipeType.BuilderFactory<B> builderFactory) {
+        return new RecipeTypeBuilder<>(this, parent, id, builderFactory);
     }
 
     public void trackTranslation(String key) {

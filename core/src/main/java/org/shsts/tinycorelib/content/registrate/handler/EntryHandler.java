@@ -28,7 +28,7 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
 
     protected final String modid;
     protected final List<EntryBuilder<V, ?, ?, ?>> builders = new ArrayList<>();
-    private final Class<V> entryClazz;
+    private final Class<V> entryClass;
     @Nullable
     private final Supplier<IForgeRegistry<V>> registrySupp;
     @Nullable
@@ -38,14 +38,14 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
         this.modid = registrate.modid;
         this.registry = registry;
         this.registrySupp = null;
-        this.entryClazz = registry.getRegistrySuperType();
+        this.entryClass = registry.getRegistrySuperType();
     }
 
-    public EntryHandler(Registrate registrate, Class<V> entryClazz, Supplier<IForgeRegistry<V>> registry) {
+    public EntryHandler(Registrate registrate, Class<V> entryClass, Supplier<IForgeRegistry<V>> registry) {
         this.modid = registrate.modid;
         this.registry = null;
         this.registrySupp = registry;
-        this.entryClazz = entryClazz;
+        this.entryClass = entryClass;
     }
 
     private void onRegisterEvent(RegistryEvent.Register<V> event) {
@@ -87,6 +87,6 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
     }
 
     public void addListener(IEventBus modEventBus) {
-        modEventBus.addGenericListener(entryClazz, this::onRegisterEvent);
+        modEventBus.addGenericListener(entryClass, this::onRegisterEvent);
     }
 }
