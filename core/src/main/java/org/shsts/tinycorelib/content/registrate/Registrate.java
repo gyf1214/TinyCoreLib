@@ -48,6 +48,7 @@ import org.shsts.tinycorelib.content.registrate.builder.VanillaRecipeTypeBuilder
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
+import org.shsts.tinycorelib.content.registrate.handler.DynamicHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuScreenHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
@@ -71,6 +72,7 @@ public class Registrate implements IRegistrate {
     public final String modid;
 
     private final Map<ResourceLocation, EntryHandler<?>> entryHandlers = new HashMap<>();
+    private final Map<ResourceLocation, DynamicHandler<?>> dynamicHandlers = new HashMap<>();
 
     // registry
     public final RegistryHandler registryHandler;
@@ -129,10 +131,10 @@ public class Registrate implements IRegistrate {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends IForgeRegistryEntry<T>> EntryHandler<T> getHandler(
-        ResourceKey<Registry<T>> key, Class<?> entryClass) {
-        return (EntryHandler<T>) entryHandlers.computeIfAbsent(key.location(),
-            $ -> new EntryHandler<>(this, (Class<T>) entryClass,
+    public <V extends IForgeRegistryEntry<V>> EntryHandler<V> getHandler(
+        ResourceKey<Registry<V>> key, Class<?> entryClass) {
+        return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
+            $ -> new EntryHandler<>(this, (Class<V>) entryClass,
                 () -> registryHandler.getRegistry(key)));
     }
 
@@ -167,9 +169,20 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
+    public <T extends IForgeRegistryEntry<T>> IRegistrate createDynamicHandler(
+        IForgeRegistry<T> registry, Supplier<T> dummy) {
+        var handler = new DynamicHandler<>(registry.getRegistrySuperType(), dummy);
+        dynamicHandlers.put(registry.getRegistryName(), handler);
+        return this;
+    }
+
+    @Override
     public void register(IEventBus modEventBus) {
         modEventBus.addListener(registryHandler::onNewRegistry);
         for (var handler : entryHandlers.values()) {
+            handler.addListener(modEventBus);
+        }
+        for (var handler : dynamicHandlers.values()) {
             handler.addListener(modEventBus);
         }
         recipeTypeHandler.addListeners(modEventBus);
@@ -246,6 +259,14 @@ public class Registrate implements IRegistrate {
         IEntryHandler<T> handler, String id, Supplier<U> factory) {
         return new SimpleEntryBuilder<>(this, (EntryHandler<T>) handler, this, id, factory)
             .register();
+    }
+
+    @Override
+    public <T extends IForgeRegistryEntry<T>> ResourceKey<T> dynamicEntry(
+        IForgeRegistry<T> registry, String id) {
+        var loc = new ResourceLocation(modid, id);
+        dynamicHandlers.get(registry.getRegistryName()).register(loc);
+        return ResourceKey.create(registry.getRegistryKey(), loc);
     }
 
     private EntryHandler<IEvent<?>> getEventHandler() {

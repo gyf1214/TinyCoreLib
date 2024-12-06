@@ -2,16 +2,21 @@ package org.shsts.tinycorelib.test;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.data.worldgen.biome.OverworldBiomes;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.common.world.ForgeWorldPreset;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
@@ -50,6 +55,9 @@ public final class All {
 
     public static final IRecipeType<TestRecipe.Builder> TEST_RECIPE;
     public static final IRecipeType<TestVanillaRecipe.Builder> TEST_VANILLA_RECIPE;
+
+    public static final ResourceKey<Biome> VOID_BIOME;
+    public static final IEntry<VoidPreset> VOID_PRESET;
 
     static {
         CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
@@ -110,6 +118,12 @@ public final class All {
             .recipeClass(TestVanillaRecipe.class)
             .serializer(TestVanillaRecipe.SERIALIZER)
             .register();
+
+        VOID_BIOME = REGISTRATE.createDynamicHandler(ForgeRegistries.BIOMES, OverworldBiomes::theVoid)
+            .dynamicEntry(ForgeRegistries.BIOMES, "void");
+
+        var presetHandler = REGISTRATE.getHandler(ForgeRegistries.Keys.WORLD_TYPES, ForgeWorldPreset.class);
+        VOID_PRESET = REGISTRATE.registryEntry(presetHandler, "void", VoidPreset::new);
     }
 
     public static void init() {}

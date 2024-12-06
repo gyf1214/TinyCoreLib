@@ -70,6 +70,9 @@ public interface IRegistrate {
 
     <T> ICapability<T> getCapability(Capability<T> cap);
 
+    <T extends IForgeRegistryEntry<T>> IRegistrate createDynamicHandler(
+        IForgeRegistry<T> registry, Supplier<T> dummy);
+
     void register(IEventBus modEventBus);
 
     void registerClient(IEventBus modEventBus);
@@ -130,6 +133,9 @@ public interface IRegistrate {
 
     <T extends IForgeRegistryEntry<T>, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory);
+
+    <T extends IForgeRegistryEntry<T>> ResourceKey<T> dynamicEntry(
+        IForgeRegistry<T> registry, String id);
 
     <A> IEntry<IEvent<A>> event(String id);
 
