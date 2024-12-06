@@ -5,6 +5,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
+import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -27,6 +28,7 @@ import org.shsts.tinycorelib.datagen.content.handler.BlockStateHandler;
 import org.shsts.tinycorelib.datagen.content.handler.DataHandler;
 import org.shsts.tinycorelib.datagen.content.handler.ItemModelHandler;
 import org.shsts.tinycorelib.datagen.content.handler.LootTableHandler;
+import org.shsts.tinycorelib.datagen.content.handler.RecipeHandler;
 import org.shsts.tinycorelib.datagen.content.handler.TagsHandler;
 
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ public class DataGen implements IDataGen {
     public final BlockStateHandler blockStateHandler;
     public final ItemModelHandler itemModelHandler;
     public final LootTableHandler lootTableHandler;
+    public final RecipeHandler recipeHandler;
 
     public final TrackedContext<Block> blockTrackedContext;
     public final TrackedContext<Item> itemTrackedContext;
@@ -67,6 +70,7 @@ public class DataGen implements IDataGen {
         this.blockStateHandler = createHandler(BlockStateHandler::new);
         this.itemModelHandler = createHandler(ItemModelHandler::new);
         this.lootTableHandler = createHandler(LootTableHandler::new);
+        this.recipeHandler = createHandler(RecipeHandler::new);
         createTagsHandler(Registry.BLOCK);
         createTagsHandler(Registry.ITEM);
 
@@ -146,6 +150,11 @@ public class DataGen implements IDataGen {
     public IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons) {
         itemModelHandler.addModelCallback(cons);
         return this;
+    }
+
+    @Override
+    public void registerRecipe(ResourceLocation loc, Supplier<FinishedRecipe> recipe) {
+        recipeHandler.registerRecipe(recipe);
     }
 
     @Override

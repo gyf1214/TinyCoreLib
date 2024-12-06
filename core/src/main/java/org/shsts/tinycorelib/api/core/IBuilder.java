@@ -15,7 +15,7 @@ public interface IBuilder<U, P, S extends IBuilder<U, P, S>> extends ISelf<S> {
 
     S onCreateObject(Consumer<U> cons);
 
-    S onBuild(Runnable callback);
+    S onBuild(Runnable cb);
 
     default S transform(Transformer<S> trans) {
         return trans.apply(self());

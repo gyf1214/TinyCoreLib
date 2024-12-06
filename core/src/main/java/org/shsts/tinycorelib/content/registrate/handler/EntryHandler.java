@@ -73,7 +73,7 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
 
     @Override
     public <U extends V> IEntry<U> getEntry(ResourceLocation loc) {
-        return new Entry<>(loc, RegistryObject.create(loc, getRegistry()));
+        return new Entry<>(loc, () -> RegistryObject.<V, U>create(loc, getRegistry()).get());
     }
 
     @Override

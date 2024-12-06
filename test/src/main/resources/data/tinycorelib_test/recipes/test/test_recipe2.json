@@ -1,0 +1,6 @@
+{
+  "type": "tinycorelib_test:test",
+  "beginSeconds": 0,
+  "endSeconds": 20000,
+  "displayItem": "minecraft:sand"
+}

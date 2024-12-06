@@ -61,7 +61,7 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B, P,
     }
 
     @Override
-    protected SmartRecipeType<?, ?, B> createObject() {
+    protected SmartRecipeType<C, R, B> createObject() {
         if (prefix == null) {
             prefix = id();
         }
@@ -73,8 +73,8 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B, P,
 
     @Override
     @SuppressWarnings("unchecked")
-    public SmartRecipeType<?, ?, B> buildObject() {
-        return (SmartRecipeType<?, ?, B>) super.buildObject();
+    public SmartRecipeType<C, R, B> buildObject() {
+        return (SmartRecipeType<C, R, B>) super.buildObject();
     }
 
     public void registerSerializer(IForgeRegistry<RecipeSerializer<?>> registry) {

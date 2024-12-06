@@ -18,6 +18,7 @@ import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
+import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 
 import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_REGISTRY_KEY;
 import static org.shsts.tinycorelib.api.CoreLibKeys.SERVER_TICK_LOC;
@@ -43,6 +44,8 @@ public final class All {
     public static final IEntry<IEvent<Unit>> TICK_SECOND;
 
     public static final IMenuEvent<TestPacket> TEST_MENU_EVENT;
+
+    public static final IRecipeType<TestRecipe.Builder> TEST_RECIPE;
 
     static {
         CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
@@ -91,6 +94,11 @@ public final class All {
         EVENTS = REGISTRATE.getHandler(EVENT_REGISTRY_KEY, IEvent.class);
         SERVER_TICK = EVENTS.getEntry(SERVER_TICK_LOC);
         TICK_SECOND = REGISTRATE.event("tick_second");
+
+        TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.Builder::new)
+            .recipeClass(TestRecipe.class)
+            .serializer(TestRecipe.SERIALIZER)
+            .register();
     }
 
     public static void init() {}

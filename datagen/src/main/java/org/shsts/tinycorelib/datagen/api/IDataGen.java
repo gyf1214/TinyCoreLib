@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import org.shsts.tinycorelib.api.recipe.IRecipeDataConsumer;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IDataGen {
+public interface IDataGen extends IRecipeDataConsumer {
     String modid();
 
     <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item);

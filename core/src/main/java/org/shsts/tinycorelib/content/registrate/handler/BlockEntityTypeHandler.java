@@ -18,7 +18,7 @@ public class BlockEntityTypeHandler extends EntryHandler<BlockEntityType<?>> {
     }
 
     public BlockEntityTypeEntry getTypeEntry(ResourceLocation loc) {
-        return new BlockEntityTypeEntry(loc, RegistryObject.create(loc, getRegistry()));
+        return new BlockEntityTypeEntry(loc, () -> RegistryObject.create(loc, getRegistry()).get());
     }
 
     public BlockEntityTypeEntry getTypeEntry(String id) {

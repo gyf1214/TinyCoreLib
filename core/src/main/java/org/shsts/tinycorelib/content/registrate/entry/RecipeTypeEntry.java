@@ -28,7 +28,7 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>, B> extends Entry<RecipeTyp
 
     public RecipeTypeEntry(ResourceLocation loc,
         Supplier<SmartRecipeType<C, R, B>> supplier) {
-        super(loc, () -> (RecipeType<?>) supplier);
+        super(loc, supplier::get);
     }
 
     @Override
@@ -41,6 +41,11 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>, B> extends Entry<RecipeTyp
     public RecipeSerializer<?> getSerializer() {
         assert serializer != null;
         return serializer;
+    }
+
+    @Override
+    public Class<R> recipeClass() {
+        return get().recipeClass;
     }
 
     public void setSerializer(RecipeSerializer<?> value) {
@@ -105,14 +110,16 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>, B> extends Entry<RecipeTyp
     @Override
     @SuppressWarnings("unchecked")
     public B recipe(IRecipeDataConsumer consumer, ResourceLocation loc) {
-        var builder = getBuilder(normalizeLoc(consumer, loc));
+        var loc1 = normalizeLoc(consumer, loc);
+        var builder = getBuilder(loc1);
         if (builder instanceof IRecipeBuilder<?, ?> recipeBuilder) {
-            recipeBuilder.onBuild(() -> consumer.registerRecipe(loc, () -> {
+            recipeBuilder.onBuild(() -> consumer.registerRecipe(loc1, () -> {
                 var recipe = recipeBuilder.buildObject();
-                return new Finished(loc, (R) recipe);
+                return new Finished(loc1, (R) recipe);
             }));
         } else if (builder instanceof IVanillaRecipeBuilder<?, ?> vanillaBuilder) {
-            vanillaBuilder.onBuild(() -> consumer.registerRecipe(loc, vanillaBuilder::buildObject));
+            vanillaBuilder.onBuild(() -> consumer.registerRecipe(loc1,
+                vanillaBuilder::buildObject));
         }
         return get().defaults.apply(builder);
     }

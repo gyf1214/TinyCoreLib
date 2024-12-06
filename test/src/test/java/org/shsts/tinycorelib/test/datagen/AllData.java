@@ -18,6 +18,7 @@ import org.shsts.tinycorelib.test.TinyCoreLibTest;
 import java.util.List;
 
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
+import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
 @ParametersAreNonnullByDefault
@@ -54,6 +55,11 @@ public final class AllData {
             .block(TEST_BLOCK3)
             .blockState(ctx -> ctx.provider().simpleBlock(ctx.object(),
                 ctx.provider().models().cubeAll(ctx.id(), mcLoc("block/nether_bricks"))))
+            .build();
+
+        TEST_RECIPE.recipe(DATA_GEN, "test_recipe1")
+            .range(0, 10)
+            .displayItem(Items.GLASS)
             .build();
     }
 

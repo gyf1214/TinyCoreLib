@@ -9,6 +9,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
+import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilderBase;
 import org.shsts.tinycorelib.content.registrate.entry.RecipeTypeEntry;
@@ -32,10 +33,11 @@ public class RecipeTypeHandler {
             Registry.RECIPE_TYPE_REGISTRY, registrate.modid);
     }
 
-    public <B> RecipeTypeEntry<?, ?, B> register(RecipeTypeBuilderBase<?, ?, B, ?, ?> builder) {
+    public <C, R extends IRecipe<C>, B> RecipeTypeEntry<?, ?, B> register(
+        RecipeTypeBuilderBase<C, R, B, ?, ?> builder) {
         builders.add(builder);
-        return new RecipeTypeEntry<>(builder.loc(), recipeTypeRegister.register(
-            builder.id(), builder::buildObject));
+        var recipeType = recipeTypeRegister.register(builder.id(), builder::buildObject);
+        return new RecipeTypeEntry<>(builder.loc(), recipeType);
     }
 
     public void onRegisterSerializer(RegistryEvent.Register<RecipeSerializer<?>> event) {

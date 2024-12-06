@@ -47,8 +47,8 @@ public abstract class Builder<U, P, S extends IBuilder<U, P, S>> implements IBui
     }
 
     @Override
-    public S onBuild(Runnable callback) {
-        onBuild.add(callback);
+    public S onBuild(Runnable cb) {
+        onBuild.add(cb);
         return self();
     }
 }
