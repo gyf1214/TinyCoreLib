@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -18,12 +19,14 @@ import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
+import org.shsts.tinycorelib.api.recipe.IVanillaRecipeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IVanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
@@ -63,6 +66,8 @@ public interface IRegistrate {
     IMenuType getMenuType(String id);
 
     <T> ICapability<T> getCapability(CapabilityToken<T> token);
+
+    <T> ICapability<T> getCapability(Capability<T> cap);
 
     void register(IEventBus modEventBus);
 
@@ -137,5 +142,15 @@ public interface IRegistrate {
         > IRecipeTypeBuilder<R, B, IRegistrate> recipeType(String id,
         IRecipeType.BuilderFactory<B> builderFactory) {
         return recipeType(this, id, builderFactory);
+    }
+
+    <C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R, B>,
+        P> IVanillaRecipeTypeBuilder<R, B, P> vanillaRecipeType(P parent,
+        String id, IRecipeType.BuilderFactory<B> builderFactory);
+
+    default <C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R, B>
+        > IVanillaRecipeTypeBuilder<R, B, IRegistrate> vanillaRecipeType(
+        String id, IRecipeType.BuilderFactory<B> builderFactory) {
+        return vanillaRecipeType(this, id, builderFactory);
     }
 }

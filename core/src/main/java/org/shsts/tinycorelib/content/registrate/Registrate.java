@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -19,6 +20,7 @@ import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
+import org.shsts.tinycorelib.api.recipe.IVanillaRecipeBuilder;
 import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
@@ -27,6 +29,7 @@ import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IVanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
@@ -41,6 +44,7 @@ import org.shsts.tinycorelib.content.registrate.builder.MenuBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
+import org.shsts.tinycorelib.content.registrate.builder.VanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
@@ -154,7 +158,12 @@ public class Registrate implements IRegistrate {
 
     @Override
     public <T> ICapability<T> getCapability(CapabilityToken<T> token) {
-        return new CapabilityEntry<>(modid, token);
+        return new CapabilityEntry<>(token);
+    }
+
+    @Override
+    public <T> ICapability<T> getCapability(Capability<T> cap) {
+        return new CapabilityEntry<>(cap);
     }
 
     @Override
@@ -259,6 +268,13 @@ public class Registrate implements IRegistrate {
         P> IRecipeTypeBuilder<R, B, P> recipeType(P parent, String id,
         IRecipeType.BuilderFactory<B> builderFactory) {
         return new RecipeTypeBuilder<>(this, parent, id, builderFactory);
+    }
+
+    @Override
+    public <C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R, B>,
+        P> IVanillaRecipeTypeBuilder<R, B, P> vanillaRecipeType(P parent,
+        String id, IRecipeType.BuilderFactory<B> builderFactory) {
+        return new VanillaRecipeTypeBuilder<>(this, parent, id, builderFactory);
     }
 
     public void trackTranslation(String key) {

@@ -21,6 +21,14 @@ public class CapabilityEntry<T> extends Entry<Capability<T>> implements ICapabil
         super(new ResourceLocation(modid, ""), () -> CapabilityManager.get(token));
     }
 
+    public CapabilityEntry(CapabilityToken<T> token) {
+        super(new ResourceLocation(""), () -> CapabilityManager.get(token));
+    }
+
+    public CapabilityEntry(Capability<T> cap) {
+        super(new ResourceLocation(""), cap);
+    }
+
     @Override
     public T get(BlockEntity be, @Nullable Direction dir) {
         return be.getCapability(get(), dir)

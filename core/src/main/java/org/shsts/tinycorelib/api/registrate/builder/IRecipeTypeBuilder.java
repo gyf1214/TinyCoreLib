@@ -10,5 +10,5 @@ import org.shsts.tinycorelib.api.recipe.IRecipeSerializer;
 @MethodsReturnNonnullByDefault
 public interface IRecipeTypeBuilder<R extends IRecipe<?>, B extends IRecipeBuilder<R, B>, P> extends
     IRecipeTypeBuilderBase<R, B, P, IRecipeTypeBuilder<R, B, P>> {
-    IRecipeTypeBuilder<R, B, P> serializer(IRecipeSerializer<R, B> serializer);
+    IRecipeTypeBuilder<R, B, P> serializer(IRecipeSerializer<R, B> value);
 }

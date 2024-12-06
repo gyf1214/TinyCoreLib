@@ -1,6 +1,5 @@
 package org.shsts.tinycorelib.content.recipe;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -10,21 +9,18 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
-import org.shsts.tinycorelib.api.recipe.IRecipeSerializer;
+import org.shsts.tinycorelib.api.recipe.IVanillaRecipeSerializer;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SmartRecipeSerializer<C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>>
+public class VanillaRecipeSerializer<C, R extends IRecipe<C>>
     extends ForgeRegistryEntry<RecipeSerializer<?>>
     implements RecipeSerializer<SmartRecipe<C, R>> {
-    private static final Gson GSON = new Gson();
+    private final IRecipeType<?> type;
+    private final IVanillaRecipeSerializer<R> compose;
 
-    private final IRecipeType<B> type;
-    public final IRecipeSerializer<R, B> compose;
-
-    public SmartRecipeSerializer(IRecipeType<B> type, IRecipeSerializer<R, B> compose) {
+    public VanillaRecipeSerializer(IRecipeType<?> type, IVanillaRecipeSerializer<R> compose) {
         this.type = type;
         this.compose = compose;
     }
@@ -32,7 +28,7 @@ public class SmartRecipeSerializer<C, R extends IRecipe<C>, B extends IRecipeBui
     @Override
     public SmartRecipe<C, R> fromJson(ResourceLocation loc, JsonObject jo,
         ICondition.IContext context) {
-        var recipe = compose.fromJson(type, loc, jo, context);
+        var recipe = compose.fromJson(loc, jo, context);
         return new SmartRecipe<>(type.get(), this, loc, recipe);
     }
 
@@ -42,16 +38,13 @@ public class SmartRecipeSerializer<C, R extends IRecipe<C>, B extends IRecipeBui
     }
 
     @Override
-    public void toNetwork(FriendlyByteBuf buf, SmartRecipe<C, R> recipe) {
-        var jo = new JsonObject();
-        compose.toJson(jo, recipe.compose);
-        var str = GSON.toJson(jo);
-        buf.writeUtf(str);
+    public SmartRecipe<C, R> fromNetwork(ResourceLocation loc, FriendlyByteBuf buf) {
+        var recipe = compose.fromNetwork(loc, buf);
+        return new SmartRecipe<>(type.get(), this, loc, recipe);
     }
 
     @Override
-    public SmartRecipe<C, R> fromNetwork(ResourceLocation loc, FriendlyByteBuf buf) {
-        var jo = GSON.fromJson(buf.readUtf(), JsonObject.class);
-        return fromJson(loc, jo);
+    public void toNetwork(FriendlyByteBuf buf, SmartRecipe<C, R> recipe) {
+        compose.toNetwork(buf, recipe.compose);
     }
 }

@@ -5,28 +5,29 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
-import org.shsts.tinycorelib.api.recipe.IRecipeSerializer;
-import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
+import org.shsts.tinycorelib.api.recipe.IVanillaRecipeBuilder;
+import org.shsts.tinycorelib.api.recipe.IVanillaRecipeSerializer;
+import org.shsts.tinycorelib.api.registrate.builder.IVanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
-import org.shsts.tinycorelib.content.recipe.SmartRecipeSerializer;
+import org.shsts.tinycorelib.content.recipe.VanillaRecipeSerializer;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class RecipeTypeBuilder<C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>, P>
-    extends RecipeTypeBuilderBase<C, R, B, P, IRecipeTypeBuilder<R, B, P>>
-    implements IRecipeTypeBuilder<R, B, P> {
-    @Nullable
-    private IRecipeSerializer<R, B> serializer = null;
+public class VanillaRecipeTypeBuilder<C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R, B>, P>
+    extends RecipeTypeBuilderBase<C, R, B, P, IVanillaRecipeTypeBuilder<R, B, P>>
+    implements IVanillaRecipeTypeBuilder<R, B, P> {
 
-    public RecipeTypeBuilder(Registrate registrate, P parent, String id,
+    @Nullable
+    private IVanillaRecipeSerializer<R> serializer = null;
+
+    public VanillaRecipeTypeBuilder(Registrate registrate, P parent, String id,
         IRecipeType.BuilderFactory<B> builderFactory) {
         super(registrate, parent, id, builderFactory);
     }
 
     @Override
-    public IRecipeTypeBuilder<R, B, P> serializer(IRecipeSerializer<R, B> value) {
+    public IVanillaRecipeTypeBuilder<R, B, P> serializer(IVanillaRecipeSerializer<R> value) {
         serializer = value;
         return self();
     }
@@ -35,6 +36,6 @@ public class RecipeTypeBuilder<C, R extends IRecipe<C>, B extends IRecipeBuilder
     protected RecipeSerializer<?> createSerializer() {
         assert entry != null;
         assert serializer != null;
-        return new SmartRecipeSerializer<>(entry, serializer);
+        return new VanillaRecipeSerializer<>(entry, serializer);
     }
 }

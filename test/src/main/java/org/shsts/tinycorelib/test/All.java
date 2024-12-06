@@ -10,6 +10,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.network.IChannel;
@@ -38,6 +40,7 @@ public final class All {
     public static final IMenuType TEST_MENU;
 
     public static final ICapability<ITestCapability> TEST_CAPABILITY;
+    public static final ICapability<IItemHandler> ITEM_HANDLER_CAPABILITY;
 
     public static final IEntryHandler<IEvent<?>> EVENTS;
     public static final IEntry<IEvent<Level>> SERVER_TICK;
@@ -46,6 +49,7 @@ public final class All {
     public static final IMenuEvent<TestPacket> TEST_MENU_EVENT;
 
     public static final IRecipeType<TestRecipe.Builder> TEST_RECIPE;
+    public static final IRecipeType<TestVanillaRecipe.Builder> TEST_VANILLA_RECIPE;
 
     static {
         CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
@@ -83,6 +87,8 @@ public final class All {
 
         TEST_CAPABILITY = REGISTRATE.capability(ITestCapability.class, new CapabilityToken<>() {});
 
+        ITEM_HANDLER_CAPABILITY = REGISTRATE.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+
         TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
             .menu("test_menu")
             .title($ -> new TextComponent("Test Title"))
@@ -98,6 +104,11 @@ public final class All {
         TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.Builder::new)
             .recipeClass(TestRecipe.class)
             .serializer(TestRecipe.SERIALIZER)
+            .register();
+
+        TEST_VANILLA_RECIPE = REGISTRATE.vanillaRecipeType("test_vanilla", TestVanillaRecipe.Builder::new)
+            .recipeClass(TestVanillaRecipe.class)
+            .serializer(TestVanillaRecipe.SERIALIZER)
             .register();
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.test.All;
@@ -17,22 +18,26 @@ import org.shsts.tinycorelib.test.TinyCoreLibTest;
 
 import java.util.List;
 
+import static org.shsts.tinycorelib.test.All.TEST_BLOCK2;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
+import static org.shsts.tinycorelib.test.All.TEST_VANILLA_RECIPE;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public final class AllData {
+    private static final TagKey<Item> TEST_ITEM_TAG = itemTag("test_item_tag");
+
     public static void init() {
         DATA_GEN
             .blockModel(AllData::testBlockModel)
             .item(All.TEST_ITEM)
             .model(ctx -> ctx.provider().withExistingParent(ctx.id(), "item/generated")
                 .texture("layer0", mcLoc("item/arrow")))
-            .tag(itemTag("test_item_tag"))
+            .tag(TEST_ITEM_TAG)
             .build()
-            .tag(itemTag("test_item_tag"), itemTag("test_parent_item_tag"))
+            .tag(TEST_ITEM_TAG, itemTag("test_parent_item_tag"))
             .block(All.TEST_BLOCK1)
             .blockState(ctx -> {
                 var prov = ctx.provider();
@@ -60,6 +65,19 @@ public final class AllData {
         TEST_RECIPE.recipe(DATA_GEN, "test_recipe1")
             .range(0, 10)
             .displayItem(Items.GLASS)
+            .build();
+
+        TEST_VANILLA_RECIPE.recipe(DATA_GEN, "test_vanilla1")
+            .ingredient(TEST_ITEM_TAG)
+            .result(TEST_BLOCK2)
+            .cookingTime(100)
+            .beginSeconds(0)
+            .build()
+            .recipe(DATA_GEN, "test_vanilla2")
+            .ingredient(() -> Blocks.GLASS)
+            .result(TEST_BLOCK3)
+            .cookingTime(100)
+            .beginSeconds(10)
             .build();
     }
 

@@ -14,12 +14,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
 import org.shsts.tinycorelib.api.recipe.IRecipeSerializer;
-import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -50,20 +45,15 @@ public class TestRecipe implements IRecipe<ITestCapability> {
         return loc;
     }
 
-    public static class Builder implements IRecipeBuilder<TestRecipe, Builder> {
-        private final List<Consumer<TestRecipe>> onCreate = new ArrayList<>();
-        private final List<Runnable> onBuild = new ArrayList<>();
-        private final IRecipeType<Builder> parent;
-        private final ResourceLocation loc;
-
+    public static class Builder extends RecipeBuilderBase<TestRecipe, TestRecipe, Builder>
+        implements IRecipeBuilder<TestRecipe, Builder> {
         private int beginSeconds = 0;
         private int endSeconds = 0;
         @Nullable
         private ResourceLocation displayItem = null;
 
         public Builder(IRecipeType<Builder> parent, ResourceLocation loc) {
-            this.parent = parent;
-            this.loc = loc;
+            super(parent, loc);
         }
 
         public Builder range(int begin, int end) {
@@ -77,43 +67,14 @@ public class TestRecipe implements IRecipe<ITestCapability> {
             return self();
         }
 
-        public Builder displayItem(IEntry<? extends Item> item) {
-            displayItem = item.loc();
-            return self();
-        }
-
         public Builder displayItem(ResourceLocation loc) {
             displayItem = loc;
             return self();
         }
 
         @Override
-        public TestRecipe buildObject() {
-            var obj = new TestRecipe(this);
-            for (var cb : onCreate) {
-                cb.accept(obj);
-            }
-            return obj;
-        }
-
-        @Override
-        public IRecipeType<Builder> build() {
-            for (var cb : onBuild) {
-                cb.run();
-            }
-            return parent;
-        }
-
-        @Override
-        public Builder onCreateObject(Consumer<TestRecipe> cons) {
-            onCreate.add(cons);
-            return self();
-        }
-
-        @Override
-        public Builder onBuild(Runnable cb) {
-            onBuild.add(cb);
-            return self();
+        protected TestRecipe createObject() {
+            return new TestRecipe(this);
         }
     }
 

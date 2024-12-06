@@ -29,6 +29,11 @@ public class Entry<U> implements IEntry<U> {
         this.supplier = supplier;
     }
 
+    public Entry(ResourceLocation loc, U object) {
+        this.loc = loc;
+        this.object = object;
+    }
+
     @Override
     public ResourceLocation loc() {
         return loc;

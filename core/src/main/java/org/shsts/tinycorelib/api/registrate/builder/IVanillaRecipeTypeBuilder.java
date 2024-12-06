@@ -12,5 +12,5 @@ import org.shsts.tinycorelib.api.recipe.IVanillaRecipeSerializer;
 public interface IVanillaRecipeTypeBuilder<R extends IRecipe<?>,
     B extends IVanillaRecipeBuilder<R, B>, P> extends
     ILoc, IRecipeTypeBuilderBase<R, B, P, IVanillaRecipeTypeBuilder<R, B, P>> {
-    IVanillaRecipeTypeBuilder<R, B, P> serializer(IVanillaRecipeSerializer<R> serializer);
+    IVanillaRecipeTypeBuilder<R, B, P> serializer(IVanillaRecipeSerializer<R> value);
 }
