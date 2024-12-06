@@ -55,6 +55,7 @@ import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RecipeTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RenderTypeHandler;
+import org.shsts.tinycorelib.content.registrate.handler.RendererHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
@@ -89,6 +90,7 @@ public class Registrate implements IRegistrate {
     public final RenderTypeHandler renderTypeHandler;
     public final TintHandler tintHandler;
     public final MenuScreenHandler menuScreenHandler;
+    public final RendererHandler rendererHandler;
 
     private final TrackedObjects trackedObjects;
 
@@ -103,9 +105,11 @@ public class Registrate implements IRegistrate {
         this.menuTypeHandler = createEntryHandler(MenuTypeHandler::new);
         this.recipeTypeHandler = new RecipeTypeHandler(this);
         this.capabilityHandler = new CapabilityHandler(this);
+
         this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
         this.menuScreenHandler = new MenuScreenHandler();
+        this.rendererHandler = new RendererHandler();
 
         this.trackedObjects = new TrackedObjects();
     }
@@ -198,6 +202,7 @@ public class Registrate implements IRegistrate {
     public void registerClient(IEventBus modEventBus) {
         modEventBus.addListener(tintHandler::onRegisterBlockColors);
         modEventBus.addListener(tintHandler::onRegisterItemColors);
+        modEventBus.addListener(rendererHandler::onRegisterRenderers);
         modEventBus.addListener(this::onClientSetup);
     }
 
