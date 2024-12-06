@@ -10,6 +10,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
+import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilderBase;
 import org.shsts.tinycorelib.content.registrate.entry.RecipeTypeEntry;
@@ -33,7 +34,8 @@ public class RecipeTypeHandler {
             Registry.RECIPE_TYPE_REGISTRY, registrate.modid);
     }
 
-    public <C, R extends IRecipe<C>, B> RecipeTypeEntry<?, ?, B> register(
+    public <C, R extends IRecipe<C>,
+        B extends IRecipeBuilderBase<R>> RecipeTypeEntry<?, ?, B> register(
         RecipeTypeBuilderBase<C, R, B, ?, ?> builder) {
         builders.add(builder);
         var recipeType = recipeTypeRegister.register(builder.id(), builder::buildObject);

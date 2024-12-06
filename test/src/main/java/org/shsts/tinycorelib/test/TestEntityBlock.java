@@ -19,9 +19,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.slf4j.Logger;
 
+import java.util.List;
+
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK_ENTITY;
 import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.TEST_MENU;
+import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
+import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -57,12 +61,23 @@ public class TestEntityBlock extends Block implements EntityBlock {
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level world, BlockPos pos,
         Player player, InteractionHand hand, BlockHitResult hitResult) {
+
+        var capability = TEST_BLOCK_ENTITY.get(world, pos)
+            .flatMap(TEST_CAPABILITY::tryGet);
+
         if (!world.isClientSide && player instanceof ServerPlayer serverPlayer) {
+            var recipeManager = CORE.recipeManager(world);
+            var recipes = capability
+                .map($ -> recipeManager.getRecipesFor(TEST_RECIPE, $, world))
+                .orElseGet(List::of);
+            for (var recipe : recipes) {
+                LOGGER.info("matched recipe = {}", recipe.loc());
+            }
+
             TEST_MENU.open(serverPlayer, pos);
             return InteractionResult.CONSUME;
         } else {
-            var seconds = TEST_BLOCK_ENTITY.get(world, pos)
-                .flatMap(TEST_CAPABILITY::tryGet)
+            var seconds = capability
                 .map(ITestCapability::getSeconds)
                 .orElse(0);
             LOGGER.info("seconds = {}", seconds);

@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class TestRecipe implements IRecipe<TestCapability> {
+public class TestRecipe implements IRecipe<ITestCapability> {
     private final ResourceLocation loc;
     private final int beginSeconds, endSeconds;
     public final ItemStack displayItem;
@@ -40,7 +40,7 @@ public class TestRecipe implements IRecipe<TestCapability> {
     }
 
     @Override
-    public boolean matches(TestCapability container, Level world) {
+    public boolean matches(ITestCapability container, Level world) {
         var seconds = container.getSeconds();
         return seconds >= beginSeconds && seconds < endSeconds;
     }

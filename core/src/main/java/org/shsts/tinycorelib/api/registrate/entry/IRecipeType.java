@@ -5,11 +5,12 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.recipe.IRecipeDataConsumer;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IRecipeType<B> extends IEntry<RecipeType<?>> {
+public interface IRecipeType<B extends IRecipeBuilderBase<?>> extends IEntry<RecipeType<?>> {
     RecipeSerializer<?> getSerializer();
 
     Class<?> recipeClass();
@@ -22,7 +23,7 @@ public interface IRecipeType<B> extends IEntry<RecipeType<?>> {
         return recipe(consumer, new ResourceLocation(consumer.modid(), id));
     }
 
-    interface BuilderFactory<B> {
+    interface BuilderFactory<B extends IRecipeBuilderBase<?>> {
         B create(IRecipeType<B> parent, ResourceLocation loc);
     }
 }

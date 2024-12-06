@@ -9,7 +9,7 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IRecipeSerializer<R extends IRecipe<?>, B> {
+public interface IRecipeSerializer<R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> {
     R fromJson(IRecipeType<B> type, ResourceLocation loc, JsonObject jo, ICondition.IContext context);
 
     void toJson(JsonObject jo, R recipe);

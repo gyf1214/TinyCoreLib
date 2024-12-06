@@ -9,5 +9,5 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IVanillaRecipeBuilder<R extends IRecipe<?>, S extends IVanillaRecipeBuilder<R, S>>
-    extends IBuilder<FinishedRecipe, IRecipeType<S>, S> {
+    extends IRecipeBuilderBase<R>, IBuilder<FinishedRecipe, IRecipeType<S>, S> {
 }

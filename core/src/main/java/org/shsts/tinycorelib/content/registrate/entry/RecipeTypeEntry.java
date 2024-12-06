@@ -10,6 +10,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
+import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.recipe.IRecipeDataConsumer;
 import org.shsts.tinycorelib.api.recipe.IRecipeSerializer;
 import org.shsts.tinycorelib.api.recipe.IVanillaRecipeBuilder;
@@ -21,8 +22,8 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class RecipeTypeEntry<C, R extends IRecipe<C>, B> extends Entry<RecipeType<?>>
-    implements IRecipeType<B> {
+public class RecipeTypeEntry<C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>>
+    extends Entry<RecipeType<?>> implements IRecipeType<B> {
     @Nullable
     private RecipeSerializer<?> serializer = null;
 

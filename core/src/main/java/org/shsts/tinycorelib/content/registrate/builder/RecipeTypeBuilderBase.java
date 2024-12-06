@@ -10,6 +10,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
+import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilderBase;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.content.common.Builder;
@@ -21,8 +22,8 @@ import org.slf4j.Logger;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B, P,
-    S extends IRecipeTypeBuilderBase<R, B, P, S>>
+public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>,
+    P, S extends IRecipeTypeBuilderBase<R, B, P, S>>
     extends Builder<RecipeType<?>, P, S>
     implements IRecipeTypeBuilderBase<R, B, P, S> {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -66,7 +67,7 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B, P,
             prefix = id();
         }
         assert recipeClass != null;
-        return new SmartRecipeType<>(builderFactory, prefix, defaults, recipeClass);
+        return new SmartRecipeType<>(loc, builderFactory, prefix, defaults, recipeClass);
     }
 
     protected abstract RecipeSerializer<?> createSerializer();
