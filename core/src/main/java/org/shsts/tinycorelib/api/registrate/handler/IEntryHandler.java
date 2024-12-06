@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.api.registrate;
+package org.shsts.tinycorelib.api.registrate.handler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -7,8 +7,8 @@ import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IEntryHandler<T> {
-    <U extends T> IEntry<U> getEntry(ResourceLocation loc);
+public interface IEntryHandler<V> {
+    <U extends V> IEntry<U> getEntry(ResourceLocation loc);
 
-    <U extends T> IEntry<U> getEntry(String id);
+    <U extends V> IEntry<U> getEntry(String id);
 }

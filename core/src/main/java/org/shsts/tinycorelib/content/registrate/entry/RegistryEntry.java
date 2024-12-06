@@ -6,8 +6,8 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.shsts.tinycorelib.api.registrate.IEntryHandler;
 import org.shsts.tinycorelib.api.registrate.entry.IRegistry;
+import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 
 @ParametersAreNonnullByDefault

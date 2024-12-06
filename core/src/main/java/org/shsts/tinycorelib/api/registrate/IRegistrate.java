@@ -32,6 +32,7 @@ import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
+import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
