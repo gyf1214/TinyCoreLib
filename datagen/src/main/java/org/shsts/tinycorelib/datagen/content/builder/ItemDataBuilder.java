@@ -40,7 +40,7 @@ public class ItemDataBuilder<U extends Item, P> extends EntryDataBuilder<Item, U
 
     @Override
     public IItemDataBuilder<U, P> tag(TagKey<Item> tag) {
-        callbacks.add(() -> dataGen.tag(object, List.of(tag)));
+        callbacks.add(() -> dataGen.tag(object, tag));
         return self();
     }
 

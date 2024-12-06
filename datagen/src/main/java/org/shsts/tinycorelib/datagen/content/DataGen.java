@@ -135,6 +135,12 @@ public class DataGen implements IDataGen {
     }
 
     @Override
+    public <T> IDataGen tag(Supplier<? extends T> object, TagKey<T> tag) {
+        tagsHandler(tag.registry()).addTags(object, tag);
+        return this;
+    }
+
+    @Override
     public <T> IDataGen tag(TagKey<T> object, TagKey<T> tag) {
         tagsHandler(tag.registry()).addTag(object, tag);
         return this;

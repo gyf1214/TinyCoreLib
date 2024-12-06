@@ -53,6 +53,10 @@ public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
         }
     }
 
+    public void addTags(Supplier<? extends T> object, TagKey<T> tag) {
+        callbacks.add(prov -> ((Provider) prov).addTag(tag, object.get()));
+    }
+
     public void addTag(TagKey<T> object, TagKey<T> tag) {
         callbacks.add(prov -> ((Provider) prov).addTag(tag, object));
     }

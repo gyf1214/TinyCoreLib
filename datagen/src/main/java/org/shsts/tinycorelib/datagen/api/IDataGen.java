@@ -34,6 +34,8 @@ public interface IDataGen extends IRecipeDataConsumer {
 
     <T> IDataGen tag(Supplier<? extends T> object, List<TagKey<T>> tags);
 
+    <T> IDataGen tag(Supplier<? extends T> object, TagKey<T> tag);
+
     <T> IDataGen tag(TagKey<T> object, TagKey<T> tag);
 
     IDataGen blockModel(Consumer<IDataContext<BlockModelProvider>> cons);

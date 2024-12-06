@@ -60,7 +60,7 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
 
     @Override
     public IBlockDataBuilder<U, P> tag(TagKey<Block> tag) {
-        callbacks.add(() -> dataGen.tag(object, List.of(tag)));
+        callbacks.add(() -> dataGen.tag(object, tag));
         return self();
     }
 
@@ -72,7 +72,7 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
 
     @Override
     public IBlockDataBuilder<U, P> itemTag(TagKey<Item> tag) {
-        callbacks.add(() -> dataGen.tag(() -> object.get().asItem(), List.of(tag)));
+        callbacks.add(() -> dataGen.tag(() -> object.get().asItem(), tag));
         return self();
     }
 
