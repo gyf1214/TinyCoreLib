@@ -28,6 +28,7 @@ import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 @MethodsReturnNonnullByDefault
 public final class AllData {
     private static final TagKey<Item> TEST_ITEM_TAG = itemTag("test_item_tag");
+    private static final TagKey<Item> TEST_ITEM_TAG2 = itemTag("test_item_tag2");
 
     public static void init() {
         DATA_GEN
@@ -38,6 +39,8 @@ public final class AllData {
             .tag(TEST_ITEM_TAG)
             .build()
             .tag(TEST_ITEM_TAG, itemTag("test_parent_item_tag"))
+            .tag(() -> Items.GLASS, TEST_ITEM_TAG)
+            .tag(() -> Items.SAND, List.of(TEST_ITEM_TAG, TEST_ITEM_TAG2))
             .block(All.TEST_BLOCK1)
             .blockState(ctx -> {
                 var prov = ctx.provider();
