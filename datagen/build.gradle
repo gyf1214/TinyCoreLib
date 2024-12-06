@@ -2,6 +2,7 @@ archivesBaseName = "tinydatagen"
 
 configurations {
     api
+    dev
 }
 
 task apiJar(type: Jar) {
@@ -10,10 +11,33 @@ task apiJar(type: Jar) {
     from sourceSets.main.output
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task devJar(type: Jar) {
+    classifier = 'dev'
+    from sourceSets.main.output
+}
+
 artifacts {
     api apiJar
+    dev devJar
 }
 
 dependencies {
     compileOnly project(path: ':core')
+}
+
+build.dependsOn apiJar, sourcesJar
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact jar
+            artifact apiJar
+            artifact sourcesJar
+        }
+    }
 }

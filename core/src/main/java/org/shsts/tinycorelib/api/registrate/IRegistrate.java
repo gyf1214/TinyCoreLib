@@ -145,9 +145,8 @@ public interface IRegistrate {
         P> IRecipeTypeBuilder<R, B, P> recipeType(P parent, String id,
         IRecipeType.BuilderFactory<B> builderFactory);
 
-    default <C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>
-        > IRecipeTypeBuilder<R, B, IRegistrate> recipeType(String id,
-        IRecipeType.BuilderFactory<B> builderFactory) {
+    default <C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>> IRecipeTypeBuilder<R,
+        B, IRegistrate> recipeType(String id, IRecipeType.BuilderFactory<B> builderFactory) {
         return recipeType(this, id, builderFactory);
     }
 
@@ -155,8 +154,8 @@ public interface IRegistrate {
         P> IVanillaRecipeTypeBuilder<R, B, P> vanillaRecipeType(P parent,
         String id, IRecipeType.BuilderFactory<B> builderFactory);
 
-    default <C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R, B>
-        > IVanillaRecipeTypeBuilder<R, B, IRegistrate> vanillaRecipeType(
+    default <C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R,
+        B>> IVanillaRecipeTypeBuilder<R, B, IRegistrate> vanillaRecipeType(
         String id, IRecipeType.BuilderFactory<B> builderFactory) {
         return vanillaRecipeType(this, id, builderFactory);
     }

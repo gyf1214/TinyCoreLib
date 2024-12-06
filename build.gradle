@@ -18,6 +18,7 @@ subprojects {
     apply plugin: 'eclipse'
     apply plugin: 'net.minecraftforge.gradle'
     apply plugin: 'org.parchmentmc.librarian.forgegradle'
+    apply plugin: 'maven-publish'
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -58,6 +59,19 @@ subprojects {
     }
 
     jar.finalizedBy('reobfJar')
+
+    publishing {
+        repositories {
+            maven {
+                name = 'shsts'
+                url = 'https://www.shsts.org/m2'
+                credentials {
+                    username = shstsUser
+                    password = shstsPassword
+                }
+            }
+        }
+    }
 }
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"

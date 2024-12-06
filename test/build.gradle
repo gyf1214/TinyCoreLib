@@ -9,6 +9,8 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             jvmArgs '-ea'
 
+            ideaModule rootProject.getName() + '.test.main'
+
             mods {
                 tinycorelib_test {
                     source sourceSets.main
@@ -23,6 +25,8 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             jvmArgs '-ea'
 
+            ideaModule rootProject.getName() + '.test.main'
+
             mods {
                 tinycorelib_test {
                     source sourceSets.main
@@ -34,6 +38,8 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             jvmArgs '-ea'
+
+            ideaModule rootProject.getName() + '.test.test'
 
             mods {
                 tinycorelib_test {
@@ -58,29 +64,12 @@ sourceSets.main.resources {
     exclude '.cache/'
 }
 
-repositories {
-    flatDir {
-        dir "${rootProject.childProjects.core.buildDir}/libs"
-    }
-    flatDir {
-        dir "${rootProject.childProjects.datagen.buildDir}/libs"
-    }
-}
-
 dependencies {
     compileOnly project(path: ':core', configuration: 'api')
-    runtimeOnly fg.deobf("tiny:tinycorelib:${version}")
+    runtimeOnly project(path: ':core', configuration: 'dev')
 
     testCompileOnly project(path: ':core', configuration: 'api')
+    testRuntimeOnly project(path: ':core', configuration: 'dev')
     testCompileOnly project(path: ':datagen', configuration: 'api')
-    testRuntimeOnly fg.deobf("tiny:tinycorelib:${version}")
-    testRuntimeOnly fg.deobf("tiny:tinydatagen:${version}")
-}
-
-compileJava {
-    dependsOn ':core:jar'
-}
-
-compileTestJava {
-    dependsOn ':datagen:jar'
+    testRuntimeOnly project(path: ':datagen', configuration: 'dev')
 }
