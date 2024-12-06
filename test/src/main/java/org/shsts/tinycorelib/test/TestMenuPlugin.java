@@ -40,7 +40,7 @@ public class TestMenuPlugin implements IMenuPlugin {
     public void applyMenuScreen(MenuScreenBase screen) {
         ((TestScreen) screen).onInit(screen1 ->
             screen1.addWidgetToScreen(new Button(8 + screen1.getGuiLeft(), 30 + screen1.getGuiTop(),
-                100, 24, new TextComponent("OK"), $ -> {
+                100, 20, new TextComponent("OK"), $ -> {
                 var seconds = TEST_CAPABILITY.get(blockEntity).getSeconds();
                 menu.triggerEvent(TEST_MENU_EVENT, () -> new TestPacket(seconds));
             })));
