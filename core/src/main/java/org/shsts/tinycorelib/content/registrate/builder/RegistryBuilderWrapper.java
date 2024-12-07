@@ -37,6 +37,7 @@ public class RegistryBuilderWrapper<V extends IForgeRegistryEntry<V>, P>
         this.registrate = registrate;
         this.loc = new ResourceLocation(registrate.modid, id);
         this.entryClass = entryClass;
+        onBuild.add(this::register);
     }
 
     @Override

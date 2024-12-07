@@ -47,6 +47,7 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B extends I
         this.handler = registrate.recipeTypeHandler;
         this.loc = new ResourceLocation(registrate.modid, id);
         this.builderFactory = builderFactory;
+        onBuild.add(this::register);
     }
 
     @Override

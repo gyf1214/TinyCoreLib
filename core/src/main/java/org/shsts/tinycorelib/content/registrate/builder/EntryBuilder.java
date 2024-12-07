@@ -33,6 +33,7 @@ public abstract class EntryBuilder<T extends IForgeRegistryEntry<T>, U extends T
         this.registrate = registrate;
         this.handler = handler;
         this.loc = new ResourceLocation(registrate.modid, id);
+        onBuild.add(this::register);
     }
 
     protected Entry<U> createEntry() {
