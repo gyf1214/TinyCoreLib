@@ -28,11 +28,11 @@ public class SmartMenuType extends MenuType<AbstractContainerMenu> {
     @Nullable
     private final Channel channel;
     private final Function<BlockEntity, Component> title;
-    private final List<Function<IMenu, IMenuPlugin>> plugins;
+    private final List<Function<IMenu, IMenuPlugin<?>>> plugins;
 
     @SuppressWarnings("DataFlowIssue")
     public SmartMenuType(@Nullable Channel channel, Function<BlockEntity, Component> title,
-        List<Function<IMenu, IMenuPlugin>> plugins) {
+        List<Function<IMenu, IMenuPlugin<?>>> plugins) {
         super(null);
         this.channel = channel;
         this.title = title;

@@ -9,10 +9,12 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.gui.IMenu;
 import org.shsts.tinycorelib.api.gui.IMenuPlugin;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
+import org.shsts.tinycorelib.api.gui.client.MenuScreenBase;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
@@ -36,7 +38,7 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
     private Function<BlockEntity, Component> title = $ -> TextComponent.EMPTY;
     @Nullable
     private DistLazy<IMenuScreenFactory<?>> screenFactory = null;
-    private final List<Function<IMenu, IMenuPlugin>> plugins = new ArrayList<>();
+    private final List<Function<IMenu, IMenuPlugin<?>>> plugins = new ArrayList<>();
 
     public MenuBuilder(Registrate registrate, P parent, String id) {
         super(registrate, registrate.menuTypeHandler, parent, id);
@@ -68,7 +70,7 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
     }
 
     @Override
-    public IMenuBuilder<P> plugin(Function<IMenu, IMenuPlugin> factory) {
+    public IMenuBuilder<P> plugin(Function<IMenu, IMenuPlugin<?>> factory) {
         plugins.add(factory);
         return self();
     }
@@ -86,6 +88,15 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
         return ((MenuTypeHandler) handler).registerType(this);
     }
 
+    @OnlyIn(Dist.CLIENT)
+    private static <S extends MenuScreenBase> void applyMenuScreen(IMenuPlugin<S> plugin,
+        MenuScreenBase screen) {
+        var clazz = plugin.menuScreenClass();
+        if (clazz != null && clazz.isInstance(screen)) {
+            plugin.applyMenuScreen(clazz.cast(screen));
+        }
+    }
+
     @Override
     protected SmartMenuType createObject() {
         assert screenFactory != null;
@@ -94,7 +105,7 @@ public class MenuBuilder<P> extends EntryBuilder<MenuType<?>, MenuType<?>, P, IM
             registrate.menuScreenHandler.setMenuScreen(type, (menu, inventory, title1) -> {
                 var screen = factory.create(menu, inventory, title1);
                 for (var plugin : menu.getPlugins()) {
-                    plugin.applyMenuScreen(screen);
+                    applyMenuScreen(plugin, screen);
                 }
                 return screen;
             }));

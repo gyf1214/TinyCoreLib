@@ -11,7 +11,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.SlotItemHandler;
 import org.shsts.tinycorelib.api.gui.IMenu;
 import org.shsts.tinycorelib.api.gui.IMenuPlugin;
-import org.shsts.tinycorelib.api.gui.client.MenuScreenBase;
 import org.slf4j.Logger;
 
 import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
@@ -20,7 +19,7 @@ import static org.shsts.tinycorelib.test.All.TEST_MENU_EVENT;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class TestMenuPlugin implements IMenuPlugin {
+public class TestMenuPlugin implements IMenuPlugin<TestScreen> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final IMenu menu;
@@ -44,10 +43,16 @@ public class TestMenuPlugin implements IMenuPlugin {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void applyMenuScreen(MenuScreenBase screen) {
-        ((TestScreen) screen).onInit(screen1 ->
-            screen1.addWidgetToScreen(new Button(8 + screen1.getGuiLeft(), 30 + screen1.getGuiTop(),
-                100, 20, new TextComponent("OK"), $ -> {
+    public Class<TestScreen> menuScreenClass() {
+        return TestScreen.class;
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void applyMenuScreen(TestScreen screen) {
+        screen.onInit($ ->
+            screen.addWidgetToScreen(new Button(8 + screen.getGuiLeft(), 30 + screen.getGuiTop(),
+                100, 20, new TextComponent("OK"), $1 -> {
                 var seconds = TEST_CAPABILITY.get(blockEntity).getSeconds();
                 menu.triggerEvent(TEST_MENU_EVENT, () -> new TestPacket(seconds));
             })));

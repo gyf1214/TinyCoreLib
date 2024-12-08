@@ -26,7 +26,7 @@ public interface IMenuBuilder<P> extends IEntryBuilder<MenuType<?>, MenuType<?>,
 
     IMenuBuilder<P> screen(DistLazy<IMenuScreenFactory<?>> value);
 
-    IMenuBuilder<P> plugin(Function<IMenu, IMenuPlugin> factory);
+    IMenuBuilder<P> plugin(Function<IMenu, IMenuPlugin<?>> factory);
 
     IMenuBuilder<P> dummyPlugin(Consumer<IMenu> cons);
 

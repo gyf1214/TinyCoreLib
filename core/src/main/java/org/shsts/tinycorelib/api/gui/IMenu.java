@@ -30,7 +30,7 @@ public interface IMenu {
 
     Inventory inventory();
 
-    List<IMenuPlugin> getPlugins();
+    List<IMenuPlugin<?>> getPlugins();
 
     void setValidPredicate(Predicate<IMenu> pred);
 

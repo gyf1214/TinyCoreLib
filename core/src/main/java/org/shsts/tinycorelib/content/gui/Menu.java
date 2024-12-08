@@ -39,7 +39,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     private final Inventory inventory;
     @Nullable
     private final Channel channel;
-    private final List<IMenuPlugin> plugins = new ArrayList<>();
+    private final List<IMenuPlugin<?>> plugins = new ArrayList<>();
 
     private Predicate<IMenu> isValid = $ -> true;
     private Predicate<Slot> onQuickMoveStack = $ -> false;
@@ -109,12 +109,12 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         this.channel = channel;
     }
 
-    public void addPlugin(IMenuPlugin plugin) {
+    public void addPlugin(IMenuPlugin<?> plugin) {
         plugins.add(plugin);
     }
 
     @Override
-    public List<IMenuPlugin> getPlugins() {
+    public List<IMenuPlugin<?>> getPlugins() {
         return plugins;
     }
 
@@ -122,7 +122,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     public void removed(Player player) {
         super.removed(player);
         for (var plugin : plugins) {
-            plugin.onMenuRemoved(player);
+            plugin.onMenuRemoved();
         }
     }
 

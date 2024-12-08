@@ -12,7 +12,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.shsts.tinycorelib.api.gui.IMenu;
 import org.shsts.tinycorelib.api.gui.IMenuPlugin;
-import org.shsts.tinycorelib.api.gui.client.MenuScreenBase;
 
 import static net.minecraft.client.gui.GuiComponent.fill;
 import static org.shsts.tinycorelib.test.TestScreen.MARGIN;
@@ -21,7 +20,7 @@ import static org.shsts.tinycorelib.test.TestScreen.SPACING;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class InventoryPlugin implements IMenuPlugin {
+public class InventoryPlugin implements IMenuPlugin<TestScreen> {
     private final IMenu menu;
     private final int endY;
 
@@ -60,8 +59,13 @@ public class InventoryPlugin implements IMenuPlugin {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void applyMenuScreen(MenuScreenBase s) {
-        var screen = (TestScreen) s;
+    public Class<TestScreen> menuScreenClass() {
+        return TestScreen.class;
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void applyMenuScreen(TestScreen screen) {
         if (screen.getImageHeight() < endY) {
             screen.setImageHeight(endY);
         }
