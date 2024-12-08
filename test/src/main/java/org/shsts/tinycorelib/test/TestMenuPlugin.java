@@ -8,11 +8,13 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.items.SlotItemHandler;
 import org.shsts.tinycorelib.api.gui.IMenu;
 import org.shsts.tinycorelib.api.gui.IMenuPlugin;
 import org.shsts.tinycorelib.api.gui.client.MenuScreenBase;
 import org.slf4j.Logger;
 
+import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.TEST_MENU_EVENT;
 
@@ -27,6 +29,11 @@ public class TestMenuPlugin implements IMenuPlugin {
     public TestMenuPlugin(IMenu menu) {
         this.menu = menu;
         this.blockEntity = menu.blockEntity();
+
+        var itemHandler = ITEM_HANDLER_CAPABILITY.get(blockEntity);
+        var slot = new SlotItemHandler(itemHandler, 0, 111, 32);
+        menu.addSlot(slot);
+
         menu.onEventPacket(TEST_MENU_EVENT, this::onEvent);
     }
 

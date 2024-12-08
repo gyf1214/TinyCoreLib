@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
@@ -56,6 +57,10 @@ public class TestVanillaRecipe implements IRecipe<BlockEntity> {
     @Override
     public ResourceLocation loc() {
         return loc;
+    }
+
+    public ItemStack getResult() {
+        return smeltingRecipe.getResultItem().copy();
     }
 
     private static class FinishedCooking extends SimpleCookingRecipeBuilder.Result {

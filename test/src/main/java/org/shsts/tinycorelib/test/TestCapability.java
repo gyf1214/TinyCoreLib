@@ -12,14 +12,21 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemStackHandler;
 import org.shsts.tinycorelib.api.blockentity.IEventManager;
 import org.shsts.tinycorelib.api.blockentity.IEventSubscriber;
 import org.shsts.tinycorelib.api.blockentity.INBTUpdatable;
 import org.slf4j.Logger;
 
+import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.SERVER_TICK;
 import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
+import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
+import static org.shsts.tinycorelib.test.All.TEST_VANILLA_RECIPE;
 import static org.shsts.tinycorelib.test.All.TICK_SECOND;
+import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -28,7 +35,8 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final BlockEntity blockEntity;
-    private final LazyOptional<ITestCapability> myself;
+    private final LazyOptional<ITestCapability> testCap;
+    private final LazyOptional<IItemHandler> itemCap;
 
     private IEventManager eventManager;
     private boolean isUpdateForced = true;
@@ -37,7 +45,10 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
 
     public TestCapability(BlockEntity blockEntity) {
         this.blockEntity = blockEntity;
-        this.myself = LazyOptional.of(() -> this);
+        var itemHandler = new ItemStackHandler(1);
+
+        this.testCap = LazyOptional.of(() -> this);
+        this.itemCap = LazyOptional.of(() -> itemHandler);
     }
 
     private void onTick(Level world) {
@@ -64,6 +75,17 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
         var pos = blockEntity.getBlockPos();
         var state = blockEntity.getBlockState();
         world.sendBlockUpdated(pos, state, state, TestBlock.UPDATE_CLIENTS);
+
+        var recipeManager = CORE.recipeManager(world);
+        var recipes = recipeManager.getRecipesFor(TEST_RECIPE, this, world);
+        for (var recipe : recipes) {
+            LOGGER.info("matched test recipe = {}", recipe.loc());
+        }
+        recipeManager.getRecipeFor(TEST_VANILLA_RECIPE, blockEntity, world)
+            .ifPresent(recipe -> {
+                var itemHandler = (IItemHandlerModifiable) ITEM_HANDLER_CAPABILITY.get(blockEntity);
+                itemHandler.setStackInSlot(0, recipe.getResult());
+            });
     }
 
     @Override
@@ -112,7 +134,9 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction direction) {
         if (cap == TEST_CAPABILITY.get()) {
-            return myself.cast();
+            return testCap.cast();
+        } else if (cap == ITEM_HANDLER_CAPABILITY.get()) {
+            return itemCap.cast();
         }
         return LazyOptional.empty();
     }

@@ -25,12 +25,17 @@ import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
 public class TestScreen extends MenuScreenBase {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    public static final int CONTENT_HEIGHT = 50;
+    public static final int SLOT_SIZE = 18;
+    public static final int SPACING = 3;
+    public static final int MARGIN = 6;
     private static final int TEXT_COLOR = 0xFF202020;
 
     private final List<Consumer<TestScreen>> initCallbacks = new ArrayList<>();
 
     public TestScreen(IMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
+        this.imageHeight = CONTENT_HEIGHT + MARGIN;
         menu.<TestPacket>onSyncPacket("seconds",
             p -> LOGGER.info("sync packet seconds = {}", p.getValue()));
     }
@@ -53,6 +58,14 @@ public class TestScreen extends MenuScreenBase {
 
     public void onInit(Consumer<TestScreen> cb) {
         initCallbacks.add(cb);
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
+    }
+
+    public void setImageHeight(int value) {
+        imageHeight = value;
     }
 
     @Override

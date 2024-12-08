@@ -77,7 +77,7 @@ public final class AllData {
             .beginSeconds(0)
             .build()
             .recipe(DATA_GEN, "test_vanilla2")
-            .ingredient(() -> Blocks.GLASS)
+            .ingredient(() -> Blocks.STONE)
             .result(TEST_BLOCK3)
             .cookingTime(100)
             .beginSeconds(10)
