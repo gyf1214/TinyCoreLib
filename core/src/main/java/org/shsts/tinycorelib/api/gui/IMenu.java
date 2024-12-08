@@ -36,6 +36,15 @@ public interface IMenu {
 
     Slot addSlot(Slot slot);
 
+    int getSlotSize();
+
+    Slot getSlot(int index);
+
+    /**
+     * The callback returns whether to continue call this function.
+     */
+    void setOnQuickMoveStack(Predicate<Slot> cb);
+
     <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory);
 
     <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory);

@@ -91,6 +91,8 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
                     assert BlockBuilder.this.entry != null;
                     return new BlockItem(BlockBuilder.this.entry.get(), properties);
                 });
+            // avoid register() when build() is called
+            onBuild.clear();
         }
 
         @Override

@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.shsts.tinycorelib.api.gui.IMenu;
@@ -41,6 +42,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     private final List<IMenuPlugin> plugins = new ArrayList<>();
 
     private Predicate<IMenu> isValid = $ -> true;
+    private Predicate<Slot> onQuickMoveStack = $ -> false;
 
     private class SyncSlot<P extends IPacket> {
         private final int index;
@@ -171,6 +173,21 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         return super.addSlot(slot);
     }
 
+    @Override
+    public int getSlotSize() {
+        return slots.size();
+    }
+
+    @Override
+    public Slot getSlot(int index) {
+        return super.getSlot(index);
+    }
+
+    @Override
+    public void setOnQuickMoveStack(Predicate<Slot> cb) {
+        onQuickMoveStack = cb;
+    }
+
     private <P extends IPacket> SyncSlot<P> createSyncSlot(Function<BlockEntity, P> factory) {
         var index = syncSlots.size();
         var slot = new SyncSlot<>(index, factory);
@@ -245,5 +262,14 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         for (var slot : syncSlots) {
             slot.sync(blockEntity);
         }
+    }
+
+    @Override
+    public ItemStack quickMoveStack(Player player, int index) {
+        var slot = getSlot(index);
+        if (onQuickMoveStack.test(slot)) {
+            return slot.getItem();
+        }
+        return ItemStack.EMPTY;
     }
 }

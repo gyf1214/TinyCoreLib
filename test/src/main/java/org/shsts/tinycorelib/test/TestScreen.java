@@ -42,11 +42,12 @@ public class TestScreen extends MenuScreenBase {
 
     @Override
     protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {
+        super.renderLabels(poseStack, mouseX, mouseY);
+
         var seconds1 = iMenu.getSyncPacket("seconds", TestPacket.class)
             .map(TestPacket::getValue).orElse(0);
         var seconds2 = TEST_CAPABILITY.get(iMenu.blockEntity()).getSeconds();
         var line = new TextComponent("%d %d".formatted(seconds1, seconds2));
-        font.draw(poseStack, title, 8f, 6f, TEXT_COLOR);
         font.draw(poseStack, line, 8f, 18f, TEXT_COLOR);
     }
 

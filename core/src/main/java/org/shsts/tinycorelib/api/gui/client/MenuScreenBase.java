@@ -40,6 +40,9 @@ public abstract class MenuScreenBase extends AbstractContainerScreen<AbstractCon
     }
 
     @Override
+    protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {}
+
+    @Override
     public void removed() {
         super.removed();
         for (var plugin : iMenu.getPlugins()) {
