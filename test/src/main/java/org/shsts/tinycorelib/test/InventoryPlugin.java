@@ -22,7 +22,6 @@ import static org.shsts.tinycorelib.test.TestScreen.SPACING;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class InventoryPlugin implements IMenuPlugin {
-
     private final IMenu menu;
     private final int endY;
 
