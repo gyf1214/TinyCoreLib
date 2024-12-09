@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -41,7 +42,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     private final Channel channel;
     private final List<IMenuPlugin<?>> plugins = new ArrayList<>();
 
-    private Predicate<IMenu> isValid = $ -> true;
+    private BooleanSupplier isValid = () -> true;
     private Predicate<Slot> onQuickMoveStack = $ -> false;
 
     private class SyncSlot<P extends IPacket> {
@@ -140,7 +141,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
             level == player.getLevel() &&
             level.getBlockEntity(pos) == be &&
             player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0 &&
-            isValid.test(this);
+            isValid.getAsBoolean();
     }
 
     @Override
@@ -164,7 +165,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     }
 
     @Override
-    public void setValidPredicate(Predicate<IMenu> pred) {
+    public void setValidPredicate(BooleanSupplier pred) {
         isValid = pred;
     }
 

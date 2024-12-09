@@ -12,6 +12,7 @@ import org.shsts.tinycorelib.api.network.IPacket;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -32,7 +33,7 @@ public interface IMenu {
 
     List<IMenuPlugin<?>> getPlugins();
 
-    void setValidPredicate(Predicate<IMenu> pred);
+    void setValidPredicate(BooleanSupplier pred);
 
     Slot addSlot(Slot slot);
 
