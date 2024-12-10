@@ -41,6 +41,11 @@ public abstract class Builder<U, P, S extends IBuilder<U, P, S>> implements IBui
     }
 
     @Override
+    public P end() {
+        return parent;
+    }
+
+    @Override
     public S onCreateObject(Consumer<U> cons) {
         onCreateObject.add(cons);
         return self();

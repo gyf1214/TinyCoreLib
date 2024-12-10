@@ -79,7 +79,7 @@ public final class All {
             .translucent()
             .blockItem()
             .properties(p -> p.tab(CreativeModeTab.TAB_DECORATIONS))
-            .build()
+            .end()
             .register();
 
         TEST_BLOCK3 = REGISTRATE.block("test_block3", TestEntityBlock::new)

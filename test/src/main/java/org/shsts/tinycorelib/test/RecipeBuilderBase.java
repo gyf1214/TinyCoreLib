@@ -46,6 +46,11 @@ public abstract class RecipeBuilderBase<R extends IRecipe<?>, U, S extends Recip
     }
 
     @Override
+    public IRecipeType<S> end() {
+        return parent;
+    }
+
+    @Override
     public S onCreateObject(Consumer<U> cons) {
         onCreate.add(cons);
         return self();

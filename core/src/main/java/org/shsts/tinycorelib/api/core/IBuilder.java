@@ -13,6 +13,11 @@ public interface IBuilder<U, P, S extends IBuilder<U, P, S>> extends ISelf<S> {
 
     P build();
 
+    /**
+     * Return to parent but not build the object.
+     */
+    P end();
+
     S onCreateObject(Consumer<U> cons);
 
     S onBuild(Runnable cb);
