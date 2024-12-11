@@ -32,6 +32,16 @@ public class TestResourceBuilder<P> implements IBuilder<JsonObject, P, TestResou
         this.loc = loc;
     }
 
+    public static <P> TestResourceBuilder<P> factory(IDataHandler<TestResourceProvider> handler,
+        P parent, ResourceLocation loc) {
+        var builder = new TestResourceBuilder<>(parent, loc);
+        return builder.onBuild(() -> {
+            handler.addCallback(p -> p.addBuilder(builder));
+            handler.dataGen().trackLang(loc.getNamespace() + ".test_resource." +
+                loc.getPath().replace('/', '.'));
+        });
+    }
+
     public TestResourceBuilder<P> name(String value) {
         name = value;
         return self();
@@ -102,15 +112,5 @@ public class TestResourceBuilder<P> implements IBuilder<JsonObject, P, TestResou
     public TestResourceBuilder<P> onBuild(Runnable cb) {
         onBuild.add(cb);
         return self();
-    }
-
-    public static <P> TestResourceBuilder<P> builder(IDataHandler<TestResourceProvider> handler,
-        P parent, ResourceLocation loc) {
-        var builder = new TestResourceBuilder<>(parent, loc);
-        return builder.onBuild(() -> {
-            handler.addCallback(p -> p.addBuilder(builder));
-            handler.dataGen().trackLang(loc.getNamespace() + ".test_resource." +
-                loc.getPath().replace('/', '.'));
-        });
     }
 }

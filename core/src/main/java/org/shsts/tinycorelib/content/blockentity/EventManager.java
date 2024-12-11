@@ -22,6 +22,7 @@ import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -95,8 +96,20 @@ public class EventManager implements ICapabilityProvider, IEventManager {
     }
 
     @Override
-    public <T extends ICapabilityProvider> T getProvider(ResourceLocation loc, Class<T> clazz) {
+    public <T extends ICapabilityProvider> T getProvider(
+        ResourceLocation loc, Class<T> clazz) {
         return clazz.cast(providers.get(loc));
+    }
+
+    @Override
+    public <T extends ICapabilityProvider> Optional<T> tryGetProvider(
+        ResourceLocation loc, Class<T> clazz) {
+        if (!providers.containsKey(loc)) {
+            return Optional.empty();
+        }
+        var prov = providers.get(loc);
+        return clazz.isInstance(prov) ? Optional.of(clazz.cast(prov)) :
+            Optional.empty();
     }
 
     @Override

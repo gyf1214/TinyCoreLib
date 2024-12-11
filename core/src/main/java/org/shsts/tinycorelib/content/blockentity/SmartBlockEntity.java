@@ -15,6 +15,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Optional;
+
 import static org.shsts.tinycorelib.content.CoreContents.CLIENT_LOAD;
 import static org.shsts.tinycorelib.content.CoreContents.CLIENT_TICK;
 import static org.shsts.tinycorelib.content.CoreContents.EVENT_MANAGER;
@@ -34,11 +36,11 @@ public class SmartBlockEntity extends BlockEntity {
         super(type, pos, state);
     }
 
-    private EventManager getEventManager() {
+    private Optional<EventManager> getEventManager() {
         if (eventManager == null) {
-            eventManager = (EventManager) EVENT_MANAGER.get(this);
+            eventManager = (EventManager) EVENT_MANAGER.tryGet(this).orElse(null);
         }
-        return eventManager;
+        return Optional.ofNullable(eventManager);
     }
 
     @Override
@@ -52,9 +54,9 @@ public class SmartBlockEntity extends BlockEntity {
         assert level != null;
         var eventManager = getEventManager();
         if (!isChunkUnloaded) {
-            eventManager.invoke(REMOVED_IN_WORLD.get(), level);
+            eventManager.ifPresent($ -> $.invoke(REMOVED_IN_WORLD.get(), level));
         } else {
-            eventManager.invoke(REMOVED_BY_CHUNK.get(), level);
+            eventManager.ifPresent($ -> $.invoke(REMOVED_BY_CHUNK.get(), level));
         }
         super.setRemoved();
     }
@@ -62,9 +64,9 @@ public class SmartBlockEntity extends BlockEntity {
     private void onTick(Level world) {
         var eventManager = getEventManager();
         if (world.isClientSide) {
-            eventManager.invoke(CLIENT_TICK.get(), world);
+            eventManager.ifPresent($ -> $.invoke(CLIENT_TICK.get(), world));
         } else {
-            eventManager.invoke(SERVER_TICK.get(), world);
+            eventManager.ifPresent($ -> $.invoke(SERVER_TICK.get(), world));
         }
     }
 
@@ -74,9 +76,9 @@ public class SmartBlockEntity extends BlockEntity {
         assert level != null;
         var eventManager = getEventManager();
         if (level.isClientSide) {
-            eventManager.invoke(CLIENT_LOAD.get(), level);
+            eventManager.ifPresent($ -> $.invoke(CLIENT_LOAD.get(), level));
         } else {
-            eventManager.invoke(SERVER_LOAD.get(), level);
+            eventManager.ifPresent($ -> $.invoke(SERVER_LOAD.get(), level));
         }
     }
 
@@ -88,8 +90,10 @@ public class SmartBlockEntity extends BlockEntity {
 
     private CompoundTag getUpdateTag(boolean forceUpdate) {
         var tag = new CompoundTag();
-        var caps = getEventManager().getUpdateTag(forceUpdate);
-        tag.put("ForgeCaps", caps);
+        getEventManager().ifPresent($ -> {
+            var caps = $.getUpdateTag(forceUpdate);
+            tag.put("ForgeCaps", caps);
+        });
         return tag;
     }
 
@@ -101,20 +105,23 @@ public class SmartBlockEntity extends BlockEntity {
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
-        var eventManager = getEventManager();
-        if (eventManager.shouldSendUpdate()) {
-            var ret = ClientboundBlockEntityDataPacket.create(this, be ->
-                ((SmartBlockEntity) be).getUpdateTag(false));
-            eventManager.resetShouldSendUpdate();
-            return ret;
-        }
-        return null;
+        return getEventManager()
+            .filter(EventManager::shouldSendUpdate)
+            .map($ -> {
+                var ret = ClientboundBlockEntityDataPacket.create(this, be ->
+                    ((SmartBlockEntity) be).getUpdateTag(false));
+                $.resetShouldSendUpdate();
+                return ret;
+            }).orElse(null);
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag) {
+        if (!tag.contains("ForgeCaps", Tag.TAG_COMPOUND)) {
+            return;
+        }
         var caps = tag.getList("ForgeCaps", Tag.TAG_COMPOUND);
-        getEventManager().handleUpdateTag(caps);
+        getEventManager().ifPresent($ -> $.handleUpdateTag(caps));
     }
 
     @Override

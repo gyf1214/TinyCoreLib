@@ -90,11 +90,11 @@ public final class AllData {
 
         TEST_RESOURCES = DATA_GEN.createHandler(TestResourceProvider::new);
 
-        TEST_RESOURCE1 = TEST_RESOURCES.builder("test1", TestResourceBuilder::builder)
+        TEST_RESOURCE1 = TEST_RESOURCES.builder("test1", TestResourceBuilder::factory)
             .name("foo")
             .register();
 
-        TEST_RESOURCE2 = TEST_RESOURCES.builder("test2", TestResourceBuilder::builder)
+        TEST_RESOURCE2 = TEST_RESOURCES.builder("test2", TestResourceBuilder::factory)
             .name("bar")
             .reference(TEST_RESOURCE1)
             .register();
