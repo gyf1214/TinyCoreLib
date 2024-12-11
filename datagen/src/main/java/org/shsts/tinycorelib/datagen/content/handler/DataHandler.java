@@ -7,6 +7,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.ModelProvider;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 import org.slf4j.Logger;
@@ -25,6 +26,11 @@ public abstract class DataHandler<P extends DataProvider> implements IDataHandle
 
     public DataHandler(DataGen dataGen) {
         this.dataGen = dataGen;
+    }
+
+    @Override
+    public IDataGen dataGen() {
+        return dataGen;
     }
 
     @Override

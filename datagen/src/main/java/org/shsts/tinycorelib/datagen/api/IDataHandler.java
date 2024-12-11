@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IDataHandler<P extends DataProvider> {
+    IDataGen dataGen();
+
     void addCallback(Consumer<P> cb);
 
     P createProvider(GatherDataEvent event);
