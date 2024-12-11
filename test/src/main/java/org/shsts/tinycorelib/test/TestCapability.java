@@ -7,6 +7,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -74,7 +75,7 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
         blockEntity.setChanged();
         var pos = blockEntity.getBlockPos();
         var state = blockEntity.getBlockState();
-        world.sendBlockUpdated(pos, state, state, TestBlock.UPDATE_CLIENTS);
+        world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
 
         var recipeManager = CORE.recipeManager(world);
         var recipes = recipeManager.getRecipesFor(TEST_RECIPE, this, world);
