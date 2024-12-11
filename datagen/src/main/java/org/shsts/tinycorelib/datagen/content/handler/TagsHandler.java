@@ -62,7 +62,7 @@ public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
     }
 
     @Override
-    protected TagsProvider<T> createProvider(GatherDataEvent event) {
+    public TagsProvider<T> createProvider(GatherDataEvent event) {
         return new Provider(event);
     }
 }

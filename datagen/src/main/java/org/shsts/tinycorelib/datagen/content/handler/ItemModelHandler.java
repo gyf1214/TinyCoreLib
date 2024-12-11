@@ -56,7 +56,7 @@ public class ItemModelHandler extends DataHandler<ItemModelProvider> {
     }
 
     @Override
-    protected ItemModelProvider createProvider(GatherDataEvent event) {
+    public ItemModelProvider createProvider(GatherDataEvent event) {
         return new Provider(event);
     }
 

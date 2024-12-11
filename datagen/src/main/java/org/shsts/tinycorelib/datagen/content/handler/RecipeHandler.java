@@ -49,7 +49,7 @@ public class RecipeHandler extends DataHandler<RecipeProvider> {
     }
 
     @Override
-    protected RecipeProvider createProvider(GatherDataEvent event) {
+    public RecipeProvider createProvider(GatherDataEvent event) {
         return new Provider(event);
     }
 

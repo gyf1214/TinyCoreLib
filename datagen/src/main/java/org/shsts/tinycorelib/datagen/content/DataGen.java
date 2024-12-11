@@ -18,6 +18,7 @@ import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
+import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -55,6 +57,7 @@ public class DataGen implements IDataGen {
 
     private final Registrate registrate;
     private final List<DataHandler<?>> dataHandlers;
+    private final List<BiFunction<IDataGen, GatherDataEvent, ? extends DataProvider>> dataProviders;
     private final Map<ResourceKey<? extends Registry<?>>, TagsHandler<?>> tagsHandlers;
     private final List<TrackedContext<?>> trackedContexts;
 
@@ -64,13 +67,14 @@ public class DataGen implements IDataGen {
         this.modid = registrate.modid;
 
         this.dataHandlers = new ArrayList<>();
+        this.dataProviders = new ArrayList<>();
         this.tagsHandlers = new HashMap<>();
         this.trackedContexts = new ArrayList<>();
 
-        this.blockStateHandler = createHandler(BlockStateHandler::new);
-        this.itemModelHandler = createHandler(ItemModelHandler::new);
-        this.lootTableHandler = createHandler(LootTableHandler::new);
-        this.recipeHandler = createHandler(RecipeHandler::new);
+        this.blockStateHandler = createDataHandler(BlockStateHandler::new);
+        this.itemModelHandler = createDataHandler(ItemModelHandler::new);
+        this.lootTableHandler = createDataHandler(LootTableHandler::new);
+        this.recipeHandler = createDataHandler(RecipeHandler::new);
         createTagsHandler(Registry.BLOCK);
         createTagsHandler(Registry.ITEM);
 
@@ -79,14 +83,14 @@ public class DataGen implements IDataGen {
         this.langTrackedContext = createTrackedContext(TrackedType.LANG);
     }
 
-    private <T extends DataHandler<?>> T createHandler(Function<DataGen, T> factory) {
+    private <T extends DataHandler<?>> T createDataHandler(Function<DataGen, T> factory) {
         var ret = factory.apply(this);
         dataHandlers.add(ret);
         return ret;
     }
 
     private <T> void createTagsHandler(Registry<T> registry) {
-        var ret = createHandler($ -> new TagsHandler<>($, registry));
+        var ret = createDataHandler($ -> new TagsHandler<>($, registry));
         tagsHandlers.put(registry.key(), ret);
     }
 
@@ -105,6 +109,33 @@ public class DataGen implements IDataGen {
     @Override
     public String modid() {
         return modid;
+    }
+
+    private class SimpleDataHandler<P extends DataProvider> extends DataHandler<P> {
+        private final IDataHandler.ProviderFactory<P> factory;
+
+        private SimpleDataHandler(ProviderFactory<P> factory) {
+            super(DataGen.this);
+            this.factory = factory;
+        }
+
+        @Override
+        public P createProvider(GatherDataEvent event) {
+            return factory.create(DataGen.this, this, event);
+        }
+    }
+
+    @Override
+    public <P extends DataProvider> IDataHandler<P> createHandler(
+        IDataHandler.ProviderFactory<P> factory) {
+        return createDataHandler($ -> new SimpleDataHandler<>(factory));
+    }
+
+    @Override
+    public <P extends DataProvider> IDataGen addProvider(
+        BiFunction<IDataGen, GatherDataEvent, P> factory) {
+        dataProviders.add(factory);
+        return this;
     }
 
     @Override
@@ -167,6 +198,9 @@ public class DataGen implements IDataGen {
     public void onGatherData(GatherDataEvent event) {
         for (var handler : dataHandlers) {
             handler.onGatherData(event);
+        }
+        for (var prov : dataProviders) {
+            event.getGenerator().addProvider(prov.apply(this, event));
         }
         event.getGenerator().addProvider(new DataProvider() {
             @Override

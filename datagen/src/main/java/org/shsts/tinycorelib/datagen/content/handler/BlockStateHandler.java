@@ -108,7 +108,7 @@ public class BlockStateHandler extends DataHandler<BlockStateProvider> {
     }
 
     @Override
-    protected BlockStateProvider createProvider(GatherDataEvent event) {
+    public BlockStateProvider createProvider(GatherDataEvent event) {
         return new Provider(event);
     }
 

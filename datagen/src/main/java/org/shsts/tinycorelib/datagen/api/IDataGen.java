@@ -2,6 +2,7 @@ package org.shsts.tinycorelib.datagen.api;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.data.DataProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -16,6 +17,7 @@ import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -23,6 +25,13 @@ import java.util.function.Supplier;
 @MethodsReturnNonnullByDefault
 public interface IDataGen extends IRecipeDataConsumer {
     String modid();
+
+    <P extends DataProvider> IDataHandler<P> createHandler(IDataHandler.ProviderFactory<P> factory);
+
+    /**
+     * Add a DataProvider without any callbacks.
+     */
+    <P extends DataProvider> IDataGen addProvider(BiFunction<IDataGen, GatherDataEvent, P> factory);
 
     <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item);
 

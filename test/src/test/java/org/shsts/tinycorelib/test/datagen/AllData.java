@@ -12,6 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
+import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.test.All;
 import org.shsts.tinycorelib.test.TinyCoreLibTest;
@@ -29,6 +30,10 @@ import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 public final class AllData {
     private static final TagKey<Item> TEST_ITEM_TAG = itemTag("test_item_tag");
     private static final TagKey<Item> TEST_ITEM_TAG2 = itemTag("test_item_tag2");
+
+    public static IDataHandler<TestResourceProvider> TEST_RESOURCES;
+    public static ResourceLocation TEST_RESOURCE1;
+    public static ResourceLocation TEST_RESOURCE2;
 
     public static void init() {
         DATA_GEN
@@ -82,6 +87,17 @@ public final class AllData {
             .cookingTime(100)
             .beginSeconds(10)
             .build();
+
+        TEST_RESOURCES = DATA_GEN.createHandler(TestResourceProvider::new);
+
+        TEST_RESOURCE1 = TEST_RESOURCES.builder("test1", TestResourceBuilder::builder)
+            .name("foo")
+            .register();
+
+        TEST_RESOURCE2 = TEST_RESOURCES.builder("test2", TestResourceBuilder::builder)
+            .name("bar")
+            .reference(TEST_RESOURCE1)
+            .register();
     }
 
     private static ResourceLocation mcLoc(String id) {

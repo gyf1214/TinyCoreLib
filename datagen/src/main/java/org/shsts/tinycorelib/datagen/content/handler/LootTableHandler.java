@@ -133,7 +133,7 @@ public class LootTableHandler extends DataHandler<LootTableProvider> {
     }
 
     @Override
-    protected LootTableProvider createProvider(GatherDataEvent event) {
+    public LootTableProvider createProvider(GatherDataEvent event) {
         return new Provider(event);
     }
 
