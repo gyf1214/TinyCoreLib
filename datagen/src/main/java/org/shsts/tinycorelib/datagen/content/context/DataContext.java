@@ -7,11 +7,11 @@ import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class DataContext<P extends DataProvider> implements IDataContext<P> {
+public class DataContext<D extends DataProvider> implements IDataContext<D> {
     public final String modid;
-    public final P provider;
+    public final D provider;
 
-    public DataContext(String modid, P provider) {
+    public DataContext(String modid, D provider) {
         this.modid = modid;
         this.provider = provider;
     }
@@ -22,7 +22,7 @@ public class DataContext<P extends DataProvider> implements IDataContext<P> {
     }
 
     @Override
-    public P provider() {
+    public D provider() {
         return provider;
     }
 }

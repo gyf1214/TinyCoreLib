@@ -27,14 +27,14 @@ import java.util.function.Supplier;
 public interface IDataGen extends IRecipeDataConsumer {
     String modid();
 
-    <P extends DataProvider> IDataHandler<P> createHandler(IDataHandler.ProviderFactory<P> factory);
+    <D extends DataProvider> IDataHandler<D> createHandler(IDataHandler.ProviderFactory<D> factory);
 
     Set<String> getTrackedLang();
 
     /**
      * Add a DataProvider without any callbacks.
      */
-    <P extends DataProvider> IDataGen addProvider(BiFunction<IDataGen, GatherDataEvent, P> factory);
+    <D extends DataProvider> IDataGen addProvider(BiFunction<IDataGen, GatherDataEvent, D> factory);
 
     <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item);
 

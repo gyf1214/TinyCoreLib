@@ -6,8 +6,8 @@ import net.minecraft.data.DataProvider;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IDataContext<P extends DataProvider> {
+public interface IDataContext<D extends DataProvider> {
     String modid();
 
-    P provider();
+    D provider();
 }

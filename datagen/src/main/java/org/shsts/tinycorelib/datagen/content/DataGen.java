@@ -112,29 +112,29 @@ public class DataGen implements IDataGen {
         return modid;
     }
 
-    private class SimpleDataHandler<P extends DataProvider> extends DataHandler<P> {
-        private final IDataHandler.ProviderFactory<P> factory;
+    private class SimpleDataHandler<D extends DataProvider> extends DataHandler<D> {
+        private final IDataHandler.ProviderFactory<D> factory;
 
-        private SimpleDataHandler(ProviderFactory<P> factory) {
+        private SimpleDataHandler(ProviderFactory<D> factory) {
             super(DataGen.this);
             this.factory = factory;
         }
 
         @Override
-        public P createProvider(GatherDataEvent event) {
+        public D createProvider(GatherDataEvent event) {
             return factory.create(DataGen.this, this, event);
         }
     }
 
     @Override
-    public <P extends DataProvider> IDataHandler<P> createHandler(
-        IDataHandler.ProviderFactory<P> factory) {
+    public <D extends DataProvider> IDataHandler<D> createHandler(
+        IDataHandler.ProviderFactory<D> factory) {
         return createDataHandler($ -> new SimpleDataHandler<>(factory));
     }
 
     @Override
-    public <P extends DataProvider> IDataGen addProvider(
-        BiFunction<IDataGen, GatherDataEvent, P> factory) {
+    public <D extends DataProvider> IDataGen addProvider(
+        BiFunction<IDataGen, GatherDataEvent, D> factory) {
         dataProviders.add(factory);
         return this;
     }

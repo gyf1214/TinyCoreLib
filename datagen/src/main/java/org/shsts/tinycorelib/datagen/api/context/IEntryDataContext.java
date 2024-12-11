@@ -9,7 +9,7 @@ import org.shsts.tinycorelib.api.core.ILoc;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IEntryDataContext<T extends IForgeRegistryEntry<T>,
-    U extends T, P extends DataProvider> extends ILoc, IDataContext<P> {
+    U extends T, D extends DataProvider> extends ILoc, IDataContext<D> {
     @Override
     String modid();
 

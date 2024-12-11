@@ -14,15 +14,14 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public abstract class DataHandler<P extends DataProvider> implements IDataHandler<P> {
+public abstract class DataHandler<D extends DataProvider> implements IDataHandler<D> {
     private static final Logger LOGGER = LogUtils.getLogger();
     protected final DataGen dataGen;
-    protected final List<Consumer<P>> callbacks = new ArrayList<>();
+    protected final List<Consumer<D>> callbacks = new ArrayList<>();
 
     public DataHandler(DataGen dataGen) {
         this.dataGen = dataGen;
@@ -34,17 +33,22 @@ public abstract class DataHandler<P extends DataProvider> implements IDataHandle
     }
 
     @Override
-    public void addCallback(Consumer<P> callback) {
+    public void addCallback(Consumer<D> callback) {
         callbacks.add(callback);
     }
 
     @Override
-    public <B> B builder(String id, BiFunction<IDataHandler<P>, ResourceLocation, B> factory) {
-        return factory.apply(this, new ResourceLocation(dataGen.modid, id));
+    public <B, P> B builder(P parent, String id, BuilderFactory<B, D, P> factory) {
+        return factory.create(this, parent, new ResourceLocation(dataGen.modid, id));
     }
 
     @Override
-    public void register(P provider) {
+    public <B> B builder(String id, BuilderFactory<B, D, IDataHandler<D>> factory) {
+        return builder(this, id, factory);
+    }
+
+    @Override
+    public void register(D provider) {
         LOGGER.info("DataHandler{{}}: add {} callbacks", provider.getName(), callbacks.size());
         for (var callback : callbacks) {
             callback.accept(provider);

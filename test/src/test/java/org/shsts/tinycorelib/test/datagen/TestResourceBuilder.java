@@ -104,9 +104,9 @@ public class TestResourceBuilder<P> implements IBuilder<JsonObject, P, TestResou
         return self();
     }
 
-    public static TestResourceBuilder<IDataHandler<TestResourceProvider>> builder(
-        IDataHandler<TestResourceProvider> handler, ResourceLocation loc) {
-        var builder = new TestResourceBuilder<>(handler, loc);
+    public static <P> TestResourceBuilder<P> builder(IDataHandler<TestResourceProvider> handler,
+        P parent, ResourceLocation loc) {
+        var builder = new TestResourceBuilder<>(parent, loc);
         return builder.onBuild(() -> {
             handler.addCallback(p -> p.addBuilder(builder));
             handler.dataGen().trackLang(loc.getNamespace() + ".test_resource." +

@@ -10,11 +10,11 @@ import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class EntryDataContext<T extends IForgeRegistryEntry<T>,
-    U extends T, P extends DataProvider> extends DataContext<P> implements IEntryDataContext<T, U, P> {
+    U extends T, D extends DataProvider> extends DataContext<D> implements IEntryDataContext<T, U, D> {
     public final ResourceLocation loc;
     public final U object;
 
-    public EntryDataContext(String modid, String id, P provider, U object) {
+    public EntryDataContext(String modid, String id, D provider, U object) {
         super(modid, provider);
         this.loc = new ResourceLocation(modid, id);
         this.object = object;
