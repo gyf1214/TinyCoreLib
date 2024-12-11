@@ -41,6 +41,6 @@ public class BlockEntityTypeEntry extends Entry<BlockEntityType<?>> implements I
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> ticker() {
-        return SmartBlockEntity::ticker;
+        return (world, pos, state, be) -> SmartBlockEntity.ticker(world, be);
     }
 }

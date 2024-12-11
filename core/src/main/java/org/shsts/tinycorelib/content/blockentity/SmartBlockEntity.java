@@ -15,10 +15,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import static org.shsts.tinycorelib.content.CoreContents.CLIENT_LOAD;
 import static org.shsts.tinycorelib.content.CoreContents.CLIENT_TICK;
 import static org.shsts.tinycorelib.content.CoreContents.EVENT_MANAGER;
 import static org.shsts.tinycorelib.content.CoreContents.REMOVED_BY_CHUNK;
 import static org.shsts.tinycorelib.content.CoreContents.REMOVED_IN_WORLD;
+import static org.shsts.tinycorelib.content.CoreContents.SERVER_LOAD;
 import static org.shsts.tinycorelib.content.CoreContents.SERVER_TICK;
 
 @ParametersAreNonnullByDefault
@@ -66,7 +68,19 @@ public class SmartBlockEntity extends BlockEntity {
         }
     }
 
-    public static <T extends BlockEntity> void ticker(Level world, BlockPos pos, BlockState state, T be) {
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        assert level != null;
+        var eventManager = getEventManager();
+        if (level.isClientSide) {
+            eventManager.invoke(CLIENT_LOAD.get(), level);
+        } else {
+            eventManager.invoke(SERVER_LOAD.get(), level);
+        }
+    }
+
+    public static <T extends BlockEntity> void ticker(Level world, T be) {
         if (be instanceof SmartBlockEntity sbe) {
             sbe.onTick(world);
         }
