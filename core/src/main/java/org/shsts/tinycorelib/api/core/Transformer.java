@@ -12,4 +12,9 @@ public interface Transformer<S> extends Function<S, S> {
     default Transformer<S> chain(Transformer<S> other) {
         return $ -> other.apply(apply($));
     }
+
+    @SuppressWarnings("unchecked")
+    default <S1> Transformer<S1> cast() {
+        return (Transformer<S1>) this;
+    }
 }
