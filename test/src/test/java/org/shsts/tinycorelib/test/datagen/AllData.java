@@ -98,6 +98,8 @@ public final class AllData {
             .name("bar")
             .reference(TEST_RESOURCE1)
             .register();
+
+        DATA_GEN.addProvider(TestLanguageProvider::new);
     }
 
     private static ResourceLocation mcLoc(String id) {

@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -139,6 +140,11 @@ public class DataGen implements IDataGen {
     }
 
     @Override
+    public Set<String> getTrackedLang() {
+        return langTrackedContext.getTracked();
+    }
+
+    @Override
     public <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item) {
         return new BlockDataBuilder<>(this, this, loc, item);
     }
@@ -186,6 +192,18 @@ public class DataGen implements IDataGen {
     @Override
     public IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons) {
         itemModelHandler.addModelCallback(cons);
+        return this;
+    }
+
+    @Override
+    public IDataGen trackLang(String key) {
+        langTrackedContext.trackExtra(key, key);
+        return this;
+    }
+
+    @Override
+    public IDataGen processLang(String key) {
+        langTrackedContext.process(key);
         return this;
     }
 

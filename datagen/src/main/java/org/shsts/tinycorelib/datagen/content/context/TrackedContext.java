@@ -55,7 +55,8 @@ public class TrackedContext<V> {
     }
 
     public void postValidate() {
-        var processed = this.processed.stream().map($ -> (V) $.get())
+        var processed = this.processed.stream()
+            .map($ -> (V) $.get())
             .collect(Collectors.toSet());
         var tracked = getTrackedMap();
 

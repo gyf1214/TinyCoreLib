@@ -17,6 +17,7 @@ import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -27,6 +28,8 @@ public interface IDataGen extends IRecipeDataConsumer {
     String modid();
 
     <P extends DataProvider> IDataHandler<P> createHandler(IDataHandler.ProviderFactory<P> factory);
+
+    Set<String> getTrackedLang();
 
     /**
      * Add a DataProvider without any callbacks.
@@ -50,6 +53,10 @@ public interface IDataGen extends IRecipeDataConsumer {
     IDataGen blockModel(Consumer<IDataContext<BlockModelProvider>> cons);
 
     IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons);
+
+    IDataGen trackLang(String key);
+
+    IDataGen processLang(String key);
 
     void onGatherData(GatherDataEvent event);
 }
