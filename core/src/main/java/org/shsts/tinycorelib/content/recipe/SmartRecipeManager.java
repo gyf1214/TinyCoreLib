@@ -3,7 +3,10 @@ package org.shsts.tinycorelib.content.recipe;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
@@ -23,40 +26,42 @@ public class SmartRecipeManager implements IRecipeManager {
         this.manager = manager;
     }
 
-    @Override
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
+    private <C, R extends IRecipe<C>,
+        B extends IRecipeBuilderBase<R>> RecipeType<SmartRecipe<C, R>> getType(
+        IRecipeType<B> type) {
+        return ((RecipeTypeEntry<C, R, B>) type).get();
+    }
+
+    @Override
     public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> Optional<R> getRecipeFor(
         IRecipeType<B> type, C container, Level world) {
-        var type1 = ((RecipeTypeEntry<C, R, B>) type).get();
-        return manager.getRecipeFor(type1, new ContainerWrapper<>(container), world)
+        return manager.getRecipeFor(getType(type), new ContainerWrapper<>(container), world)
             .map($ -> $.compose);
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "RedundantSuppression"})
     public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> List<R> getRecipesFor(
         IRecipeType<B> type, C container, Level world) {
-        var type1 = ((RecipeTypeEntry<C, R, B>) type).get();
-        return manager.getRecipesFor(type1, new ContainerWrapper<>(container), world)
+        return manager.getRecipesFor(getType(type), new ContainerWrapper<>(container), world)
             .stream().map($ -> $.compose)
             .toList();
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> List<R> getAllRecipesFor(
+    @SuppressWarnings({"unchecked", "rawtypes", "RedundantCast"})
+    public <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> List<R> getAllRecipesFor(
         IRecipeType<B> type) {
-        var type1 = ((RecipeTypeEntry<C, R, B>) type).get();
-        return manager.getAllRecipesFor(type1)
-            .stream().map($ -> $.compose)
+        return (List<R>) (List) manager.getAllRecipesFor((RecipeType<Recipe<Container>>) type.get())
+            .stream().map($ -> ((SmartRecipe) $).compose)
             .toList();
     }
 
     @Override
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
+    public <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
         IRecipeType<B> type, ResourceLocation loc) {
-        var clazz = ((RecipeTypeEntry<C, R, B>) type).recipeClass();
+        var clazz = ((RecipeTypeEntry<?, R, B>) type).recipeClass();
         return manager.byKey(loc).flatMap($ -> {
             if (!($ instanceof SmartRecipe<?, ?> smartRecipe)) {
                 return Optional.empty();

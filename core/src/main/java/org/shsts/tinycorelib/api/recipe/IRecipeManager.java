@@ -18,9 +18,9 @@ public interface IRecipeManager {
     <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> List<R> getRecipesFor(
         IRecipeType<B> type, C container, Level world);
 
-    <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> List<R> getAllRecipesFor(
+    <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> List<R> getAllRecipesFor(
         IRecipeType<B> type);
 
-    <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
+    <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
         IRecipeType<B> type, ResourceLocation loc);
 }
