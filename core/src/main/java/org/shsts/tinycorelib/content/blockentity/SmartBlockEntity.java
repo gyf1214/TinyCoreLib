@@ -117,10 +117,10 @@ public class SmartBlockEntity extends BlockEntity {
 
     @Override
     public void handleUpdateTag(CompoundTag tag) {
-        if (!tag.contains("ForgeCaps", Tag.TAG_COMPOUND)) {
+        if (!tag.contains("ForgeCaps", Tag.TAG_LIST)) {
             return;
         }
-        var caps = tag.getList("ForgeCaps", Tag.TAG_COMPOUND);
+        var caps = tag.getList("ForgeCaps", Tag.TAG_LIST);
         getEventManager().ifPresent($ -> $.handleUpdateTag(caps));
     }
 
