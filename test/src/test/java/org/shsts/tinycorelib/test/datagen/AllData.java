@@ -2,8 +2,14 @@ package org.shsts.tinycorelib.test.datagen;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -30,6 +36,7 @@ import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 public final class AllData {
     private static final TagKey<Item> TEST_ITEM_TAG = itemTag("test_item_tag");
     private static final TagKey<Item> TEST_ITEM_TAG2 = itemTag("test_item_tag2");
+    private static final TagKey<Item> TEST_PARENT_TAG = itemTag("test_parent_item_tag");
 
     public static IDataHandler<TestResourceProvider> TEST_RESOURCES;
     public static ResourceLocation TEST_RESOURCE1;
@@ -43,7 +50,7 @@ public final class AllData {
                 .texture("layer0", mcLoc("item/arrow")))
             .tag(TEST_ITEM_TAG)
             .build()
-            .tag(TEST_ITEM_TAG, itemTag("test_parent_item_tag"))
+            .tag(TEST_ITEM_TAG, TEST_PARENT_TAG)
             .tag(() -> Items.GLASS, TEST_ITEM_TAG)
             .tag(() -> Items.SAND, List.of(TEST_ITEM_TAG, TEST_ITEM_TAG2))
             .block(All.TEST_BLOCK1)
@@ -87,6 +94,18 @@ public final class AllData {
             .cookingTime(100)
             .beginSeconds(10)
             .build();
+
+        DATA_GEN.vanillaRecipe(() -> ShapedRecipeBuilder.shaped(TEST_BLOCK3.get())
+            .pattern("###").pattern("#X#")
+            .define('#', Items.BIRCH_PLANKS)
+            .define('X', TEST_PARENT_TAG)
+            .unlockedBy("has_test", has(TEST_PARENT_TAG)));
+
+        DATA_GEN.nullRecipe(Items.OAK_PLANKS);
+
+        DATA_GEN.replaceVanillaRecipe(() -> ShapelessRecipeBuilder.shapeless(Items.BIRCH_PLANKS, 6)
+            .requires(Items.BIRCH_LOG)
+            .unlockedBy("has_birch", has(Items.BIRCH_LOG)));
 
         TEST_RESOURCES = DATA_GEN.createHandler(TestResourceProvider::new);
 
@@ -133,5 +152,18 @@ public final class AllData {
 
     private static TagKey<Item> itemTag(String id) {
         return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(TinyCoreLibTest.ID, id));
+    }
+
+    private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... predicates) {
+        return new InventoryChangeTrigger.TriggerInstance(EntityPredicate.Composite.ANY,
+            MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, predicates);
+    }
+
+    public static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> tag) {
+        return inventoryTrigger(ItemPredicate.Builder.item().of(tag).build());
+    }
+
+    public static InventoryChangeTrigger.TriggerInstance has(Item item) {
+        return inventoryTrigger(ItemPredicate.Builder.item().of(item).build());
     }
 }

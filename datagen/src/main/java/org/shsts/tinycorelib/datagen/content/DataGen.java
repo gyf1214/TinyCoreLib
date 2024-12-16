@@ -6,6 +6,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -192,6 +194,31 @@ public class DataGen implements IDataGen {
     @Override
     public IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons) {
         itemModelHandler.addModelCallback(cons);
+        return this;
+    }
+
+    @Override
+    public IDataGen replaceVanillaRecipe(Supplier<RecipeBuilder> recipe) {
+        recipeHandler.registerRecipe(cons -> recipe.get().save(cons));
+        return this;
+    }
+
+    @Override
+    public IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe, String suffix) {
+        recipeHandler.registerRecipe(cons -> {
+            var builder = recipe.get();
+            var loc = builder.getResult().getRegistryName();
+            assert loc != null;
+            var prefix = builder instanceof SimpleCookingRecipeBuilder ? "smelt" : "craft";
+            var recipeLoc = new ResourceLocation(modid, prefix + "/" + loc.getPath() + suffix);
+            builder.save(cons, recipeLoc);
+        });
+        return this;
+    }
+
+    @Override
+    public IDataGen nullRecipe(ResourceLocation loc) {
+        recipeHandler.registerRecipe(() -> new NullRecipe(loc));
         return this;
     }
 

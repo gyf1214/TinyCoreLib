@@ -3,6 +3,7 @@ package org.shsts.tinycorelib.datagen.api;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -53,6 +54,26 @@ public interface IDataGen extends IRecipeDataConsumer {
     IDataGen blockModel(Consumer<IDataContext<BlockModelProvider>> cons);
 
     IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons);
+
+    IDataGen replaceVanillaRecipe(Supplier<RecipeBuilder> recipe);
+
+    default IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe) {
+        return vanillaRecipe(recipe, "");
+    }
+
+    IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe, String suffix);
+
+    IDataGen nullRecipe(ResourceLocation loc);
+
+    default IDataGen nullRecipe(String loc) {
+        return nullRecipe(new ResourceLocation(loc));
+    }
+
+    default IDataGen nullRecipe(Item item) {
+        var loc = item.getRegistryName();
+        assert loc != null;
+        return nullRecipe(loc);
+    }
 
     IDataGen trackLang(String key);
 
