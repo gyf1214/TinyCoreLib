@@ -3,8 +3,6 @@ package org.shsts.tinycorelib.content.recipe;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -14,6 +12,7 @@ import org.shsts.tinycorelib.api.recipe.IRecipeManager;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.content.registrate.entry.RecipeTypeEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,12 +48,19 @@ public class SmartRecipeManager implements IRecipeManager {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes", "RedundantCast"})
+    @SuppressWarnings("unchecked")
     public <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> List<R> getAllRecipesFor(
         IRecipeType<B> type) {
-        return (List<R>) (List) manager.getAllRecipesFor((RecipeType<Recipe<Container>>) type.get())
-            .stream().map($ -> ((SmartRecipe) $).compose)
-            .toList();
+        return (List<R>) getRawRecipesFor(type);
+    }
+
+    @Override
+    public List<IRecipe<?>> getRawRecipesFor(IRecipeType<?> type) {
+        var ret = new ArrayList<IRecipe<?>>();
+        for (var recipe : manager.getAllRecipesFor((SmartRecipeType<?, ?, ?>) type.get())) {
+            ret.add(recipe.compose);
+        }
+        return ret;
     }
 
     @Override
@@ -62,13 +68,13 @@ public class SmartRecipeManager implements IRecipeManager {
     public <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
         IRecipeType<B> type, ResourceLocation loc) {
         var clazz = ((RecipeTypeEntry<?, R, B>) type).recipeClass();
-        return manager.byKey(loc).flatMap($ -> {
-            if (!($ instanceof SmartRecipe<?, ?> smartRecipe)) {
-                return Optional.empty();
-            }
-            return clazz.isInstance(smartRecipe.compose) ?
-                Optional.of(clazz.cast(smartRecipe.compose)) :
-                Optional.empty();
-        });
+        return byLoc(loc).filter(clazz::isInstance).map(clazz::cast);
+    }
+
+    @Override
+    public Optional<IRecipe<?>> byLoc(ResourceLocation loc) {
+        return manager.byKey(loc)
+            .flatMap($ -> $ instanceof SmartRecipe<?, ?> smartRecipe ?
+                Optional.of(smartRecipe.compose) : Optional.empty());
     }
 }

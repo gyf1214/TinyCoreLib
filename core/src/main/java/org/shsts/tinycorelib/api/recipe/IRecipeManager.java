@@ -21,6 +21,10 @@ public interface IRecipeManager {
     <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> List<R> getAllRecipesFor(
         IRecipeType<B> type);
 
+    List<IRecipe<?>> getRawRecipesFor(IRecipeType<?> type);
+
     <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
         IRecipeType<B> type, ResourceLocation loc);
+
+    Optional<IRecipe<?>> byLoc(ResourceLocation loc);
 }
