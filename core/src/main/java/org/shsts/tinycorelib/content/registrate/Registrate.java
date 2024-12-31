@@ -303,7 +303,8 @@ public class Registrate implements IRegistrate {
         return new VanillaRecipeTypeBuilder<>(this, parent, id, builderFactory);
     }
 
-    public void trackTranslation(String key) {
+    @Override
+    public void trackLang(String key) {
         trackedObjects.put(TrackedType.LANG, key, key);
     }
 
@@ -311,14 +312,14 @@ public class Registrate implements IRegistrate {
         var loc = block.getRegistryName();
         assert loc != null;
         trackedObjects.put(TrackedType.BLOCK, block, loc.toString());
-        trackTranslation(block.getDescriptionId());
+        trackLang(block.getDescriptionId());
     }
 
     public void trackItem(Item item) {
         var loc = item.getRegistryName();
         assert loc != null;
         trackedObjects.put(TrackedType.ITEM, item, loc.toString());
-        trackTranslation(item.getDescriptionId());
+        trackLang(item.getDescriptionId());
     }
 
     public <V> Map<V, String> getTracked(TrackedType<V> type) {

@@ -159,4 +159,6 @@ public interface IRegistrate {
         String id, IRecipeType.BuilderFactory<B> builderFactory) {
         return vanillaRecipeType(this, id, builderFactory);
     }
+
+    void trackLang(String key);
 }
