@@ -131,4 +131,10 @@ public class SmartBlockEntity extends BlockEntity {
             handleUpdateTag(tag);
         }
     }
+
+    @Override
+    public String toString() {
+        var dimension = level == null ? null : level.dimension().location();
+        return getClass().getSimpleName() + "[pos=" + worldPosition + "@" + dimension + "]";
+    }
 }
