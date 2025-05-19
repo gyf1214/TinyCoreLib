@@ -30,13 +30,13 @@ public class InventoryPlugin implements IMenuPlugin<TestScreen> {
         var barY = y + 3 * SLOT_SIZE + SPACING;
         for (var j = 0; j < 9; j++) {
             var x = MARGIN + j * SLOT_SIZE;
-            menu.addSlot(new Slot(inventory, j, x + 1, barY + 1));
+            menu.addMenuSlot(new Slot(inventory, j, x + 1, barY + 1));
         }
         for (var i = 0; i < 3; i++) {
             for (var j = 0; j < 9; j++) {
                 var x = MARGIN + j * SLOT_SIZE;
                 var y1 = y + i * SLOT_SIZE;
-                menu.addSlot(new Slot(inventory, 9 + i * 9 + j, x + 1, y1 + 1));
+                menu.addMenuSlot(new Slot(inventory, 9 + i * 9 + j, x + 1, y1 + 1));
             }
         }
         this.endY = barY + SLOT_SIZE + MARGIN;

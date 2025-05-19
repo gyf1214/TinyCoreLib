@@ -31,7 +31,7 @@ public class TestMenuPlugin implements IMenuPlugin<TestScreen> {
 
         var itemHandler = ITEM_HANDLER_CAPABILITY.get(blockEntity);
         var slot = new SlotItemHandler(itemHandler, 0, 111, 32);
-        menu.addSlot(slot);
+        menu.addMenuSlot(slot);
 
         menu.onEventPacket(TEST_MENU_EVENT, this::onEvent);
     }

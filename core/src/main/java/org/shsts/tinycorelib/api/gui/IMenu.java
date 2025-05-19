@@ -35,7 +35,7 @@ public interface IMenu {
 
     void setValidPredicate(BooleanSupplier pred);
 
-    Slot addSlot(Slot slot);
+    void addMenuSlot(Slot slot);
 
     int getSlotSize();
 

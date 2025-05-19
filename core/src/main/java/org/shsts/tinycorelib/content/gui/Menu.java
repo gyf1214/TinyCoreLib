@@ -170,8 +170,8 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     }
 
     @Override
-    public Slot addSlot(Slot slot) {
-        return super.addSlot(slot);
+    public void addMenuSlot(Slot slot) {
+        addSlot(slot);
     }
 
     @Override
