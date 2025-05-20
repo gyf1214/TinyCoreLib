@@ -71,7 +71,7 @@ public class InventoryPlugin implements IMenuPlugin<TestScreen> {
         }
         screen.onInit($ -> {
             for (var i = 0; i < menu.getSlotSize(); i++) {
-                var slot = menu.getSlot(i);
+                var slot = menu.getMenuSlot(i);
                 var x = slot.x - 1 + screen.getGuiLeft();
                 var y = slot.y - 1 + screen.getGuiTop();
                 screen.addWidgetToScreen(new SlotBg(x, y));

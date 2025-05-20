@@ -180,8 +180,8 @@ public class Menu extends AbstractContainerMenu implements IMenu {
     }
 
     @Override
-    public Slot getSlot(int index) {
-        return super.getSlot(index);
+    public Slot getMenuSlot(int index) {
+        return getSlot(index);
     }
 
     @Override
@@ -267,7 +267,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        var slot = getSlot(index);
+        var slot = getMenuSlot(index);
         if (onQuickMoveStack.test(slot)) {
             return slot.getItem();
         }

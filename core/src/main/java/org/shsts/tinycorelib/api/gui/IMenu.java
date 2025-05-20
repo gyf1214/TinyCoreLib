@@ -39,7 +39,7 @@ public interface IMenu {
 
     int getSlotSize();
 
-    Slot getSlot(int index);
+    Slot getMenuSlot(int index);
 
     /**
      * The callback returns whether to continue call this function.
