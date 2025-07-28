@@ -29,8 +29,6 @@ import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 
 import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_REGISTRY_KEY;
 import static org.shsts.tinycorelib.api.CoreLibKeys.SERVER_TICK_LOC;
-import static org.shsts.tinycorelib.test.TestScreen.CONTENT_HEIGHT;
-import static org.shsts.tinycorelib.test.TestScreen.SPACING;
 import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
 import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
 
@@ -100,11 +98,8 @@ public final class All {
         ITEM_HANDLER_CAPABILITY = REGISTRATE.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
 
         TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
-            .menu("test_menu")
+            .menu("test_menu", TestMenu::new)
             .title($ -> new TextComponent("Test Title"))
-            .dummyPlugin(menu -> menu.addSyncSlot("seconds", TestPacket::new))
-            .plugin(TestMenuPlugin::new)
-            .plugin(menu -> new InventoryPlugin(menu, CONTENT_HEIGHT + SPACING))
             .screen(() -> () -> TestScreen::new)
             .register();
 

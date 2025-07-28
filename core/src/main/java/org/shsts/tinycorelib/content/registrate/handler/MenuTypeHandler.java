@@ -25,7 +25,7 @@ public class MenuTypeHandler extends EntryHandler<MenuType<?>> {
         return getTypeEntry(new ResourceLocation(modid, id));
     }
 
-    public MenuTypeEntry registerType(MenuBuilder<?> builder) {
+    public MenuTypeEntry registerType(MenuBuilder<?, ?> builder) {
         builders.add(builder);
         return new MenuTypeEntry(builder.loc());
     }

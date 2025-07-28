@@ -13,9 +13,9 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.shsts.tinycorelib.api.gui.IMenuEvent;
+import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.network.IPacket;
-import org.shsts.tinycorelib.content.gui.Menu;
 import org.shsts.tinycorelib.content.gui.MenuEvent;
 import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
@@ -49,7 +49,7 @@ public class Channel implements IChannel {
 
     private void handleMenuSyncPacket(MenuSyncPacket packet, NetworkEvent.Context ctx) {
         var player = Minecraft.getInstance().player;
-        if (player != null && player.containerMenu instanceof Menu menu &&
+        if (player != null && player.containerMenu instanceof MenuBase menu &&
             menu.containerId == packet.getContainerId()) {
             menu.handleSyncPacket(packet.getIndex(), packet.getContent());
         }
@@ -57,7 +57,7 @@ public class Channel implements IChannel {
 
     private void handleMenuEventPacket(MenuEventPacket packet, NetworkEvent.Context ctx) {
         var player = ctx.getSender();
-        if (player != null && player.containerMenu instanceof Menu menu &&
+        if (player != null && player.containerMenu instanceof MenuBase menu &&
             menu.containerId == packet.getContainerId()) {
             menu.handleEventPacket(packet.getEvent(), packet.getContent());
         }
@@ -118,6 +118,17 @@ public class Channel implements IChannel {
         registerPacket(MenuEventPacket.class, () -> new MenuEventPacket(this),
             this::handleMenuEventPacket);
         return event;
+    }
+
+    @Override
+    public IPacket createMenuSyncPacket(int containerId, int index, IPacket content) {
+        return new MenuSyncPacket(this, containerId, index, content);
+    }
+
+    @Override
+    public <P extends IPacket> IPacket createMenuEventPacket(int containerId,
+        IMenuEvent<P> event, P content) {
+        return new MenuEventPacket(this, containerId, event, content);
     }
 
     @Override

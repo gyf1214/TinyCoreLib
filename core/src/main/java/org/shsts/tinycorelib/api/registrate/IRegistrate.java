@@ -16,6 +16,8 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
+import org.shsts.tinycorelib.api.gui.IMenuFactory;
+import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
@@ -121,10 +123,10 @@ public interface IRegistrate {
         return blockEntityType(this, id);
     }
 
-    <P> IMenuBuilder<P> menu(P parent, String id);
+    <M extends MenuBase, P> IMenuBuilder<M, P> menu(P parent, String id, IMenuFactory<M> menuFactory);
 
-    default IMenuBuilder<IRegistrate> menu(String id) {
-        return menu(this, id);
+    default <M extends MenuBase> IMenuBuilder<M, IRegistrate> menu(String id, IMenuFactory<M> menuFactory) {
+        return menu(this, id, menuFactory);
     }
 
     IRegistrate setDefaultChannel(@Nullable IChannel value);

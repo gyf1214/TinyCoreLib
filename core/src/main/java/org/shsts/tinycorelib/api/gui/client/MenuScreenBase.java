@@ -9,20 +9,16 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.shsts.tinycorelib.api.gui.IMenu;
+import org.shsts.tinycorelib.api.gui.MenuBase;
 
 @OnlyIn(Dist.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public abstract class MenuScreenBase extends AbstractContainerScreen<AbstractContainerMenu> {
-    protected final IMenu iMenu;
-
-    public MenuScreenBase(IMenu menu, Inventory inventory, Component title) {
-        super(menu.getMenu(), inventory, title);
-        this.iMenu = menu;
+public abstract class MenuScreenBase<M extends MenuBase> extends AbstractContainerScreen<M> {
+    public MenuScreenBase(M menu, Inventory inventory, Component title) {
+        super(menu, inventory, title);
     }
 
     @Override
@@ -41,12 +37,4 @@ public abstract class MenuScreenBase extends AbstractContainerScreen<AbstractCon
 
     @Override
     protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {}
-
-    @Override
-    public void removed() {
-        super.removed();
-        for (var plugin : iMenu.getPlugins()) {
-            plugin.onScreenRemoved();
-        }
-    }
 }

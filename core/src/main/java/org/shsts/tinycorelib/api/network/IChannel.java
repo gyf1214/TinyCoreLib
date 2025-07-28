@@ -25,4 +25,8 @@ public interface IChannel {
     <P extends IPacket> IChannel registerMenuSyncPacket(Class<P> clazz, Supplier<P> constructor);
 
     <P extends IPacket> IMenuEvent<P> registerMenuEventPacket(Class<P> clazz, Supplier<P> constructor);
+
+    IPacket createMenuSyncPacket(int containerId, int index, IPacket content);
+
+    <P extends IPacket> IPacket createMenuEventPacket(int containerId, IMenuEvent<P> event, P content);
 }

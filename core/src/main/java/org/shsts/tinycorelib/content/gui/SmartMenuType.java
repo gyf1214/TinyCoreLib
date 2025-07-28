@@ -15,32 +15,31 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkHooks;
-import org.shsts.tinycorelib.api.gui.IMenu;
-import org.shsts.tinycorelib.api.gui.IMenuPlugin;
-import org.shsts.tinycorelib.content.network.Channel;
+import org.shsts.tinycorelib.api.gui.IMenuFactory;
+import org.shsts.tinycorelib.api.gui.MenuBase;
+import org.shsts.tinycorelib.api.network.IChannel;
 
-import java.util.List;
 import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SmartMenuType extends MenuType<AbstractContainerMenu> {
+public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
     @Nullable
-    private final Channel channel;
+    private final IChannel channel;
     private final Function<BlockEntity, Component> title;
-    private final List<Function<IMenu, IMenuPlugin<?>>> plugins;
+    private final IMenuFactory<M> factory;
 
     @SuppressWarnings("DataFlowIssue")
-    public SmartMenuType(@Nullable Channel channel, Function<BlockEntity, Component> title,
-        List<Function<IMenu, IMenuPlugin<?>>> plugins) {
+    public SmartMenuType(@Nullable IChannel channel, Function<BlockEntity, Component> title,
+        IMenuFactory<M> factory) {
         super(null);
         this.channel = channel;
         this.title = title;
-        this.plugins = plugins;
+        this.factory = factory;
     }
 
     @Override
-    public Menu create(int containerId, Inventory pPlayerInventory) {
+    public M create(int containerId, Inventory pPlayerInventory) {
         throw new IllegalStateException();
     }
 
@@ -53,16 +52,12 @@ public class SmartMenuType extends MenuType<AbstractContainerMenu> {
         return be;
     }
 
-    private Menu create(int containerId, Inventory inventory, BlockEntity be) {
-        var menu = new Menu(this, containerId, inventory, be, channel);
-        for (var factory : plugins) {
-            menu.addPlugin(factory.apply(menu));
-        }
-        return menu;
+    private M create(int containerId, Inventory inventory, BlockEntity be) {
+        return factory.create(this, containerId, inventory, be, channel);
     }
 
     @Override
-    public Menu create(int containerId, Inventory inventory, FriendlyByteBuf data) {
+    public M create(int containerId, Inventory inventory, FriendlyByteBuf data) {
         var be = getBlockEntityFromData(data);
         return create(containerId, inventory, be);
     }

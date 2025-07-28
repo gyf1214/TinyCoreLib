@@ -24,6 +24,6 @@ public class MenuTypeEntry extends Entry<MenuType<?>> implements IMenuType {
 
     @Override
     public void open(ServerPlayer player, BlockPos pos) {
-        ((SmartMenuType) get()).open(player, pos);
+        ((SmartMenuType<?>) get()).open(player, pos);
     }
 }

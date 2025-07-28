@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.content.gui;
+package org.shsts.tinycorelib.api.gui;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -8,42 +8,30 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.shsts.tinycorelib.api.gui.IMenu;
-import org.shsts.tinycorelib.api.gui.IMenuEvent;
-import org.shsts.tinycorelib.api.gui.IMenuPlugin;
+import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.network.IPacket;
-import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
-import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
-import org.shsts.tinycorelib.content.network.Channel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class Menu extends AbstractContainerMenu implements IMenu {
-    private final Level world;
-    private final BlockEntity blockEntity;
-    private final Player player;
-    private final Inventory inventory;
+public class MenuBase extends AbstractContainerMenu implements IMenu {
+    protected final Level world;
+    protected final BlockEntity blockEntity;
+    protected final Player player;
+    protected final Inventory inventory;
     @Nullable
-    private final Channel channel;
-    private final List<IMenuPlugin<?>> plugins = new ArrayList<>();
-
-    private BooleanSupplier isValid = () -> true;
-    private Predicate<Slot> onQuickMoveStack = $ -> false;
+    private final IChannel channel;
 
     private class SyncSlot<P extends IPacket> {
         private final int index;
@@ -62,7 +50,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
                 var packet1 = factory.apply(be);
                 if (!packet1.equals(packet)) {
                     packet = packet1;
-                    var syncPacket = new MenuSyncPacket(channel, containerId, index, packet1);
+                    var syncPacket = channel.createMenuSyncPacket(containerId, index, packet1);
                     channel.sendToPlayer(serverPlayer, syncPacket);
                 }
             }
@@ -99,8 +87,8 @@ public class Menu extends AbstractContainerMenu implements IMenu {
 
     private final Map<IMenuEvent<?>, EventHandler<?>> eventHandlers = new HashMap<>();
 
-    public Menu(MenuType<?> menuType, int id, Inventory inventory, BlockEntity blockEntity,
-        @Nullable Channel channel) {
+    public MenuBase(MenuType<?> menuType, int id, Inventory inventory, BlockEntity blockEntity,
+        @Nullable IChannel channel) {
         super(menuType, id);
         this.blockEntity = blockEntity;
         this.world = blockEntity.getLevel();
@@ -108,28 +96,6 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         this.player = inventory.player;
         this.inventory = inventory;
         this.channel = channel;
-    }
-
-    public void addPlugin(IMenuPlugin<?> plugin) {
-        plugins.add(plugin);
-    }
-
-    @Override
-    public List<IMenuPlugin<?>> getPlugins() {
-        return plugins;
-    }
-
-    @Override
-    public void removed(Player player) {
-        super.removed(player);
-        for (var plugin : plugins) {
-            plugin.onMenuRemoved();
-        }
-    }
-
-    @Override
-    public AbstractContainerMenu getMenu() {
-        return this;
     }
 
     @Override
@@ -140,53 +106,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         return player == this.player &&
             level == player.getLevel() &&
             level.getBlockEntity(pos) == be &&
-            player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0 &&
-            isValid.getAsBoolean();
-    }
-
-    @Override
-    public BlockEntity blockEntity() {
-        return blockEntity;
-    }
-
-    @Override
-    public Player player() {
-        return player;
-    }
-
-    @Override
-    public Inventory inventory() {
-        return inventory;
-    }
-
-    @Override
-    public Level world() {
-        return world;
-    }
-
-    @Override
-    public void setValidPredicate(BooleanSupplier pred) {
-        isValid = pred;
-    }
-
-    @Override
-    public void addMenuSlot(Slot slot) {
-        addSlot(slot);
-    }
-
-    @Override
-    public int getSlotSize() {
-        return slots.size();
-    }
-
-    @Override
-    public Slot getMenuSlot(int index) {
-        return getSlot(index);
-    }
-
-    @Override
-    public void setOnQuickMoveStack(Predicate<Slot> cb) {
-        onQuickMoveStack = cb;
+            player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0;
     }
 
     private <P extends IPacket> SyncSlot<P> createSyncSlot(Function<BlockEntity, P> factory) {
@@ -196,51 +116,61 @@ public class Menu extends AbstractContainerMenu implements IMenu {
         return slot;
     }
 
-    @Override
-    public <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory) {
+    protected <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory) {
         assert !syncSlotNames.containsKey(name);
         var slot = createSyncSlot(factory);
         syncSlotNames.put(name, slot);
     }
 
-    @Override
-    public <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory) {
+    protected <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory) {
         return createSyncSlot(factory).index;
     }
 
-    @Override
+    /**
+     * Called by Client to get the latest sync packet.
+     */
     public <P extends IPacket> Optional<P> getSyncPacket(int index, Class<P> clazz) {
         return syncSlots.get(index).getPacket(clazz);
     }
 
-    @Override
+    /**
+     * Called by Client to get the latest sync packet.
+     */
     public <P extends IPacket> Optional<P> getSyncPacket(String name, Class<P> clazz) {
         return syncSlotNames.get(name).getPacket(clazz);
     }
 
-    @Override
+    /**
+     * Callback added by Client.
+     */
     @SuppressWarnings("unchecked")
     public <P extends IPacket> void onSyncPacket(int index, Consumer<P> cb) {
         var slot = (SyncSlot<P>) syncSlots.get(index);
         slot.addCallback(cb);
     }
 
-    @Override
+    /**
+     * Callback added by Client.
+     */
     @SuppressWarnings("unchecked")
     public <P extends IPacket> void onSyncPacket(String name, Consumer<P> cb) {
         var slot = (SyncSlot<P>) syncSlotNames.get(name);
         slot.addCallback(cb);
     }
 
-    @Override
-    public <P extends IPacket> void onEventPacket(IMenuEvent<P> event, Consumer<P> cb) {
+    /**
+     * Callback added by Server.
+     */
+    protected <P extends IPacket> void onEventPacket(IMenuEvent<P> event, Consumer<P> cb) {
         eventHandlers.put(event, new EventHandler<>(event.clazz(), cb));
     }
 
-    @Override
+    /**
+     * Trigger an event from Client.
+     */
     public <P extends IPacket> void triggerEvent(IMenuEvent<P> event, Supplier<P> factory) {
         if (channel != null) {
-            var packet = new MenuEventPacket(channel, containerId, event, factory.get());
+            var packet = channel.createMenuEventPacket(containerId, event, factory.get());
             channel.sendToServer(packet);
         }
     }
@@ -267,10 +197,7 @@ public class Menu extends AbstractContainerMenu implements IMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        var slot = getMenuSlot(index);
-        if (onQuickMoveStack.test(slot)) {
-            return slot.getItem();
-        }
+        // do nothing by default
         return ItemStack.EMPTY;
     }
 }
