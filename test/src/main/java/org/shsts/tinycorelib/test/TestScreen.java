@@ -11,7 +11,6 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.shsts.tinycorelib.api.gui.client.MenuScreenBase;
@@ -44,8 +43,8 @@ public class TestScreen extends MenuScreenBase<TestMenu> {
         public void updateNarration(NarrationElementOutput output) {}
     }
 
-    public TestScreen(TestMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
+    public TestScreen(TestMenu menu, Component title) {
+        super(menu, title);
 
         this.imageHeight = menu.endY;
 

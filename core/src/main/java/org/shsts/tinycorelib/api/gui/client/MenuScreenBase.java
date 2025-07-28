@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -17,8 +16,8 @@ import org.shsts.tinycorelib.api.gui.MenuBase;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class MenuScreenBase<M extends MenuBase> extends AbstractContainerScreen<M> {
-    public MenuScreenBase(M menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
+    public MenuScreenBase(M menu, Component title) {
+        super(menu, menu.inventory(), title);
     }
 
     @Override
