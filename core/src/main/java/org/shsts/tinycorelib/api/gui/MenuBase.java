@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class MenuBase extends AbstractContainerMenu implements IMenu {
+public class MenuBase extends AbstractContainerMenu {
     protected final Level world;
     protected final BlockEntity blockEntity;
     protected final Player player;
@@ -87,15 +87,33 @@ public class MenuBase extends AbstractContainerMenu implements IMenu {
 
     private final Map<IMenuEvent<?>, EventHandler<?>> eventHandlers = new HashMap<>();
 
-    public MenuBase(MenuType<?> menuType, int id, Inventory inventory, BlockEntity blockEntity,
-        @Nullable IChannel channel) {
-        super(menuType, id);
-        this.blockEntity = blockEntity;
+    public record Properties(MenuType<?> menuType, int id, Inventory inventory,
+        BlockEntity blockEntity, @Nullable IChannel channel) {}
+
+    public MenuBase(Properties properties) {
+        super(properties.menuType, properties.id);
+        this.blockEntity = properties.blockEntity;
         this.world = blockEntity.getLevel();
         assert world != null;
+        this.inventory = properties.inventory;
         this.player = inventory.player;
-        this.inventory = inventory;
-        this.channel = channel;
+        this.channel = properties.channel;
+    }
+
+    public BlockEntity blockEntity() {
+        return blockEntity;
+    }
+
+    public Player player() {
+        return player;
+    }
+
+    public Inventory inventory() {
+        return inventory;
+    }
+
+    public int slotSize() {
+        return slots.size();
     }
 
     @Override

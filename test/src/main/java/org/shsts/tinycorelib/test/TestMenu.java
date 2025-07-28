@@ -3,14 +3,9 @@ package org.shsts.tinycorelib.test;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.SlotItemHandler;
-import org.jetbrains.annotations.Nullable;
 import org.shsts.tinycorelib.api.gui.MenuBase;
-import org.shsts.tinycorelib.api.network.IChannel;
 import org.slf4j.Logger;
 
 import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
@@ -29,9 +24,8 @@ public class TestMenu extends MenuBase {
 
     public final int endY;
 
-    public TestMenu(MenuType<?> menuType, int id, Inventory inventory,
-        BlockEntity blockEntity, @Nullable IChannel channel) {
-        super(menuType, id, inventory, blockEntity, channel);
+    public TestMenu(Properties properties) {
+        super(properties);
 
         var y = CONTENT_HEIGHT + SPACING;
         var barY = y + 3 * SLOT_SIZE + SPACING;
@@ -60,9 +54,5 @@ public class TestMenu extends MenuBase {
     private void onEvent(TestPacket p) {
         LOGGER.info("Menu event: seconds = {}", p.getValue());
         TEST_CAPABILITY.get(blockEntity).foo();
-    }
-
-    public BlockEntity blockEntity() {
-        return blockEntity;
     }
 }

@@ -10,7 +10,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.core.DistLazy;
-import org.shsts.tinycorelib.api.gui.IMenuFactory;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
 import org.shsts.tinycorelib.api.gui.client.MenuScreenBase;
@@ -29,14 +28,15 @@ import java.util.function.Function;
 public class MenuBuilder<M extends MenuBase, P>
     extends EntryBuilder<MenuType<?>, MenuType<?>, P, IMenuBuilder<M, P>>
     implements IMenuBuilder<M, P> {
-    private final IMenuFactory<M> menuFactory;
+    private final Function<MenuBase.Properties, M> menuFactory;
     @Nullable
     private IChannel channel = null;
     private Function<BlockEntity, Component> title = $ -> TextComponent.EMPTY;
     @Nullable
     private DistLazy<IMenuScreenFactory<M, ?>> screenFactory = null;
 
-    public MenuBuilder(Registrate registrate, P parent, String id, IMenuFactory<M> menuFactory) {
+    public MenuBuilder(Registrate registrate, P parent, String id,
+        Function<MenuBase.Properties, M> menuFactory) {
         super(registrate, registrate.menuTypeHandler, parent, id);
         this.menuFactory = menuFactory;
     }

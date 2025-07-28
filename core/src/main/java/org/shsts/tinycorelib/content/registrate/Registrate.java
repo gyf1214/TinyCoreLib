@@ -17,7 +17,6 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
-import org.shsts.tinycorelib.api.gui.IMenuFactory;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
@@ -246,7 +245,7 @@ public class Registrate implements IRegistrate {
 
     @Override
     public <M extends MenuBase, P> IMenuBuilder<M, P> menu(P parent, String id,
-        IMenuFactory<M> menuFactory) {
+        Function<MenuBase.Properties, M> menuFactory) {
         var builder = new MenuBuilder<>(this, parent, id, menuFactory);
         return defaultChannel == null ? builder : builder.channel(defaultChannel);
     }

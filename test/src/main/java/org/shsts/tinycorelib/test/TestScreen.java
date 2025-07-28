@@ -72,7 +72,7 @@ public class TestScreen extends MenuScreenBase<TestMenu> {
     @Override
     protected void init() {
         super.init();
-        for (var i = 0; i < menu.slots.size(); i++) {
+        for (var i = 0; i < menu.slotSize(); i++) {
             var slot = menu.getSlot(i);
             var x = slot.x - 1 + leftPos;
             var y = slot.y - 1 + topPos;
