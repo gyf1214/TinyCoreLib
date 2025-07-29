@@ -42,7 +42,7 @@ public class TestMenu extends MenuBase {
         }
         this.endY = barY + SLOT_SIZE + MARGIN;
 
-        addSyncSlot("seconds", TestPacket::new);
+        addSyncSlot("seconds", () -> new TestPacket(blockEntity));
 
         var itemHandler = ITEM_HANDLER_CAPABILITY.get(blockEntity);
         var slot = new SlotItemHandler(itemHandler, 0, 111, 32);

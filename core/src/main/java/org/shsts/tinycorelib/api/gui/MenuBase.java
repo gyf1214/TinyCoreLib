@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.content.gui.SimpleSyncSlotScheduler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
@@ -35,22 +35,21 @@ public class MenuBase extends AbstractContainerMenu {
 
     private class SyncSlot<P extends IPacket> {
         private final int index;
+        private final ISyncSlotScheduler<P> scheduler;
         private final List<Consumer<P>> callbacks = new ArrayList<>();
-        private final Function<BlockEntity, P> factory;
         @Nullable
         private P packet = null;
 
-        public SyncSlot(int index, Function<BlockEntity, P> factory) {
+        public SyncSlot(int index, ISyncSlotScheduler<P> scheduler) {
             this.index = index;
-            this.factory = factory;
+            this.scheduler = scheduler;
         }
 
-        public void sync(BlockEntity be) {
+        public void sync() {
             if (channel != null && player instanceof ServerPlayer serverPlayer) {
-                var packet1 = factory.apply(be);
-                if (!packet1.equals(packet)) {
-                    packet = packet1;
-                    var syncPacket = channel.createMenuSyncPacket(containerId, index, packet1);
+                if (scheduler.shouldSend()) {
+                    var packet = scheduler.createPacket();
+                    var syncPacket = channel.createMenuSyncPacket(containerId, index, packet);
                     channel.sendToPlayer(serverPlayer, syncPacket);
                 }
             }
@@ -127,21 +126,29 @@ public class MenuBase extends AbstractContainerMenu {
             player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0;
     }
 
-    private <P extends IPacket> SyncSlot<P> createSyncSlot(Function<BlockEntity, P> factory) {
+    private <P extends IPacket> SyncSlot<P> createSyncSlot(ISyncSlotScheduler<P> scheduler) {
         var index = syncSlots.size();
-        var slot = new SyncSlot<>(index, factory);
+        var slot = new SyncSlot<>(index, scheduler);
         syncSlots.add(slot);
         return slot;
     }
 
-    protected <P extends IPacket> void addSyncSlot(String name, Function<BlockEntity, P> factory) {
+    protected <P extends IPacket> int addSyncSlot(ISyncSlotScheduler<P> scheduler) {
+        return createSyncSlot(scheduler).index;
+    }
+
+    protected <P extends IPacket> int addSyncSlot(Supplier<P> factory) {
+        return addSyncSlot(new SimpleSyncSlotScheduler<>(factory));
+    }
+
+    protected <P extends IPacket> void addSyncSlot(String name, ISyncSlotScheduler<P> scheduler) {
         assert !syncSlotNames.containsKey(name);
-        var slot = createSyncSlot(factory);
+        var slot = createSyncSlot(scheduler);
         syncSlotNames.put(name, slot);
     }
 
-    protected <P extends IPacket> int addSyncSlot(Function<BlockEntity, P> factory) {
-        return createSyncSlot(factory).index;
+    protected <P extends IPacket> void addSyncSlot(String name, Supplier<P> factory) {
+        addSyncSlot(name, new SimpleSyncSlotScheduler<>(factory));
     }
 
     /**
@@ -209,7 +216,7 @@ public class MenuBase extends AbstractContainerMenu {
     public void broadcastChanges() {
         super.broadcastChanges();
         for (var slot : syncSlots) {
-            slot.sync(blockEntity);
+            slot.sync();
         }
     }
 
