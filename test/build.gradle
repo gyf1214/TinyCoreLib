@@ -12,6 +12,10 @@ minecraft {
             ideaModule rootProject.getName() + '.test.main'
 
             mods {
+                tinycorelib {
+                    source project(':core').sourceSets.main
+                }
+
                 tinycorelib_test {
                     source sourceSets.main
                 }
@@ -28,6 +32,10 @@ minecraft {
             ideaModule rootProject.getName() + '.test.main'
 
             mods {
+                tinycorelib {
+                    source project(':core').sourceSets.main
+                }
+
                 tinycorelib_test {
                     source sourceSets.main
                 }
@@ -42,6 +50,14 @@ minecraft {
             ideaModule rootProject.getName() + '.test.test'
 
             mods {
+                tinycorelib {
+                    source project(':core').sourceSets.main
+                }
+
+                tinydatagen {
+                    source project(':datagen').sourceSets.main
+                }
+
                 tinycorelib_test {
                     source sourceSets.main
                 }
