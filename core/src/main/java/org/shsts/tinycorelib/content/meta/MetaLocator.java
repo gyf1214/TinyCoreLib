@@ -66,7 +66,8 @@ public class MetaLocator {
                         var namespace = path1.getName(0).toString();
                         var folder = path1.getName(1).toString();
                         var path2 = path1.subpath(2, path1.getNameCount()).toString();
-                        var loc = new ResourceLocation(namespace, path2);
+                        var path3 = path2.substring(0, path2.length() - SUFFIX.length());
+                        var loc = new ResourceLocation(namespace, path3);
                         allFiles.add(new MetaFile(folder, loc, path));
                     });
             }
