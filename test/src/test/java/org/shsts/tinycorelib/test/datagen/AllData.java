@@ -40,7 +40,7 @@ public final class AllData {
     private static final TagKey<Item> TEST_ITEM_TAG2 = itemTag("test_item_tag2");
     private static final TagKey<Item> TEST_PARENT_TAG = itemTag("test_parent_item_tag");
 
-    public final static IMetaExecutor TEST_META_DATAGEN;
+    public static final IMetaExecutor TEST_META_DATAGEN;
     public static IDataHandler<TestResourceProvider> TEST_RESOURCES;
     public static ResourceLocation TEST_RESOURCE1;
     public static ResourceLocation TEST_RESOURCE2;
