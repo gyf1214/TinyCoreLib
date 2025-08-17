@@ -18,6 +18,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
+import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.test.All;
@@ -29,6 +30,7 @@ import static org.shsts.tinycorelib.test.All.TEST_BLOCK2;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
 import static org.shsts.tinycorelib.test.All.TEST_VANILLA_RECIPE;
+import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.CORE;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
 @ParametersAreNonnullByDefault
@@ -38,11 +40,20 @@ public final class AllData {
     private static final TagKey<Item> TEST_ITEM_TAG2 = itemTag("test_item_tag2");
     private static final TagKey<Item> TEST_PARENT_TAG = itemTag("test_parent_item_tag");
 
+    public final static IMetaExecutor TEST_META_DATAGEN;
     public static IDataHandler<TestResourceProvider> TEST_RESOURCES;
     public static ResourceLocation TEST_RESOURCE1;
     public static ResourceLocation TEST_RESOURCE2;
 
-    public static void init() {
+    static {
+        TEST_META_DATAGEN = CORE.registerMeta("test", new TestMetaDataGen());
+    }
+
+    public static void init() {}
+
+    public static void generate() {
+        TEST_META_DATAGEN.execute();
+
         DATA_GEN
             .blockModel(AllData::testBlockModel)
             .item(All.TEST_ITEM)

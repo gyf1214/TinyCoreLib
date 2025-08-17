@@ -15,6 +15,7 @@ import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.slf4j.Logger;
 
 import static org.shsts.tinycorelib.test.All.SERVER_TICK;
+import static org.shsts.tinycorelib.test.All.TEST_META;
 
 @Mod(TinyCoreLibTest.ID)
 @ParametersAreNonnullByDefault
@@ -46,6 +47,7 @@ public class TinyCoreLibTest {
 
         All.init();
 
+        TEST_META.execute();
         REGISTRATE.register(modEventBus);
     }
 

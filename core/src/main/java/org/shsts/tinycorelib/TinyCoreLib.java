@@ -14,11 +14,15 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
+import org.shsts.tinycorelib.api.meta.IMetaConsumer;
+import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.recipe.IRecipeManager;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.content.CoreContents;
 import org.shsts.tinycorelib.content.ForgeEvents;
+import org.shsts.tinycorelib.content.meta.MetaExecutor;
+import org.shsts.tinycorelib.content.meta.MetaLocator;
 import org.shsts.tinycorelib.content.network.Channel;
 import org.shsts.tinycorelib.content.recipe.SmartRecipeManager;
 import org.shsts.tinycorelib.content.registrate.Registrate;
@@ -33,14 +37,17 @@ public class TinyCoreLib implements ITinyCoreLib {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final IEventBus modEventBus;
+    private final MetaLocator metaLocator;
 
     public TinyCoreLib() {
         LOGGER.info("Construct TinyCoreLib!");
         this.modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        this.metaLocator = new MetaLocator();
         modEventBus.addListener(this::onConstruct);
     }
 
     private void onConstruct(FMLConstructModEvent event) {
+        metaLocator.scanFiles();
         CoreContents.init();
 
         REGISTRATE.register(modEventBus);
@@ -55,6 +62,11 @@ public class TinyCoreLib implements ITinyCoreLib {
     @Override
     public IRegistrate registrate(String modid) {
         return new Registrate(modid);
+    }
+
+    @Override
+    public IMetaExecutor registerMeta(String folder, IMetaConsumer consumer) {
+        return new MetaExecutor(metaLocator, folder, consumer);
     }
 
     @Override

@@ -19,6 +19,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.gui.IMenuEvent;
+import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
@@ -36,6 +37,8 @@ import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
 @MethodsReturnNonnullByDefault
 public final class All {
     public static final IChannel CHANNEL;
+
+    public static final IMetaExecutor TEST_META;
 
     public static final IEntry<Block> TEST_BLOCK1;
     public static final IEntry<TestBlock> TEST_BLOCK2;
@@ -61,6 +64,8 @@ public final class All {
 
     static {
         CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
+
+        TEST_META = CORE.registerMeta("test", new TestMetaConsumer());
 
         TEST_MENU_EVENT = CHANNEL
             .registerMenuSyncPacket(TestPacket.class, TestPacket::new)
