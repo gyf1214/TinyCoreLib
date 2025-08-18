@@ -8,6 +8,8 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
@@ -40,7 +42,9 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>, B extends IRecipeBuilderBa
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        assert serializer != null;
+        if (serializer == null) {
+            serializer = RegistryObject.create(loc(), ForgeRegistries.RECIPE_SERIALIZERS).get();
+        }
         return serializer;
     }
 

@@ -21,6 +21,7 @@ import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
+import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.recipe.IVanillaRecipeBuilder;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
@@ -161,6 +162,18 @@ public class Registrate implements IRegistrate {
     @Override
     public IMenuType getMenuType(String id) {
         return menuTypeHandler.getTypeEntry(id);
+    }
+
+    @Override
+    public <C, R extends IRecipe<C>,
+        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(ResourceLocation loc) {
+        return recipeTypeHandler.getRecipeType(loc);
+    }
+
+    @Override
+    public <C, R extends IRecipe<C>,
+        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(String id) {
+        return recipeTypeHandler.getRecipeType(id);
     }
 
     @Override

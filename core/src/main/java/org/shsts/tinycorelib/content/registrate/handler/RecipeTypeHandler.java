@@ -4,13 +4,17 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
+import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
+import org.shsts.tinycorelib.content.recipe.SmartRecipeType;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilderBase;
 import org.shsts.tinycorelib.content.registrate.entry.RecipeTypeEntry;
@@ -18,6 +22,7 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -32,6 +37,21 @@ public class RecipeTypeHandler {
         this.modid = registrate.modid;
         this.recipeTypeRegister = DeferredRegister.create(
             Registry.RECIPE_TYPE_REGISTRY, registrate.modid);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C, R extends IRecipe<C>,
+        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(ResourceLocation loc) {
+        Supplier<SmartRecipeType<C, R, B>> supplier = () -> {
+            var type = RegistryObject.create(loc, Registry.RECIPE_TYPE_REGISTRY, modid).get();
+            return (SmartRecipeType<C, R, B>) type;
+        };
+        return new RecipeTypeEntry<>(loc, supplier);
+    }
+
+    public <C, R extends IRecipe<C>,
+        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(String id) {
+        return getRecipeType(new ResourceLocation(modid, id));
     }
 
     public <C, R extends IRecipe<C>,

@@ -37,8 +37,8 @@ public class TinyCoreLibTest {
     }
 
     private void onConstructEvent(FMLConstructModEvent event) {
-        event.enqueueWork(this::onConstruct);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> event.enqueueWork(this::onConstructClient));
+        this.onConstruct();
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::onConstructClient);
     }
 
     private void onConstruct() {
