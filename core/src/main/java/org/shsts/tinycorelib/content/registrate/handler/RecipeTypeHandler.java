@@ -39,18 +39,16 @@ public class RecipeTypeHandler {
             Registry.RECIPE_TYPE_REGISTRY, registrate.modid);
     }
 
-    @SuppressWarnings("unchecked")
-    public <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(ResourceLocation loc) {
-        Supplier<SmartRecipeType<C, R, B>> supplier = () -> {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public IRecipeType<?> getRecipeType(ResourceLocation loc) {
+        Supplier<SmartRecipeType> supplier = () -> {
             var type = RegistryObject.create(loc, Registry.RECIPE_TYPE_REGISTRY, modid).get();
-            return (SmartRecipeType<C, R, B>) type;
+            return (SmartRecipeType<?, ?, ?>) type;
         };
-        return new RecipeTypeEntry<>(loc, supplier);
+        return new RecipeTypeEntry(loc, supplier);
     }
 
-    public <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(String id) {
+    public IRecipeType<?> getRecipeType(String id) {
         return getRecipeType(new ResourceLocation(modid, id));
     }
 

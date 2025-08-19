@@ -165,15 +165,15 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(ResourceLocation loc) {
-        return recipeTypeHandler.getRecipeType(loc);
+    @SuppressWarnings("unchecked")
+    public <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(ResourceLocation loc) {
+        return (IRecipeType<B>) recipeTypeHandler.getRecipeType(loc);
     }
 
     @Override
-    public <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(String id) {
-        return recipeTypeHandler.getRecipeType(id);
+    @SuppressWarnings("unchecked")
+    public <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(String id) {
+        return (IRecipeType<B>) recipeTypeHandler.getRecipeType(id);
     }
 
     @Override

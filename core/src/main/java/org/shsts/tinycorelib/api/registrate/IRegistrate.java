@@ -68,11 +68,9 @@ public interface IRegistrate {
      */
     IMenuType getMenuType(String id);
 
-    public <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(ResourceLocation loc);
+    <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(ResourceLocation loc);
 
-    public <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> IRecipeType<B> getRecipeType(String id);
+    <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(String id);
 
     <T> ICapability<T> getCapability(CapabilityToken<T> token);
 
