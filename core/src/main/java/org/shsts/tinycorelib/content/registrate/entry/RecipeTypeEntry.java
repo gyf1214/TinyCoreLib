@@ -49,7 +49,7 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>, B extends IRecipeBuilderBa
     }
 
     @Override
-    public Class<R> recipeClass() {
+    public Class<? extends R> recipeClass() {
         return get().recipeClass;
     }
 

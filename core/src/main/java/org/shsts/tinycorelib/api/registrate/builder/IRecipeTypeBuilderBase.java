@@ -15,7 +15,7 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 public interface IRecipeTypeBuilderBase<R extends IRecipe<?>, B extends IRecipeBuilderBase<R>,
     P, S extends IRecipeTypeBuilderBase<R, B, P, S>>
     extends ILoc, IBuilder<RecipeType<?>, P, S> {
-    S recipeClass(Class<R> clazz);
+    S recipeClass(Class<? extends R> clazz);
 
     S defaults(Transformer<B> trans);
 

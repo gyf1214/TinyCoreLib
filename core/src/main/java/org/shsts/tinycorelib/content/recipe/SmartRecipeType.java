@@ -17,10 +17,10 @@ public class SmartRecipeType<C, R extends IRecipe<C>, B extends IRecipeBuilderBa
     public final IRecipeType.BuilderFactory<B> builderFactory;
     public final String prefix;
     public final Transformer<B> defaults;
-    public final Class<R> recipeClass;
+    public final Class<? extends R> recipeClass;
 
     public SmartRecipeType(ResourceLocation loc, IRecipeType.BuilderFactory<B> builderFactory,
-        String prefix, Transformer<B> defaults, Class<R> recipeClass) {
+        String prefix, Transformer<B> defaults, Class<? extends R> recipeClass) {
         this.loc = loc;
         this.builderFactory = builderFactory;
         this.prefix = prefix;

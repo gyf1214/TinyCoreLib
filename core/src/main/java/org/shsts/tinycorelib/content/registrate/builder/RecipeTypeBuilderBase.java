@@ -35,7 +35,7 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B extends I
     @Nullable
     private String prefix = null;
     @Nullable
-    private Class<R> recipeClass = null;
+    private Class<? extends R> recipeClass = null;
     private Transformer<B> defaults = $ -> $;
 
     @Nullable
@@ -51,7 +51,7 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B extends I
     }
 
     @Override
-    public S recipeClass(Class<R> clazz) {
+    public S recipeClass(Class<? extends R> clazz) {
         recipeClass = clazz;
         return self();
     }
