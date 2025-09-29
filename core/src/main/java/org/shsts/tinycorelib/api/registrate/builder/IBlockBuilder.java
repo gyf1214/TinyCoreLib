@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 
@@ -16,7 +17,11 @@ import java.util.function.IntUnaryOperator;
 @MethodsReturnNonnullByDefault
 public interface IBlockBuilder<U extends Block, P>
     extends IEntryBuilder<Block, U, P, IBlockBuilder<U, P>> {
-    IBlockBuilder<U, P> material(Material value);
+    IBlockBuilder<U, P> material(Material value, MaterialColor color);
+
+    default IBlockBuilder<U, P> material(Material value) {
+        return material(value, value.getColor());
+    }
 
     IBlockBuilder<U, P> properties(Transformer<Block.Properties> trans);
 

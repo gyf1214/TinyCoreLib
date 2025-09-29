@@ -10,6 +10,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.core.DistLazy;
@@ -27,7 +28,10 @@ import java.util.function.IntUnaryOperator;
 public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, IBlockBuilder<U, P>>
     implements IBlockBuilder<U, P> {
     private final Function<BlockBehaviour.Properties, U> factory;
-    private Material material = Material.STONE;
+    @Nullable
+    private Material material = null;
+    @Nullable
+    private MaterialColor materialColor = null;
     private Transformer<BlockBehaviour.Properties> properties = $ -> $;
 
     @Nullable
@@ -44,8 +48,9 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     }
 
     @Override
-    public IBlockBuilder<U, P> material(Material value) {
+    public IBlockBuilder<U, P> material(Material value, MaterialColor color) {
         material = value;
+        materialColor = color;
         return self();
     }
 
@@ -146,6 +151,8 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
 
     @Override
     protected U createObject() {
-        return factory.apply(properties.apply(BlockBehaviour.Properties.of(material)));
+        assert material != null;
+        assert materialColor != null;
+        return factory.apply(properties.apply(BlockBehaviour.Properties.of(material, materialColor)));
     }
 }
