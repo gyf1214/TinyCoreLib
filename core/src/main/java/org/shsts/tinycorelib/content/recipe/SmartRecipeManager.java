@@ -68,7 +68,11 @@ public class SmartRecipeManager implements IRecipeManager {
     public <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
         IRecipeType<B> type, ResourceLocation loc) {
         var clazz = ((RecipeTypeEntry<?, R, B>) type).recipeClass();
-        return byLoc(loc).filter(clazz::isInstance).map(clazz::cast);
+        return manager.byKey(loc)
+            .flatMap($ -> $ instanceof SmartRecipe<?, ?> smartRecipe &&
+                smartRecipe.getType() == type.get() ?
+                Optional.of(smartRecipe.compose) : Optional.empty())
+            .map(clazz::cast);
     }
 
     @Override
