@@ -209,7 +209,9 @@ public class MenuBase extends AbstractContainerMenu {
     }
 
     public void handleEventPacket(IMenuEvent<?> event, IPacket packet) {
-        eventHandlers.get(event).handle(packet);
+        if (eventHandlers.containsKey(event)) {
+            eventHandlers.get(event).handle(packet);
+        }
     }
 
     @Override
