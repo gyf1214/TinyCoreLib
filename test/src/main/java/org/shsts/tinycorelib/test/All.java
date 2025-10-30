@@ -77,6 +77,7 @@ public final class All {
             .register();
 
         TEST_BLOCK2 = REGISTRATE.block("test_block2", TestBlock::new)
+            .material(Material.STONE)
             .properties(p -> p.strength(5f).requiresCorrectToolForDrops())
             .tint(0xFF00FFFF)
             .translucent()
@@ -86,6 +87,7 @@ public final class All {
             .register();
 
         TEST_BLOCK3 = REGISTRATE.block("test_block3", TestEntityBlock::new)
+            .material(Material.STONE)
             .register();
 
         TEST_ITEM = REGISTRATE.item("test_item", TestItem::new)
