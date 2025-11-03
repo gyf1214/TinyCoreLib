@@ -5,12 +5,14 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 
+import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 
 @ParametersAreNonnullByDefault
@@ -34,6 +36,9 @@ public interface IBlockBuilder<U extends Block, P>
     IBlockBuilder<U, P> tint(IntUnaryOperator colors);
 
     IBlockBuilder<U, P> tint(int... colors);
+
+    IItemBuilder<BlockItem, IBlockBuilder<U, P>> blockItem(
+        BiFunction<Block, Item.Properties, BlockItem> factory);
 
     IItemBuilder<BlockItem, IBlockBuilder<U, P>> blockItem();
 

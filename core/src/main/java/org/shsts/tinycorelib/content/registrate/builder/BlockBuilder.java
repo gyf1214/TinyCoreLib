@@ -7,6 +7,7 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
@@ -20,6 +21,7 @@ import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.entry.Entry;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
 
@@ -90,11 +92,11 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     }
 
     private class BlockItemBuilder extends ItemBuilder<BlockItem, IBlockBuilder<U, P>> {
-        public BlockItemBuilder() {
+        public BlockItemBuilder(BiFunction<Block, Item.Properties, BlockItem> factory) {
             super(BlockBuilder.this.registrate, BlockBuilder.this, BlockBuilder.this.id(),
                 properties -> {
                     assert BlockBuilder.this.entry != null;
-                    return new BlockItem(BlockBuilder.this.entry.get(), properties);
+                    return factory.apply(BlockBuilder.this.entry.get(), properties);
                 });
         }
 
@@ -108,11 +110,16 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     }
 
     @Override
-    public IItemBuilder<BlockItem, IBlockBuilder<U, P>> blockItem() {
-        if (blockItemBuilder == null) {
-            blockItemBuilder = new BlockItemBuilder();
-        }
+    public IItemBuilder<BlockItem, IBlockBuilder<U, P>> blockItem(
+        BiFunction<Block, Item.Properties, BlockItem> factory) {
+        assert blockItemBuilder == null;
+        blockItemBuilder = new BlockItemBuilder(factory);
         return blockItemBuilder;
+    }
+
+    @Override
+    public IItemBuilder<BlockItem, IBlockBuilder<U, P>> blockItem() {
+        return blockItemBuilder != null ? blockItemBuilder : blockItem(BlockItem::new);
     }
 
     @Override
