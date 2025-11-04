@@ -13,7 +13,8 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.shsts.tinycorelib.api.gui.IMenuEvent;
-import org.shsts.tinycorelib.api.gui.MenuBase;
+import org.shsts.tinycorelib.api.gui.IMenuEventHandler;
+import org.shsts.tinycorelib.api.gui.IMenuSyncHandler;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.content.gui.MenuEvent;
@@ -49,16 +50,16 @@ public class Channel implements IChannel {
 
     private void handleMenuSyncPacket(MenuSyncPacket packet, NetworkEvent.Context ctx) {
         var player = Minecraft.getInstance().player;
-        if (player != null && player.containerMenu instanceof MenuBase menu &&
-            menu.containerId == packet.getContainerId()) {
+        if (player != null && player.containerMenu.containerId == packet.getContainerId() &&
+            player.containerMenu instanceof IMenuSyncHandler menu) {
             menu.handleSyncPacket(packet.getIndex(), packet.getContent());
         }
     }
 
     private void handleMenuEventPacket(MenuEventPacket packet, NetworkEvent.Context ctx) {
         var player = ctx.getSender();
-        if (player != null && player.containerMenu instanceof MenuBase menu &&
-            menu.containerId == packet.getContainerId()) {
+        if (player != null && player.containerMenu.containerId == packet.getContainerId() &&
+            player.containerMenu instanceof IMenuEventHandler menu) {
             menu.handleEventPacket(packet.getEvent(), packet.getContent());
         }
     }

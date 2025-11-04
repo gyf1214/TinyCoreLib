@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class MenuBase extends AbstractContainerMenu {
+public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler, IMenuEventHandler {
     protected final Level world;
     protected final BlockEntity blockEntity;
     protected final Player player;
@@ -200,6 +200,7 @@ public class MenuBase extends AbstractContainerMenu {
         }
     }
 
+    @Override
     public void handleSyncPacket(int index, IPacket packet) {
         var slot = syncSlots.get(index);
         if (slot == null) {
@@ -208,6 +209,7 @@ public class MenuBase extends AbstractContainerMenu {
         slot.setPacket(packet);
     }
 
+    @Override
     public void handleEventPacket(IMenuEvent<?> event, IPacket packet) {
         if (eventHandlers.containsKey(event)) {
             eventHandlers.get(event).handle(packet);
