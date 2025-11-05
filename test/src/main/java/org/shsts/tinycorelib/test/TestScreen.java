@@ -44,7 +44,7 @@ public class TestScreen extends MenuScreenBase<TestMenu> {
     }
 
     public TestScreen(TestMenu menu, Component title) {
-        super(menu, title);
+        super(menu, menu.inventory(), title);
 
         this.imageHeight = menu.endY;
 
