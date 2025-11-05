@@ -10,4 +10,6 @@ import net.minecraft.world.inventory.MenuType;
 @MethodsReturnNonnullByDefault
 public interface IMenuType extends IEntry<MenuType<?>> {
     void open(ServerPlayer player, BlockPos pos);
+
+    void open(ServerPlayer player);
 }

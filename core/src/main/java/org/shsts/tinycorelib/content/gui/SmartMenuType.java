@@ -38,8 +38,8 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
     }
 
     @Override
-    public M create(int containerId, Inventory pPlayerInventory) {
-        throw new IllegalStateException();
+    public M create(int containerId, Inventory inventory) {
+        return factory.apply(new MenuBase.Properties(this, containerId, inventory, null, channel));
     }
 
     private static BlockEntity getBlockEntityFromData(FriendlyByteBuf data) {
@@ -57,8 +57,13 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
 
     @Override
     public M create(int containerId, Inventory inventory, FriendlyByteBuf data) {
-        var be = getBlockEntityFromData(data);
-        return create(containerId, inventory, be);
+        var hasPos = data.readBoolean();
+        if (hasPos) {
+            var be = getBlockEntityFromData(data);
+            return create(containerId, inventory, be);
+        } else {
+            return create(containerId, inventory);
+        }
     }
 
     public void open(ServerPlayer player, BlockPos pos) {
@@ -78,6 +83,25 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
                 return create(containerId, inventory, be);
             }
         };
-        NetworkHooks.openGui(player, provider, pos);
+        NetworkHooks.openGui(player, provider, buf -> {
+            buf.writeBoolean(true);
+            buf.writeBlockPos(pos);
+        });
+    }
+
+    public void open(ServerPlayer player) {
+        var provider = new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return title.apply(null);
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(int containerId,
+                Inventory inventory, Player player) {
+                return create(containerId, inventory);
+            }
+        };
+        NetworkHooks.openGui(player, provider, buf -> buf.writeBoolean(false));
     }
 }

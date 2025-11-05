@@ -42,6 +42,8 @@ public class TestMenu extends MenuBase {
         }
         this.endY = barY + SLOT_SIZE + MARGIN;
 
+        assert blockEntity != null;
+
         addSyncSlot("seconds", () -> new TestPacket(blockEntity));
 
         var itemHandler = ITEM_HANDLER_CAPABILITY.get(blockEntity);
@@ -53,6 +55,6 @@ public class TestMenu extends MenuBase {
 
     private void onEvent(TestPacket p) {
         LOGGER.info("Menu event: seconds = {}", p.getValue());
-        TEST_CAPABILITY.get(blockEntity).foo();
+        TEST_CAPABILITY.get(blockEntity()).foo();
     }
 }

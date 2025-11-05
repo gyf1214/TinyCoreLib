@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 @MethodsReturnNonnullByDefault
 public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler, IMenuEventHandler {
     protected final Level world;
+    @Nullable
     protected final BlockEntity blockEntity;
     protected final Player player;
     protected final Inventory inventory;
@@ -87,19 +88,19 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
     private final Map<IMenuEvent<?>, EventHandler<?>> eventHandlers = new HashMap<>();
 
     public record Properties(MenuType<?> menuType, int id, Inventory inventory,
-        BlockEntity blockEntity, @Nullable IChannel channel) {}
+        @Nullable BlockEntity blockEntity, @Nullable IChannel channel) {}
 
     public MenuBase(Properties properties) {
         super(properties.menuType, properties.id);
         this.blockEntity = properties.blockEntity;
-        this.world = blockEntity.getLevel();
-        assert world != null;
         this.inventory = properties.inventory;
         this.player = inventory.player;
+        this.world = player.level;
         this.channel = properties.channel;
     }
 
     public BlockEntity blockEntity() {
+        assert blockEntity != null;
         return blockEntity;
     }
 
@@ -117,11 +118,16 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
 
     @Override
     public boolean stillValid(Player player) {
+        if (player != this.player) {
+            return false;
+        }
+        if (blockEntity == null) {
+            return true;
+        }
         var be = blockEntity;
         var level = be.getLevel();
         var pos = be.getBlockPos();
-        return player == this.player &&
-            level == player.getLevel() &&
+        return level == player.getLevel() &&
             level.getBlockEntity(pos) == be &&
             player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0;
     }
