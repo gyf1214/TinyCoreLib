@@ -76,6 +76,12 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
         return self();
     }
 
+    @Override
+    public IBlockDataBuilder<U, P> noDrop() {
+        hasDrop = true;
+        return self();
+    }
+
     private LootTableHandler getDrop() {
         hasDrop = true;
         return dataGen.lootTableHandler;

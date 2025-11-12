@@ -36,6 +36,8 @@ public interface IBlockDataBuilder<U extends Block, P>
 
     IBlockDataBuilder<U, P> itemTag(TagKey<Item> tag);
 
+    IBlockDataBuilder<U, P> noDrop();
+
     IBlockDataBuilder<U, P> drop(Supplier<? extends ItemLike> item, float chance);
 
     IBlockDataBuilder<U, P> drop(Supplier<? extends ItemLike> item);
