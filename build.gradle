@@ -62,12 +62,14 @@ subprojects {
 
     publishing {
         repositories {
-            maven {
-                name = 'shsts'
-                url = 'https://www.shsts.org/m2'
-                credentials {
-                    username = shstsUser
-                    password = shstsPassword
+            if (project.findProperty('shstsUser')) {
+                maven {
+                    name = 'shsts'
+                    url = 'https://www.shsts.org/m2'
+                    credentials {
+                        username = project.findProperty('shstsUser')
+                        password = project.findProperty('shstsPassword') ?: ''
+                    }
                 }
             }
         }
