@@ -1,0 +1,45 @@
+archivesBaseName = "tinydatagen_test"
+
+minecraft {
+    runs {
+        data {
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            jvmArgs '-ea'
+
+            ideaModule rootProject.getName() + '.test.test'
+
+            mods {
+                tinycorelib {
+                    source project(':core').sourceSets.main
+                }
+
+                tinydatagen {
+                    source project(':datagen').sourceSets.main
+                }
+
+                tinycorelib_test {
+                    source project(':test').sourceSets.main
+                }
+
+                tinydatagen_test {
+                    source sourceSets.main
+                }
+            }
+
+            workingDirectory project.file('run/data')
+            args '--mod', 'tinydatagen_test', '--all', '--output', project(':test').file('src/generated/resources/')
+            args '--existing', project(':test').file('src/main/resources/')
+            args '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+dependencies {
+    compileOnly project(path: ':core', configuration: 'api')
+    compileOnly project(path: ':datagen', configuration: 'api')
+    runtimeOnly project(path: ':datagen', configuration: 'dev')
+
+    compileOnly project(path: ':test')
+    runtimeOnly project(path: ':test', configuration: 'dev')
+}

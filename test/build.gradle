@@ -41,43 +41,25 @@ minecraft {
                 }
             }
         }
-
-        data {
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            jvmArgs '-ea'
-
-            ideaModule rootProject.getName() + '.test.test'
-
-            mods {
-                tinycorelib {
-                    source project(':core').sourceSets.main
-                }
-
-                tinydatagen {
-                    source project(':datagen').sourceSets.main
-                }
-
-                tinycorelib_test {
-                    source sourceSets.main
-                }
-
-                tinydatagen_test {
-                    source sourceSets.test
-                }
-            }
-
-            workingDirectory project.file('run/data')
-            args '--mod', 'tinydatagen_test', '--all', '--output', file('src/generated/resources/')
-            args '--existing', file('src/test/resources/')
-            args '--existing', file('src/main/resources/')
-        }
     }
 }
 
 sourceSets.main.resources {
     srcDir 'src/generated/resources'
     exclude '.cache/'
+}
+
+configurations {
+    dev
+}
+
+task devJar(type: Jar) {
+    classifier = 'dev'
+    from sourceSets.main.output
+}
+
+artifacts {
+    dev devJar
 }
 
 dependencies {
