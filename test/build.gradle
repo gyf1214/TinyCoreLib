@@ -54,7 +54,7 @@ configurations {
 }
 
 task devJar(type: Jar) {
-    classifier = 'dev'
+    archiveClassifier = 'dev'
     from sourceSets.main.output
 }
 
