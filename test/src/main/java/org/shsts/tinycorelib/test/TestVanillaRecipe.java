@@ -16,7 +16,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -47,9 +46,11 @@ public class TestVanillaRecipe implements IRecipe<BlockEntity> {
     }
 
     @Override
-    public boolean matches(BlockEntity container, Level world) {
+    public boolean matches(BlockEntity container) {
         var itemHandler = (IItemHandlerModifiable) ITEM_HANDLER_CAPABILITY.get(container);
         var testCap = TEST_CAPABILITY.get(container);
+        var world = container.getLevel();
+        assert world != null;
         return smeltingRecipe.matches(new RecipeWrapper(itemHandler), world) &&
             testCap.getSeconds() >= beginSeconds;
     }
@@ -183,7 +184,6 @@ public class TestVanillaRecipe implements IRecipe<BlockEntity> {
         @Override
         public TestVanillaRecipe fromNetwork(ResourceLocation loc, FriendlyByteBuf buf) {
             var cooking = SMELTING_RECIPE.fromNetwork(loc, buf);
-            assert cooking != null;
             var beginSeconds = buf.readVarInt();
             return new TestVanillaRecipe(loc, cooking, beginSeconds);
         }

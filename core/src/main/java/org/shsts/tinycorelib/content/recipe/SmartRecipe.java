@@ -29,7 +29,7 @@ public class SmartRecipe<C, R extends IRecipe<C>> implements Recipe<ContainerWra
 
     @Override
     public boolean matches(ContainerWrapper<C> wrapper, Level level) {
-        return compose.matches(wrapper.compose(), level);
+        return compose.matches(wrapper.compose());
     }
 
     @Override

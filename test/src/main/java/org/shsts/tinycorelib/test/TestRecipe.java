@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
@@ -35,7 +34,7 @@ public class TestRecipe implements IRecipe<ITestCapability> {
     }
 
     @Override
-    public boolean matches(ITestCapability container, Level world) {
+    public boolean matches(ITestCapability container) {
         var seconds = container.getSeconds();
         return seconds >= beginSeconds && seconds < endSeconds;
     }
