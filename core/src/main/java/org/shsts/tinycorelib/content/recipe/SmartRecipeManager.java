@@ -5,7 +5,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.recipe.IRecipeManager;
@@ -33,16 +32,18 @@ public class SmartRecipeManager implements IRecipeManager {
     }
 
     @Override
+    @SuppressWarnings("DataFlowIssue")
     public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> Optional<R> getRecipeFor(
-        IRecipeType<B> type, C container, Level world) {
-        return manager.getRecipeFor(getType(type), new ContainerWrapper<>(container), world)
+        IRecipeType<B> type, C container) {
+        return manager.getRecipeFor(getType(type), new ContainerWrapper<>(container), null)
             .map($ -> $.compose);
     }
 
     @Override
+    @SuppressWarnings("DataFlowIssue")
     public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> List<R> getRecipesFor(
-        IRecipeType<B> type, C container, Level world) {
-        return manager.getRecipesFor(getType(type), new ContainerWrapper<>(container), world)
+        IRecipeType<B> type, C container) {
+        return manager.getRecipesFor(getType(type), new ContainerWrapper<>(container), null)
             .stream().map($ -> $.compose)
             .toList();
     }

@@ -78,11 +78,11 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
         world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
 
         var recipeManager = CORE.recipeManager(world);
-        var recipes = recipeManager.getRecipesFor(TEST_RECIPE, this, world);
+        var recipes = recipeManager.getRecipesFor(TEST_RECIPE, this);
         for (var recipe : recipes) {
             LOGGER.info("matched test recipe = {}", recipe.loc());
         }
-        recipeManager.getRecipeFor(TEST_VANILLA_RECIPE, blockEntity, world)
+        recipeManager.getRecipeFor(TEST_VANILLA_RECIPE, blockEntity)
             .ifPresent(recipe -> {
                 var itemHandler = (IItemHandlerModifiable) ITEM_HANDLER_CAPABILITY.get(blockEntity);
                 itemHandler.setStackInSlot(0, recipe.getResult());
