@@ -130,6 +130,13 @@ public final class AllData {
             .register();
 
         DATA_GEN.addProvider(TestLanguageProvider::new);
+        DATA_GEN.addProvider((dataGen, event) -> new TestLanguageProvider(dataGen, event, "zh_cn") {
+            @Override
+            protected void addTranslations() {
+                add("item.tinycorelib_test.test_meta", "Test Meta zh_cn");
+                add("tinycorelib_test.test_resource.test1", "Test 1 Resource zh_cn");
+            }
+        });
     }
 
     private static ResourceLocation mcLoc(String id) {

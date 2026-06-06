@@ -12,6 +12,8 @@ public interface ITinyDataGen {
 
     IDataGen dataGen(IRegistrate registrate);
 
+    IDataGen dataGen(IRegistrate registrate, boolean failValidation);
+
     static ITinyDataGen get() {
         return (ITinyDataGen) ModList.get().getModObjectById(ID).orElseThrow();
     }

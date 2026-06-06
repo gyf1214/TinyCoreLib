@@ -54,7 +54,7 @@ public class TrackedContext<V> {
         extraTracked.put(obj, key);
     }
 
-    public void postValidate() {
+    public boolean postValidate() {
         var processed = this.processed.stream()
             .map($ -> (V) $.get())
             .collect(Collectors.toSet());
@@ -70,8 +70,10 @@ public class TrackedContext<V> {
         if (missing > 0) {
             LOGGER.warn("{} has {} / {} objects not processed",
                 type, missing, tracked.size());
+            return false;
         } else {
             LOGGER.info("{} all processed", type);
+            return true;
         }
     }
 }

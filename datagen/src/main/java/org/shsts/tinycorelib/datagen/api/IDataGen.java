@@ -75,9 +75,11 @@ public interface IDataGen extends IRecipeDataConsumer {
         return nullRecipe(loc);
     }
 
+    IDataGen trackLocale(String locale);
+
     IDataGen trackLang(String key);
 
-    IDataGen processLang(String key);
+    IDataGen processLang(String locale, String key);
 
     void onGatherData(GatherDataEvent event);
 }

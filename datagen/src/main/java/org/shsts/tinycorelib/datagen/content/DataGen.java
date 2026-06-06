@@ -27,6 +27,7 @@ import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.datagen.content.builder.BlockDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
+import org.shsts.tinycorelib.datagen.content.context.TrackedLangContext;
 import org.shsts.tinycorelib.datagen.content.handler.BlockStateHandler;
 import org.shsts.tinycorelib.datagen.content.handler.DataHandler;
 import org.shsts.tinycorelib.datagen.content.handler.ItemModelHandler;
@@ -56,7 +57,7 @@ public class DataGen implements IDataGen {
 
     public final TrackedContext<Block> blockTrackedContext;
     public final TrackedContext<Item> itemTrackedContext;
-    public final TrackedContext<String> langTrackedContext;
+    public final TrackedLangContext langTrackedContext;
 
     private final Registrate registrate;
     private final List<DataHandler<?>> dataHandlers;
@@ -64,8 +65,10 @@ public class DataGen implements IDataGen {
     private final Map<ResourceKey<? extends Registry<?>>, TagsHandler<?>> tagsHandlers;
     private final List<TrackedContext<?>> trackedContexts;
 
+    private final boolean failValidation;
+
     @SuppressWarnings("deprecation")
-    public DataGen(Registrate registrate) {
+    public DataGen(Registrate registrate, boolean failValidation) {
         this.registrate = registrate;
         this.modid = registrate.modid;
 
@@ -83,7 +86,14 @@ public class DataGen implements IDataGen {
 
         this.blockTrackedContext = createTrackedContext(TrackedType.BLOCK);
         this.itemTrackedContext = createTrackedContext(TrackedType.ITEM);
-        this.langTrackedContext = createTrackedContext(TrackedType.LANG);
+        this.langTrackedContext = new TrackedLangContext(registrate);
+        trackedContexts.add(langTrackedContext);
+
+        this.failValidation = failValidation;
+    }
+
+    public DataGen(Registrate registrate) {
+        this(registrate, false);
     }
 
     private <T extends DataHandler<?>> T createDataHandler(Function<DataGen, T> factory) {
@@ -223,14 +233,20 @@ public class DataGen implements IDataGen {
     }
 
     @Override
+    public IDataGen trackLocale(String locale) {
+        langTrackedContext.addLocale(locale);
+        return this;
+    }
+
+    @Override
     public IDataGen trackLang(String key) {
         langTrackedContext.trackExtra(key, key);
         return this;
     }
 
     @Override
-    public IDataGen processLang(String key) {
-        langTrackedContext.process(key);
+    public IDataGen processLang(String locale, String key) {
+        langTrackedContext.process(locale, key);
         return this;
     }
 
@@ -251,7 +267,9 @@ public class DataGen implements IDataGen {
             @Override
             public void run(HashCache cache) {
                 for (var trackedCtx : trackedContexts) {
-                    trackedCtx.postValidate();
+                    if (!trackedCtx.postValidate() && failValidation) {
+                        throw new IllegalStateException("Tracked validation failed");
+                    }
                 }
             }
 

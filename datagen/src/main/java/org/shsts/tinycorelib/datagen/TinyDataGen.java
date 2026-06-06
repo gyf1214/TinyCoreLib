@@ -25,4 +25,9 @@ public class TinyDataGen implements ITinyDataGen {
     public IDataGen dataGen(IRegistrate registrate) {
         return new DataGen((Registrate) registrate);
     }
+
+    @Override
+    public IDataGen dataGen(IRegistrate registrate, boolean failValidation) {
+        return new DataGen((Registrate) registrate, failValidation);
+    }
 }
