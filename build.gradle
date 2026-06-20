@@ -1,13 +1,5 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: "${forgegradle_version}", changing: false
-        classpath "org.parchmentmc:librarian:${librarian_version}"
-    }
+plugins {
+    id 'net.neoforged.moddev' version "${moddev_version}" apply false
 }
 
 subprojects {
@@ -16,49 +8,49 @@ subprojects {
 
     apply plugin: 'checkstyle'
     apply plugin: 'eclipse'
-    apply plugin: 'net.minecraftforge.gradle'
-    apply plugin: 'org.parchmentmc.librarian.forgegradle'
+    apply plugin: 'net.neoforged.moddev'
     apply plugin: 'maven-publish'
 
-    java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+    java {
+        toolchain.languageVersion = JavaLanguageVersion.of(21)
+    }
 
     checkstyle {
-        toolVersion = "10.20.1"
+        toolVersion = checkstyle_version
     }
 
-    minecraft {
-        mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
-    }
-
-    dependencies {
-        minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    neoForge {
+        version = neo_version
+        parchment {
+            minecraftVersion = parchment_minecraft_version
+            mappingsVersion = parchment_version
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+        options.encoding = 'UTF-8'
+        options.release = 21
     }
 
-    processResources {
-        from(sourceSets.main.resources.srcDirs) {
-            duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-            include 'META-INF/mods.toml'
-
-            expand 'mod_version': "${version}"
+    tasks.named('processResources', ProcessResources).configure {
+        filesMatching('META-INF/neoforge.mods.toml') {
+            expand project.properties + [
+                mod_version: version,
+                minecraft_version_range: minecraft_version_range,
+                neo_version_range: neo_version_range
+            ]
         }
     }
 
-    processTestResources {
-        from(sourceSets.test.resources.srcDirs) {
-            duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-            include 'META-INF/mods.toml'
-
-            expand 'mod_version': "${version}"
+    tasks.matching { it.name == 'processTestResources' }.configureEach {
+        filesMatching('META-INF/neoforge.mods.toml') {
+            expand project.properties + [
+                mod_version: version,
+                minecraft_version_range: minecraft_version_range,
+                neo_version_range: neo_version_range
+            ]
         }
     }
-
-    jar.finalizedBy('reobfJar')
 
     publishing {
         repositories {
@@ -77,4 +69,4 @@ subprojects {
 }
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-println "Minecraft: ${minecraft_version}, Forge: ${forge_version}, ForgeGradle: ${forgegradle_version}"
+println "Minecraft: ${minecraft_version}, NeoForge: ${neo_version}, ModDevGradle: ${moddev_version}"

@@ -1,45 +1,35 @@
-archivesBaseName = "tinycorelib_test"
+base {
+    archivesName = "tinycorelib_test"
+}
 
-minecraft {
+neoForge {
     runs {
         client {
-            workingDirectory project.file('run/client')
+            client()
+            gameDirectory = project.file('run/client')
 
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            jvmArgs '-ea'
-
-            ideaModule rootProject.getName() + '.test.main'
-
-            mods {
-                tinycorelib {
-                    source project(':core').sourceSets.main
-                }
-
-                tinycorelib_test {
-                    source sourceSets.main
-                }
-            }
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+            jvmArgument '-ea'
         }
 
         server {
-            workingDirectory project.file('run/server')
+            server()
+            gameDirectory = project.file('run/server')
 
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            jvmArgs '-ea'
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+            jvmArgument '-ea'
+        }
+    }
 
-            ideaModule rootProject.getName() + '.test.main'
+    mods {
+        tinycorelib {
+            sourceSet project(':core').sourceSets.main
+        }
 
-            mods {
-                tinycorelib {
-                    source project(':core').sourceSets.main
-                }
-
-                tinycorelib_test {
-                    source sourceSets.main
-                }
-            }
+        tinycorelib_test {
+            sourceSet sourceSets.main
         }
     }
 }
@@ -49,25 +39,12 @@ sourceSets.main.resources {
     exclude '.cache/'
 }
 
-configurations {
-    dev
-}
-
-task devJar(type: Jar) {
-    archiveClassifier = 'dev'
-    from sourceSets.main.output
-}
-
-artifacts {
-    dev devJar
-}
-
 dependencies {
-    compileOnly project(path: ':core', configuration: 'api')
-    runtimeOnly project(path: ':core', configuration: 'dev')
+    compileOnly project(path: ':core')
+    runtimeOnly project(path: ':core')
 
-    testCompileOnly project(path: ':core', configuration: 'api')
-    testRuntimeOnly project(path: ':core', configuration: 'dev')
-    testCompileOnly project(path: ':datagen', configuration: 'api')
-    testRuntimeOnly project(path: ':datagen', configuration: 'dev')
+    testCompileOnly project(path: ':core')
+    testRuntimeOnly project(path: ':core')
+    testCompileOnly project(path: ':datagen')
+    testRuntimeOnly project(path: ':datagen')
 }
