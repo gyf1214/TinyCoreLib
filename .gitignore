@@ -20,5 +20,9 @@ build
 # other
 eclipse
 run
+.codex/
+scratch/
 
 **/src/generated
+
+MEMORY.md
