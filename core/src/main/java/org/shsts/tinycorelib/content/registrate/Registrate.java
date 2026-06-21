@@ -18,9 +18,6 @@ import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
-import org.shsts.tinycorelib.api.recipe.IVanillaRecipeBuilder;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
@@ -28,7 +25,6 @@ import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
-import org.shsts.tinycorelib.api.registrate.builder.IVanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
@@ -44,7 +40,6 @@ import org.shsts.tinycorelib.content.registrate.builder.MenuBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
-import org.shsts.tinycorelib.content.registrate.builder.VanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
@@ -160,15 +155,13 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(ResourceLocation loc) {
-        return (IRecipeType<B>) recipeTypeHandler.getRecipeType(loc);
+    public IRecipeType<?> getRecipeType(ResourceLocation loc) {
+        return recipeTypeHandler.getRecipeType(loc);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(String id) {
-        return (IRecipeType<B>) recipeTypeHandler.getRecipeType(id);
+    public IRecipeType<?> getRecipeType(String id) {
+        return recipeTypeHandler.getRecipeType(id);
     }
 
     @Override
@@ -277,17 +270,8 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>,
-        P> IRecipeTypeBuilder<R, B, P> recipeType(P parent, String id,
-        IRecipeType.BuilderFactory<B> builderFactory) {
-        return new RecipeTypeBuilder<>(this, parent, id, builderFactory);
-    }
-
-    @Override
-    public <C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R, B>,
-        P> IVanillaRecipeTypeBuilder<R, B, P> vanillaRecipeType(P parent,
-        String id, IRecipeType.BuilderFactory<B> builderFactory) {
-        return new VanillaRecipeTypeBuilder<>(this, parent, id, builderFactory);
+    public <R extends IRecipe<?>, P> IRecipeTypeBuilder<R, ?, P> recipeType(P parent, String id) {
+        return new RecipeTypeBuilder<>(this, parent, id, null);
     }
 
     @Override
