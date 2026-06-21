@@ -10,10 +10,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.world.ForgeWorldPreset;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
@@ -55,8 +53,6 @@ public final class All {
 
     public static final IRecipeType<TestRecipe.Builder> TEST_RECIPE;
     public static final IRecipeType<TestVanillaRecipe.Builder> TEST_VANILLA_RECIPE;
-
-    public static final IEntry<VoidPreset> VOID_PRESET;
 
     static {
         CHANNEL = CORE.createChannel(ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, "channel"), "1");
@@ -117,9 +113,6 @@ public final class All {
             .recipeClass(TestVanillaRecipe.class)
             .serializer(TestVanillaRecipe.SERIALIZER)
             .register();
-
-        var presetHandler = REGISTRATE.getHandler(ForgeRegistries.Keys.WORLD_TYPES, ForgeWorldPreset.class);
-        VOID_PRESET = REGISTRATE.registryEntry(presetHandler, "void", VoidPreset::new);
     }
 
     public static void init() {}

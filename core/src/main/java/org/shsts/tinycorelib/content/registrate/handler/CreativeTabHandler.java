@@ -26,8 +26,5 @@ public class CreativeTabHandler {
         for (var item : entries.get(event.getTabKey())) {
             event.accept(new ItemStack(item.get()));
         }
-        // TODO: it is mentioned that this even may be called multiple times,
-        //       a better way is to store Supplier<IEntry<>> then resolve IEntry on the first event call.
-        entries.clear();
     }
 }

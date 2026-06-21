@@ -25,6 +25,8 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
     private final Function<Item.Properties, U> factory;
     private Transformer<Item.Properties> properties = $ -> $;
     @Nullable
+    private ResourceKey<CreativeModeTab> creativeTab = null;
+    @Nullable
     protected DistLazy<ItemColor> tint = null;
 
     public ItemBuilder(Registrate registrate, P parent, String id,
@@ -42,7 +44,7 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
 
     @Override
     public IItemBuilder<U, P> creativeTab(ResourceKey<CreativeModeTab> tab) {
-        registrate.creativeTabHandler.setCreativeTab(this::getObject, tab);
+        creativeTab = tab;
         return self();
     }
 
@@ -63,6 +65,10 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
         if (tint != null) {
             onCreateObject.add(item -> tint.runOnDist(Dist.CLIENT, () -> itemColor ->
                 registrate.tintHandler.addItemColor(item, itemColor)));
+        }
+        var creativeTab = this.creativeTab;
+        if (creativeTab != null) {
+            onCreateObject.add(item -> registrate.creativeTabHandler.setCreativeTab(() -> item, creativeTab));
         }
         return super.createEntry();
     }
