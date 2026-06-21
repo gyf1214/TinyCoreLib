@@ -51,8 +51,8 @@ public final class All {
 
     public static final IMenuEvent<TestPacket> TEST_MENU_EVENT;
 
-    public static final IRecipeType<TestRecipe.Builder> TEST_RECIPE;
-    public static final IRecipeType<TestVanillaRecipe.Builder> TEST_VANILLA_RECIPE;
+    public static final IRecipeType<TestRecipe> TEST_RECIPE;
+    public static final IRecipeType<TestCookingRecipe> TEST_COOKING_RECIPE;
 
     static {
         CHANNEL = CORE.createChannel(ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, "channel"), "1");
@@ -104,14 +104,14 @@ public final class All {
         SERVER_TICK = EVENTS.getEntry(SERVER_TICK_LOC);
         TICK_SECOND = REGISTRATE.event("tick_second");
 
-        TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.Builder::new)
+        TEST_RECIPE = REGISTRATE.<TestRecipe>recipeType("test")
             .recipeClass(TestRecipe.class)
-            .serializer(TestRecipe.SERIALIZER)
+            .serializer(TestRecipe.CODEC)
             .register();
 
-        TEST_VANILLA_RECIPE = REGISTRATE.vanillaRecipeType("test_vanilla", TestVanillaRecipe.Builder::new)
-            .recipeClass(TestVanillaRecipe.class)
-            .serializer(TestVanillaRecipe.SERIALIZER)
+        TEST_COOKING_RECIPE = REGISTRATE.<TestCookingRecipe>recipeType("test_cooking")
+            .recipeClass(TestCookingRecipe.class)
+            .serializer(TestCookingRecipe.CODEC)
             .register();
     }
 

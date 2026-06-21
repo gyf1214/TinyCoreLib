@@ -82,10 +82,10 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
         for (var recipe : recipes) {
             LOGGER.info("matched test recipe = {}", recipe.loc());
         }
-        recipeManager.getRecipeFor(TEST_VANILLA_RECIPE, blockEntity)
+        recipeManager.getRecipeFor(TEST_COOKING_RECIPE, blockEntity)
             .ifPresent(recipe -> {
                 var itemHandler = (IItemHandlerModifiable) ITEM_HANDLER_CAPABILITY.get(blockEntity);
-                itemHandler.setStackInSlot(0, recipe.getResult());
+                itemHandler.setStackInSlot(0, recipe.get().getResult());
             });
     }
 
