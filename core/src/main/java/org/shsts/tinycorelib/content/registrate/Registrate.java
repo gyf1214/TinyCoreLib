@@ -45,11 +45,10 @@ import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CreativeTabHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
-import org.shsts.tinycorelib.content.registrate.handler.MenuScreenHandler;
+import org.shsts.tinycorelib.content.registrate.handler.EventHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RecipeTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
-import org.shsts.tinycorelib.content.registrate.handler.RendererHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
@@ -82,8 +81,8 @@ public class Registrate implements IRegistrate {
 
     // client only
     public final TintHandler tintHandler;
-    public final MenuScreenHandler menuScreenHandler;
-    public final RendererHandler rendererHandler;
+    public final EventHandler.MenuScreen menuScreenHandler;
+    public final EventHandler.Renderer rendererHandler;
 
     private final TrackedObjects trackedObjects;
 
@@ -101,8 +100,8 @@ public class Registrate implements IRegistrate {
         this.creativeTabHandler = new CreativeTabHandler();
 
         this.tintHandler = new TintHandler();
-        this.menuScreenHandler = new MenuScreenHandler();
-        this.rendererHandler = new RendererHandler();
+        this.menuScreenHandler = new EventHandler.MenuScreen();
+        this.rendererHandler = new EventHandler.Renderer();
 
         this.trackedObjects = new TrackedObjects();
     }
@@ -189,8 +188,8 @@ public class Registrate implements IRegistrate {
     public void registerClient(IEventBus modEventBus) {
         modEventBus.addListener(tintHandler::onRegisterBlockColors);
         modEventBus.addListener(tintHandler::onRegisterItemColors);
-        modEventBus.addListener(rendererHandler::onRegisterRenderers);
-        modEventBus.addListener(menuScreenHandler::onRegisterMenuScreens);
+        modEventBus.addListener(rendererHandler::onEvent);
+        modEventBus.addListener(menuScreenHandler::onEvent);
     }
 
     @Override

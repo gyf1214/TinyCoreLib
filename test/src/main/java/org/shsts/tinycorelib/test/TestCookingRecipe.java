@@ -21,7 +21,7 @@ import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
 public class TestCookingRecipe implements IRecipe<BlockEntity> {
     public static final MapCodec<TestCookingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
         instance.group(
-            smeltingCodec().forGetter(TestCookingRecipe::smeltingRecipe),
+            RecipeSerializer.SMELTING_RECIPE.codec().forGetter(TestCookingRecipe::smeltingRecipe),
             Codec.INT.fieldOf("beginSeconds").forGetter(TestCookingRecipe::beginSeconds)
         ).apply(instance, TestCookingRecipe::new));
 
@@ -54,10 +54,5 @@ public class TestCookingRecipe implements IRecipe<BlockEntity> {
 
     private int beginSeconds() {
         return beginSeconds;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static MapCodec<SmeltingRecipe> smeltingCodec() {
-        return (MapCodec<SmeltingRecipe>) RecipeSerializer.SMELTING_RECIPE.codec();
     }
 }
