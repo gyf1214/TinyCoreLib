@@ -9,11 +9,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.content.recipe.SmartRecipeType;
 import org.shsts.tinycorelib.content.registrate.Registrate;
-import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilderBase;
+import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.RecipeTypeEntry;
 import org.slf4j.Logger;
 
@@ -27,7 +26,7 @@ public class RecipeTypeHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final String modid;
-    private final List<RecipeTypeBuilderBase<?, ?, ?, ?, ?>> builders = new ArrayList<>();
+    private final List<RecipeTypeBuilder<?, ?, ?>> builders = new ArrayList<>();
 
     public RecipeTypeHandler(Registrate registrate) {
         this.modid = registrate.modid;
@@ -40,7 +39,7 @@ public class RecipeTypeHandler {
             if (type == null) {
                 throw new IllegalStateException("Missing recipe type " + loc);
             }
-            return (SmartRecipeType<?, ?, ?>) type;
+            return (SmartRecipeType<?, ?>) type;
         };
         return new RecipeTypeEntry(loc, supplier);
     }
@@ -49,16 +48,15 @@ public class RecipeTypeHandler {
         return getRecipeType(ResourceLocation.fromNamespaceAndPath(modid, id));
     }
 
-    public <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> RecipeTypeEntry<?, ?, B> register(
-        RecipeTypeBuilderBase<C, R, B, ?, ?> builder) {
+    public <C, R extends IRecipe<C>> RecipeTypeEntry<C, R> register(
+        RecipeTypeBuilder<C, R, ?> builder) {
         builders.add(builder);
         return new RecipeTypeEntry<>(builder.loc(), () -> {
             var type = BuiltInRegistries.RECIPE_TYPE.get(builder.loc());
             if (type == null) {
                 throw new IllegalStateException("Missing recipe type " + builder.loc());
             }
-            return (SmartRecipeType<C, R, B>) type;
+            return (SmartRecipeType<C, R>) type;
         });
     }
 

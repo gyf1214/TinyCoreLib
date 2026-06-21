@@ -1,55 +1,34 @@
 package org.shsts.tinycorelib.content.recipe;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
-import org.shsts.tinycorelib.api.recipe.IRecipeSerializer;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SmartRecipeSerializer<C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>>
+public class SmartRecipeSerializer<C, R extends IRecipe<C>>
     implements RecipeSerializer<SmartRecipe<C, R>> {
-    private static final Gson GSON = new Gson();
+    private final MapCodec<SmartRecipe<C, R>> codec;
+    private final StreamCodec<RegistryFriendlyByteBuf, SmartRecipe<C, R>> streamCodec;
 
-    private final IRecipeType<B> type;
-    public final IRecipeSerializer<R, B> compose;
-
-    public SmartRecipeSerializer(IRecipeType<B> type, IRecipeSerializer<R, B> compose) {
-        this.type = type;
-        this.compose = compose;
+    public SmartRecipeSerializer(IRecipeType<R> type, MapCodec<R> compose) {
+        this.codec = compose.xmap(recipe -> new SmartRecipe<>(type, recipe), recipe -> recipe.compose);
+        this.streamCodec = ByteBufCodecs.fromCodecWithRegistries(codec.codec());
     }
 
     @Override
-    public SmartRecipe<C, R> fromJson(ResourceLocation loc, JsonObject jo,
-        ICondition.IContext context) {
-        var recipe = compose.fromJson(type, loc, jo, context);
-        return new SmartRecipe<>(type.get(), this, loc, recipe);
+    public MapCodec<SmartRecipe<C, R>> codec() {
+        return codec;
     }
 
     @Override
-    public SmartRecipe<C, R> fromJson(ResourceLocation loc, JsonObject jo) {
-        return fromJson(loc, jo, ICondition.IContext.EMPTY);
-    }
-
-    @Override
-    public void toNetwork(FriendlyByteBuf buf, SmartRecipe<C, R> recipe) {
-        var jo = new JsonObject();
-        compose.toJson(jo, recipe.compose);
-        var str = GSON.toJson(jo);
-        buf.writeUtf(str);
-    }
-
-    @Override
-    public SmartRecipe<C, R> fromNetwork(ResourceLocation loc, FriendlyByteBuf buf) {
-        var jo = GSON.fromJson(buf.readUtf(), JsonObject.class);
-        return fromJson(loc, jo);
+    public StreamCodec<RegistryFriendlyByteBuf, SmartRecipe<C, R>> streamCodec() {
+        return streamCodec;
     }
 }

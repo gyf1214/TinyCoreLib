@@ -270,8 +270,9 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <R extends IRecipe<?>, P> IRecipeTypeBuilder<R, ?, P> recipeType(P parent, String id) {
-        return new RecipeTypeBuilder<>(this, parent, id, null);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <R extends IRecipe<?>, P> IRecipeTypeBuilder<R, P> recipeType(P parent, String id) {
+        return (IRecipeTypeBuilder<R, P>) new RecipeTypeBuilder(this, parent, id);
     }
 
     @Override
