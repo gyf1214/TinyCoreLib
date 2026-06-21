@@ -28,5 +28,7 @@ public class MenuScreenHandler {
         for (var cb : callbacks) {
             cb.accept(event);
         }
+        // release references
+        callbacks.clear();
     }
 }

@@ -5,7 +5,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
@@ -52,18 +51,6 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     }
 
     @Override
-    public IBlockBuilder<U, P> renderType(DistLazy<RenderType> value) {
-        onCreateObject.add(block -> value.runOnDist(Dist.CLIENT, () -> type ->
-            registrate.renderTypeHandler.setRenderType(block, type)));
-        return self();
-    }
-
-    @Override
-    public IBlockBuilder<U, P> translucent() {
-        return renderType(() -> RenderType::cutoutMipped);
-    }
-
-    @Override
     public IBlockBuilder<U, P> tint(DistLazy<BlockColor> value) {
         tint = value;
         return self();
@@ -83,10 +70,7 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     private class BlockItemBuilder extends ItemBuilder<BlockItem, IBlockBuilder<U, P>> {
         public BlockItemBuilder(BiFunction<Block, Item.Properties, BlockItem> factory) {
             super(BlockBuilder.this.registrate, BlockBuilder.this, BlockBuilder.this.id(),
-                properties -> {
-                    assert BlockBuilder.this.entry != null;
-                    return factory.apply(BlockBuilder.this.entry.get(), properties);
-                });
+                properties -> factory.apply(BlockBuilder.this.getObject(), properties));
         }
 
         @Override

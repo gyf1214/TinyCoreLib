@@ -6,6 +6,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
@@ -22,7 +23,7 @@ import java.util.function.Function;
 public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IItemBuilder<U, P>>
     implements IItemBuilder<U, P> {
     private final Function<Item.Properties, U> factory;
-    private Transformer<Item.Properties> properties = $ -> $.tab(CreativeModeTab.TAB_MISC);
+    private Transformer<Item.Properties> properties = $ -> $;
     @Nullable
     protected DistLazy<ItemColor> tint = null;
 
@@ -36,6 +37,12 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
     @Override
     public IItemBuilder<U, P> properties(Transformer<Item.Properties> trans) {
         properties = properties.chain(trans);
+        return self();
+    }
+
+    @Override
+    public IItemBuilder<U, P> creativeTab(ResourceKey<CreativeModeTab> tab) {
+        registrate.creativeTabHandler.setCreativeTab(this::getObject, tab);
         return self();
     }
 

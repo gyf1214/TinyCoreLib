@@ -39,6 +39,11 @@ public abstract class EntryBuilder<T, U extends T, P,
         return handler.register(this);
     }
 
+    protected U getObject() {
+        assert entry != null;
+        return entry.get();
+    }
+
     public void registerObject(Registry<T> registry) {
         LOGGER.trace("register object {} {}", registry.key().location(), loc);
         assert entry != null;

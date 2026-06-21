@@ -64,8 +64,8 @@ public class BlockEntityTypeBuilder<P>
     @Override
     public IBlockEntityTypeBuilder<P> renderer(
         DistLazy<BlockEntityRendererProvider<BlockEntity>> renderer) {
-        onCreateObject(type -> renderer.runOnDist(Dist.CLIENT, () -> provider ->
-            registrate.rendererHandler.setBlockEntityRenderer(type, provider)));
+        renderer.runOnDist(Dist.CLIENT, () -> provider ->
+            registrate.rendererHandler.setBlockEntityRenderer(this::getObject, provider));
         return self();
     }
 

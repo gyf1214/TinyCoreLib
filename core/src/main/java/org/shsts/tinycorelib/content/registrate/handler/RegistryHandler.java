@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -35,7 +36,11 @@ public class RegistryHandler {
 
     @SuppressWarnings("unchecked")
     public <V> Registry<V> getRegistry(ResourceKey<? extends Registry<V>> key) {
-        return (Registry<V>) BuiltInRegistries.REGISTRY.get(key.location());
+        var ret = BuiltInRegistries.REGISTRY.get(key.location());
+        if (ret == null) {
+            throw new NoSuchElementException();
+        }
+        return (Registry<V>) ret;
     }
 
     public void onNewRegistry(NewRegistryEvent event) {

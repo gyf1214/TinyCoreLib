@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -49,13 +48,12 @@ import org.shsts.tinycorelib.content.registrate.builder.VanillaRecipeTypeBuilder
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
-import org.shsts.tinycorelib.content.registrate.handler.DynamicHandler;
+import org.shsts.tinycorelib.content.registrate.handler.CreativeTabHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuScreenHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RecipeTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
-import org.shsts.tinycorelib.content.registrate.handler.RenderTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RendererHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
@@ -74,7 +72,6 @@ public class Registrate implements IRegistrate {
     public final String modid;
 
     private final Map<ResourceLocation, EntryHandler<?>> entryHandlers = new HashMap<>();
-    private final Map<ResourceLocation, DynamicHandler<?>> dynamicHandlers = new HashMap<>();
 
     // registry
     public final RegistryHandler registryHandler;
@@ -86,9 +83,9 @@ public class Registrate implements IRegistrate {
 
     // others
     public final CapabilityHandler capabilityHandler;
+    public final CreativeTabHandler creativeTabHandler;
 
     // client only
-    public final RenderTypeHandler renderTypeHandler;
     public final TintHandler tintHandler;
     public final MenuScreenHandler menuScreenHandler;
     public final RendererHandler rendererHandler;
@@ -106,8 +103,8 @@ public class Registrate implements IRegistrate {
         this.menuTypeHandler = createEntryHandler(MenuTypeHandler::new);
         this.recipeTypeHandler = new RecipeTypeHandler(this);
         this.capabilityHandler = new CapabilityHandler(this);
+        this.creativeTabHandler = new CreativeTabHandler();
 
-        this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
         this.menuScreenHandler = new MenuScreenHandler();
         this.rendererHandler = new RendererHandler();
@@ -185,28 +182,14 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <T> IRegistrate createDynamicHandler(ResourceKey<? extends Registry<T>> registryKey,
-        Class<T> entryClass, Supplier<T> dummy) {
-        var handler = new DynamicHandler<>(registryKey, dummy);
-        dynamicHandlers.put(registryKey.location(), handler);
-        return this;
-    }
-
-    @Override
     public void register(IEventBus modEventBus) {
         modEventBus.addListener(registryHandler::onNewRegistry);
         for (var handler : entryHandlers.values()) {
             handler.addListener(modEventBus);
         }
-        for (var handler : dynamicHandlers.values()) {
-            handler.addListener(modEventBus);
-        }
         recipeTypeHandler.addListeners(modEventBus);
         modEventBus.addListener(capabilityHandler::onRegisterEvent);
-    }
-
-    private void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(renderTypeHandler::onClientSetup);
+        modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
     }
 
     @Override
@@ -215,7 +198,6 @@ public class Registrate implements IRegistrate {
         modEventBus.addListener(tintHandler::onRegisterItemColors);
         modEventBus.addListener(rendererHandler::onRegisterRenderers);
         modEventBus.addListener(menuScreenHandler::onRegisterMenuScreens);
-        modEventBus.addListener(this::onClientSetup);
     }
 
     @Override
@@ -277,14 +259,6 @@ public class Registrate implements IRegistrate {
         IEntryHandler<T> handler, String id, Supplier<U> factory) {
         return new SimpleEntryBuilder<>(this, (EntryHandler<T>) handler, this, id, factory)
             .register();
-    }
-
-    @Override
-    public <T> ResourceKey<T> dynamicEntry(ResourceKey<? extends Registry<T>> registryKey,
-        String id) {
-        var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
-        dynamicHandlers.get(registryKey.location()).register(loc);
-        return ResourceKey.create(registryKey, loc);
     }
 
     private EntryHandler<IEvent<?>> getEventHandler() {

@@ -9,8 +9,6 @@ import net.minecraftforge.common.world.ForgeWorldPreset;
 
 import java.util.Optional;
 
-import static org.shsts.tinycorelib.test.All.VOID_BIOME;
-
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class VoidPreset extends ForgeWorldPreset {

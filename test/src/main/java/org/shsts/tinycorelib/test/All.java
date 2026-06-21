@@ -2,16 +2,13 @@ package org.shsts.tinycorelib.test;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.data.worldgen.biome.OverworldBiomes;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.world.ForgeWorldPreset;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -59,11 +56,10 @@ public final class All {
     public static final IRecipeType<TestRecipe.Builder> TEST_RECIPE;
     public static final IRecipeType<TestVanillaRecipe.Builder> TEST_VANILLA_RECIPE;
 
-    public static final ResourceKey<Biome> VOID_BIOME;
     public static final IEntry<VoidPreset> VOID_PRESET;
 
     static {
-        CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
+        CHANNEL = CORE.createChannel(ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, "channel"), "1");
 
         TEST_META = CORE.registerMeta("test", new TestMetaConsumer());
 
@@ -72,26 +68,24 @@ public final class All {
             .registerMenuEventPacket(TestPacket.class, TestPacket::new);
 
         TEST_BLOCK1 = REGISTRATE.block("test_block1", Block::new)
-            .material(Material.DIRT)
+            .properties(p -> p.mapColor(MapColor.DIRT))
             .noBlockItem()
             .register();
 
         TEST_BLOCK2 = REGISTRATE.block("test_block2", TestBlock::new)
-            .material(Material.STONE)
-            .properties(p -> p.strength(5f).requiresCorrectToolForDrops())
+            .properties(p -> p.mapColor(MapColor.STONE).strength(5f).requiresCorrectToolForDrops())
             .tint(0xFF00FFFF)
-            .translucent()
             .blockItem()
-            .properties(p -> p.tab(CreativeModeTab.TAB_DECORATIONS))
+            .creativeTab(CreativeModeTabs.BUILDING_BLOCKS)
             .end()
             .register();
 
         TEST_BLOCK3 = REGISTRATE.block("test_block3", TestEntityBlock::new)
-            .material(Material.STONE)
+            .properties(p -> p.mapColor(MapColor.STONE))
             .register();
 
         TEST_ITEM = REGISTRATE.item("test_item", TestItem::new)
-            .properties(p -> p.tab(CreativeModeTab.TAB_COMBAT))
+            .creativeTab(CreativeModeTabs.COMBAT)
             .tint(0xFFFFFF00)
             .register();
 
@@ -106,7 +100,7 @@ public final class All {
 
         TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
             .menu("test_menu", TestMenu::new)
-            .title($ -> new TextComponent("Test Title"))
+            .title($ -> Component.literal("Test Title"))
             .screen(() -> () -> TestScreen::new)
             .register();
 
@@ -123,9 +117,6 @@ public final class All {
             .recipeClass(TestVanillaRecipe.class)
             .serializer(TestVanillaRecipe.SERIALIZER)
             .register();
-
-        VOID_BIOME = REGISTRATE.createDynamicHandler(ForgeRegistries.BIOMES, OverworldBiomes::theVoid)
-            .dynamicEntry(ForgeRegistries.BIOMES, "void");
 
         var presetHandler = REGISTRATE.getHandler(ForgeRegistries.Keys.WORLD_TYPES, ForgeWorldPreset.class);
         VOID_PRESET = REGISTRATE.registryEntry(presetHandler, "void", VoidPreset::new);

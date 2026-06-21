@@ -11,28 +11,25 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class RendererHandler {
-    private record BlockEntityEntry<T extends BlockEntity>(
-        BlockEntityType<? extends T> type, BlockEntityRendererProvider<T> provider) {
-        public void register(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerBlockEntityRenderer(type, provider);
-        }
-    }
-
-    private final List<BlockEntityEntry<?>> blockEntityRenderers = new ArrayList<>();
+    private final List<Consumer<EntityRenderersEvent.RegisterRenderers>> callbacks = new ArrayList<>();
 
     @OnlyIn(Dist.CLIENT)
     public <T extends BlockEntity> void setBlockEntityRenderer(
-        BlockEntityType<? extends T> type, BlockEntityRendererProvider<T> provider) {
-        blockEntityRenderers.add(new BlockEntityEntry<>(type, provider));
+        Supplier<BlockEntityType<? extends T>> type, BlockEntityRendererProvider<T> provider) {
+        callbacks.add(event -> event.registerBlockEntityRenderer(type.get(), provider));
     }
 
     public void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        for (var entry : blockEntityRenderers) {
-            entry.register(event);
+        for (var entry : callbacks) {
+            entry.accept(event);
         }
+        // release references
+        callbacks.clear();
     }
 }

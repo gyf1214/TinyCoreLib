@@ -27,14 +27,14 @@ public class TintHandler {
 
     public void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
         for (var entry : blockColors.entrySet()) {
-            event.getBlockColors().register(entry.getValue(), entry.getKey());
+            event.register(entry.getValue(), entry.getKey());
         }
         blockColors.clear();
     }
 
     public void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
         for (var entry : itemColors.entrySet()) {
-            event.getItemColors().register(entry.getValue(), entry.getKey());
+            event.register(entry.getValue(), entry.getKey());
         }
         itemColors.clear();
     }
