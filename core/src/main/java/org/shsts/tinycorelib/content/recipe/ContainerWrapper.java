@@ -2,15 +2,14 @@ package org.shsts.tinycorelib.content.recipe;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public record ContainerWrapper<C>(C compose) implements Container {
+public record ContainerWrapper<C>(C compose) implements RecipeInput {
     @Override
-    public int getContainerSize() {
+    public int size() {
         return 0;
     }
 
@@ -23,28 +22,4 @@ public record ContainerWrapper<C>(C compose) implements Container {
     public ItemStack getItem(int slot) {
         return ItemStack.EMPTY;
     }
-
-    @Override
-    public ItemStack removeItem(int slot, int amount) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public ItemStack removeItemNoUpdate(int slot) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack stack) {}
-
-    @Override
-    public void setChanged() {}
-
-    @Override
-    public boolean stillValid(Player player) {
-        return false;
-    }
-
-    @Override
-    public void clearContent() {}
 }
