@@ -11,9 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.neoforged.bus.api.IEventBus;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -42,11 +40,11 @@ import java.util.function.Supplier;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IRegistrate {
-    <V extends IForgeRegistryEntry<V>> IEntryHandler<V> getHandler(
-        IForgeRegistry<V> registry);
+    <V> IEntryHandler<V> getHandler(
+        ResourceKey<? extends Registry<V>> key, Registry<V> registry, Class<V> entryClass);
 
-    <V extends IForgeRegistryEntry<V>> IEntryHandler<V> getHandler(
-        ResourceKey<Registry<V>> key, Class<?> entryClass);
+    <V> IEntryHandler<V> getHandler(
+        ResourceKey<? extends Registry<V>> key, Class<?> entryClass);
 
     /**
      * Only use this when you are sure that the BlockEntityType is registered by this library.
@@ -76,25 +74,25 @@ public interface IRegistrate {
 
     <T> ICapability<T> getCapability(Capability<T> cap);
 
-    <T extends IForgeRegistryEntry<T>> IRegistrate createDynamicHandler(
-        IForgeRegistry<T> registry, Supplier<T> dummy);
+    <T> IRegistrate createDynamicHandler(
+        ResourceKey<? extends Registry<T>> registryKey, Class<T> entryClass, Supplier<T> dummy);
 
     void register(IEventBus modEventBus);
 
     void registerClient(IEventBus modEventBus);
 
-    <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> registry(
+    <V, P> IRegistryBuilder<V, P> registry(
         P parent, String id, Class<V> entryClass);
 
-    <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> genericRegistry(
+    <V, P> IRegistryBuilder<V, P> genericRegistry(
         P parent, String id, Class<?> entryClass);
 
-    default <V extends IForgeRegistryEntry<V>> IRegistryBuilder<V, IRegistrate> registry(
+    default <V> IRegistryBuilder<V, IRegistrate> registry(
         String id, Class<V> entryClass) {
         return registry(this, id, entryClass);
     }
 
-    default <V extends IForgeRegistryEntry<V>> IRegistryBuilder<V, IRegistrate> genericRegistry(
+    default <V> IRegistryBuilder<V, IRegistrate> genericRegistry(
         String id, Class<?> entryClass) {
         return genericRegistry(this, id, entryClass);
     }
@@ -139,11 +137,10 @@ public interface IRegistrate {
 
     <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token);
 
-    <T extends IForgeRegistryEntry<T>, U extends T> IEntry<U> registryEntry(
+    <T, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory);
 
-    <T extends IForgeRegistryEntry<T>> ResourceKey<T> dynamicEntry(
-        IForgeRegistry<T> registry, String id);
+    <T> ResourceKey<T> dynamicEntry(ResourceKey<? extends Registry<T>> registryKey, String id);
 
     <A> IEntry<IEvent<A>> event(String id);
 

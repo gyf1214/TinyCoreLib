@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -11,10 +13,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.bus.api.IEventBus;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -116,32 +116,31 @@ public class Registrate implements IRegistrate {
         this.trackedObjects = new TrackedObjects();
     }
 
-    public <V extends IForgeRegistryEntry<V>> void addEntryHandler(ResourceLocation loc,
+    public <V> void addEntryHandler(ResourceLocation loc,
         EntryHandler<V> handler) {
         entryHandlers.put(loc, handler);
     }
 
     private <H extends EntryHandler<?>> H createEntryHandler(Function<Registrate, H> factory) {
         var handler = factory.apply(this);
-        entryHandlers.put(handler.getRegistry().getRegistryName(), handler);
+        entryHandlers.put(handler.registryKey().location(), handler);
         return handler;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IForgeRegistryEntry<V>> EntryHandler<V> getHandler(
-        IForgeRegistry<V> registry) {
-        return (EntryHandler<V>) entryHandlers.computeIfAbsent(registry.getRegistryName(),
-            $ -> new EntryHandler<>(this, registry));
+    public <V> EntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key,
+        Registry<V> registry, Class<V> entryClass) {
+        return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
+            $ -> new EntryHandler<>(this, key, registry));
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IForgeRegistryEntry<V>> EntryHandler<V> getHandler(
-        ResourceKey<Registry<V>> key, Class<?> entryClass) {
+    public <V> EntryHandler<V> getHandler(
+        ResourceKey<? extends Registry<V>> key, Class<?> entryClass) {
         return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
-            $ -> new EntryHandler<>(this, (Class<V>) entryClass,
-                () -> registryHandler.getRegistry(key)));
+            $ -> new EntryHandler<>(this, key, () -> registryHandler.getRegistry(key)));
     }
 
     @Override
@@ -187,10 +186,10 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <T extends IForgeRegistryEntry<T>> IRegistrate createDynamicHandler(
-        IForgeRegistry<T> registry, Supplier<T> dummy) {
-        var handler = new DynamicHandler<>(registry.getRegistrySuperType(), dummy);
-        dynamicHandlers.put(registry.getRegistryName(), handler);
+    public <T> IRegistrate createDynamicHandler(ResourceKey<? extends Registry<T>> registryKey,
+        Class<T> entryClass, Supplier<T> dummy) {
+        var handler = new DynamicHandler<>(registryKey, dummy);
+        dynamicHandlers.put(registryKey.location(), handler);
         return this;
     }
 
@@ -209,7 +208,6 @@ public class Registrate implements IRegistrate {
 
     private void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(renderTypeHandler::onClientSetup);
-        event.enqueueWork(menuScreenHandler::onClientSetup);
     }
 
     @Override
@@ -217,18 +215,19 @@ public class Registrate implements IRegistrate {
         modEventBus.addListener(tintHandler::onRegisterBlockColors);
         modEventBus.addListener(tintHandler::onRegisterItemColors);
         modEventBus.addListener(rendererHandler::onRegisterRenderers);
+        modEventBus.addListener(menuScreenHandler::onRegisterMenuScreens);
         modEventBus.addListener(this::onClientSetup);
     }
 
     @Override
-    public <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> registry(
+    public <V, P> IRegistryBuilder<V, P> registry(
         P parent, String id, Class<V> entryClass) {
         return new RegistryBuilderWrapper<>(this, parent, id, entryClass);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> genericRegistry(
+    public <V, P> IRegistryBuilder<V, P> genericRegistry(
         P parent, String id, Class<?> entryClass) {
         return new RegistryBuilderWrapper<>(this, parent, id, (Class<V>) entryClass);
     }
@@ -275,18 +274,18 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <T extends IForgeRegistryEntry<T>, U extends T> IEntry<U> registryEntry(
+    public <T, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory) {
         return new SimpleEntryBuilder<>(this, (EntryHandler<T>) handler, this, id, factory)
             .register();
     }
 
     @Override
-    public <T extends IForgeRegistryEntry<T>> ResourceKey<T> dynamicEntry(
-        IForgeRegistry<T> registry, String id) {
-        var loc = new ResourceLocation(modid, id);
-        dynamicHandlers.get(registry.getRegistryName()).register(loc);
-        return ResourceKey.create(registry.getRegistryKey(), loc);
+    public <T> ResourceKey<T> dynamicEntry(ResourceKey<? extends Registry<T>> registryKey,
+        String id) {
+        var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
+        dynamicHandlers.get(registryKey.location()).register(loc);
+        return ResourceKey.create(registryKey, loc);
     }
 
     private EntryHandler<IEvent<?>> getEventHandler() {
@@ -324,15 +323,13 @@ public class Registrate implements IRegistrate {
     }
 
     public void trackBlock(Block block) {
-        var loc = block.getRegistryName();
-        assert loc != null;
+        var loc = BuiltInRegistries.BLOCK.getKey(block);
         trackedObjects.put(TrackedType.BLOCK, block, loc.toString());
         trackLang(block.getDescriptionId());
     }
 
     public void trackItem(Item item) {
-        var loc = item.getRegistryName();
-        assert loc != null;
+        var loc = BuiltInRegistries.ITEM.getKey(item);
         trackedObjects.put(TrackedType.ITEM, item, loc.toString());
         trackLang(item.getDescriptionId());
     }

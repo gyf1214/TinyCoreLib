@@ -5,11 +5,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
@@ -43,7 +42,10 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>, B extends IRecipeBuilderBa
     @Override
     public RecipeSerializer<?> getSerializer() {
         if (serializer == null) {
-            serializer = RegistryObject.create(loc(), ForgeRegistries.RECIPE_SERIALIZERS).get();
+            serializer = BuiltInRegistries.RECIPE_SERIALIZER.get(loc());
+            if (serializer == null) {
+                throw new IllegalStateException("Missing recipe serializer " + loc());
+            }
         }
         return serializer;
     }
@@ -109,7 +111,7 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>, B extends IRecipeBuilderBa
             id = loc.getNamespace() + "/" + id;
         }
         id = get().prefix + "/" + id;
-        return new ResourceLocation(modid, id);
+        return ResourceLocation.fromNamespaceAndPath(modid, id);
     }
 
     @Override

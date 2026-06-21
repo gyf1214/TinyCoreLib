@@ -2,12 +2,11 @@ package org.shsts.tinycorelib.api.registrate.entry;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraft.core.Registry;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IRegistry<V extends IForgeRegistryEntry<V>> extends IEntry<IForgeRegistry<V>> {
+public interface IRegistry<V> extends IEntry<Registry<V>> {
     IEntryHandler<V> getHandler();
 }

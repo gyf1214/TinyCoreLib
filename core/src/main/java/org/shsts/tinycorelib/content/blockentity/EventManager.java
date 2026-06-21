@@ -74,7 +74,7 @@ public class EventManager implements ICapabilityProvider, IEventManager {
     public void handleUpdateTag(ListTag tag) {
         for (var subTag : tag) {
             var tag1 = (CompoundTag) subTag;
-            var loc = new ResourceLocation(tag1.getString("id"));
+            var loc = ResourceLocation.parse(tag1.getString("id"));
             var cap = updatableCapability.get(loc);
             var tag2 = tag1.get("data");
             assert tag2 != null;

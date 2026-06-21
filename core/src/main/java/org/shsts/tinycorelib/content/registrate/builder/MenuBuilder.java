@@ -4,11 +4,9 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.api.distmarker.Dist;
+import net.neoforged.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
@@ -31,7 +29,7 @@ public class MenuBuilder<M extends MenuBase, P>
     private final Function<MenuBase.Properties, M> menuFactory;
     @Nullable
     private IChannel channel = null;
-    private Function<BlockEntity, Component> title = $ -> TextComponent.EMPTY;
+    private Function<BlockEntity, Component> title = $ -> Component.empty();
     @Nullable
     private DistLazy<IMenuScreenFactory<M, ?>> screenFactory = null;
 
@@ -55,7 +53,7 @@ public class MenuBuilder<M extends MenuBase, P>
 
     @Override
     public IMenuBuilder<M, P> title(String key) {
-        var text = new TranslatableComponent(key);
+        var text = Component.translatable(key);
         title = $ -> text;
         return self();
     }

@@ -8,7 +8,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.recipe.IRecipeSerializer;
@@ -17,7 +16,6 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SmartRecipeSerializer<C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>>
-    extends ForgeRegistryEntry<RecipeSerializer<?>>
     implements RecipeSerializer<SmartRecipe<C, R>> {
     private static final Gson GSON = new Gson();
 

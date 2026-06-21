@@ -4,11 +4,9 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryManager;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.entry.RegistryEntry;
@@ -29,15 +27,15 @@ public class RegistryHandler {
         this.modid = registrate.modid;
     }
 
-    public <V extends IForgeRegistryEntry<V>> RegistryEntry<V> register(
+    public <V> RegistryEntry<V> register(
         RegistryBuilderWrapper<V, ?> builder) {
         builders.add(builder);
         return new RegistryEntry<>(builder.loc());
     }
 
-    public <V extends IForgeRegistryEntry<V>> IForgeRegistry<V> getRegistry(
-        ResourceKey<Registry<V>> key) {
-        return RegistryManager.ACTIVE.getRegistry(key);
+    @SuppressWarnings("unchecked")
+    public <V> Registry<V> getRegistry(ResourceKey<? extends Registry<V>> key) {
+        return (Registry<V>) BuiltInRegistries.REGISTRY.get(key.location());
     }
 
     public void onNewRegistry(NewRegistryEvent event) {

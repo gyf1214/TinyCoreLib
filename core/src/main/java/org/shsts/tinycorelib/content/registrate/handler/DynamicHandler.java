@@ -2,10 +2,11 @@ package org.shsts.tinycorelib.content.registrate.handler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,13 +14,13 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class DynamicHandler<V extends IForgeRegistryEntry<V>> {
-    private final Class<V> entryClass;
+public class DynamicHandler<V> {
+    private final ResourceKey<? extends Registry<V>> registryKey;
     private final Supplier<V> dummyFactory;
     private final Set<ResourceLocation> locations = new HashSet<>();
 
-    public DynamicHandler(Class<V> entryClass, Supplier<V> dummyFactory) {
-        this.entryClass = entryClass;
+    public DynamicHandler(ResourceKey<? extends Registry<V>> registryKey, Supplier<V> dummyFactory) {
+        this.registryKey = registryKey;
         this.dummyFactory = dummyFactory;
     }
 
@@ -28,19 +29,20 @@ public class DynamicHandler<V extends IForgeRegistryEntry<V>> {
     }
 
     private V dummy(ResourceLocation loc) {
-        var object = dummyFactory.get();
-        object.setRegistryName(loc);
-        return object;
+        return dummyFactory.get();
     }
 
-    private void onRegisterEvent(RegistryEvent.Register<V> event) {
-        var registry = event.getRegistry();
+    private void onRegisterEvent(RegisterEvent event) {
+        var registry = event.getRegistry(registryKey);
+        if (registry == null) {
+            return;
+        }
         for (var loc : locations) {
-            registry.register(dummy(loc));
+            Registry.register(registry, loc, dummy(loc));
         }
     }
 
     public void addListener(IEventBus modEventBus) {
-        modEventBus.addGenericListener(entryClass, this::onRegisterEvent);
+        modEventBus.addListener(this::onRegisterEvent);
     }
 }

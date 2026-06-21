@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
@@ -98,7 +99,7 @@ public class SmartBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         return getUpdateTag(true);
     }
 
@@ -108,7 +109,7 @@ public class SmartBlockEntity extends BlockEntity {
         return getEventManager()
             .filter(EventManager::shouldSendUpdate)
             .map($ -> {
-                var ret = ClientboundBlockEntityDataPacket.create(this, be ->
+                var ret = ClientboundBlockEntityDataPacket.create(this, (be, registries) ->
                     ((SmartBlockEntity) be).getUpdateTag(false));
                 $.resetShouldSendUpdate();
                 return ret;
@@ -116,7 +117,7 @@ public class SmartBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag) {
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
         if (!tag.contains("ForgeCaps", Tag.TAG_LIST)) {
             return;
         }
@@ -125,10 +126,11 @@ public class SmartBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt,
+        HolderLookup.Provider lookupProvider) {
         var tag = pkt.getTag();
         if (tag != null) {
-            handleUpdateTag(tag);
+            handleUpdateTag(tag, lookupProvider);
         }
     }
 

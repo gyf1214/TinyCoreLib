@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.api.distmarker.Dist;
+import net.neoforged.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityFactory;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
@@ -58,7 +58,7 @@ public class BlockEntityTypeBuilder<P>
 
     @Override
     public IBlockEntityTypeBuilder<P> capability(String id, ICapabilityFactory factory) {
-        return capability(new ResourceLocation(modid(), id), factory);
+        return capability(ResourceLocation.fromNamespaceAndPath(modid(), id), factory);
     }
 
     @Override

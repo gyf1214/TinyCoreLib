@@ -2,8 +2,8 @@ package org.shsts.tinycorelib.api.core;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -16,6 +16,8 @@ public interface DistLazy<T> extends Supplier<Supplier<T>> {
     }
 
     default void runOnDist(Dist dist, Supplier<Consumer<T>> cons) {
-        DistExecutor.unsafeRunWhenOn(dist, () -> () -> cons.get().accept(getValue()));
+        if (FMLEnvironment.dist == dist) {
+            cons.get().accept(getValue());
+        }
     }
 }

@@ -3,8 +3,8 @@ package org.shsts.tinycorelib.content;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.AttachCapabilitiesEvent;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntityType;
 
 @ParametersAreNonnullByDefault

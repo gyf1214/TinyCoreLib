@@ -4,12 +4,11 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 import org.shsts.tinycorelib.content.registrate.Registrate;
@@ -23,38 +22,43 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHandler<V> {
+public class EntryHandler<V> implements IEntryHandler<V> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     protected final String modid;
     protected final List<EntryBuilder<V, ?, ?, ?>> builders = new ArrayList<>();
-    private final Class<V> entryClass;
+    private final ResourceKey<? extends Registry<V>> registryKey;
     @Nullable
-    private final Supplier<IForgeRegistry<V>> registrySupp;
+    private final Supplier<Registry<V>> registrySupp;
     @Nullable
-    private IForgeRegistry<V> registry;
+    private Registry<V> registry;
 
-    public EntryHandler(Registrate registrate, IForgeRegistry<V> registry) {
+    public EntryHandler(Registrate registrate, ResourceKey<? extends Registry<V>> registryKey,
+        Registry<V> registry) {
         this.modid = registrate.modid;
+        this.registryKey = registryKey;
         this.registry = registry;
         this.registrySupp = null;
-        this.entryClass = registry.getRegistrySuperType();
     }
 
-    public EntryHandler(Registrate registrate, Class<V> entryClass, Supplier<IForgeRegistry<V>> registry) {
+    public EntryHandler(Registrate registrate, ResourceKey<? extends Registry<V>> registryKey,
+        Supplier<Registry<V>> registry) {
         this.modid = registrate.modid;
+        this.registryKey = registryKey;
         this.registry = null;
         this.registrySupp = registry;
-        this.entryClass = entryClass;
     }
 
-    private void onRegisterEvent(RegistryEvent.Register<V> event) {
+    private void onRegisterEvent(RegisterEvent event) {
         if (builders.isEmpty()) {
             return;
         }
-        var registry = event.getRegistry();
+        var registry = event.getRegistry(registryKey);
+        if (registry == null) {
+            return;
+        }
         LOGGER.info("Mod {} registry {} register {} objects", modid,
-            registry.getRegistryName(), builders.size());
+            registryKey.location(), builders.size());
         for (var builder : builders) {
             builder.registerObject(registry);
         }
@@ -62,7 +66,7 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
         builders.clear();
     }
 
-    public IForgeRegistry<V> getRegistry() {
+    public Registry<V> getRegistry() {
         if (registry != null) {
             return registry;
         }
@@ -71,14 +75,25 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
         return registry;
     }
 
+    public ResourceKey<? extends Registry<V>> registryKey() {
+        return registryKey;
+    }
+
     @Override
     public <U extends V> IEntry<U> getEntry(ResourceLocation loc) {
-        return new Entry<>(loc, () -> RegistryObject.<V, U>create(loc, getRegistry()).get());
+        return new Entry<>(loc, () -> {
+            var value = getRegistry().get(loc);
+            if (value == null) {
+                throw new IllegalStateException("Missing registry entry " + loc +
+                    " in registry " + registryKey.location());
+            }
+            return (U) value;
+        });
     }
 
     @Override
     public <U extends V> IEntry<U> getEntry(String id) {
-        return getEntry(new ResourceLocation(modid, id));
+        return getEntry(ResourceLocation.fromNamespaceAndPath(modid, id));
     }
 
     public <U extends V> Entry<U> register(EntryBuilder<V, U, ?, ?> builder) {
@@ -87,6 +102,6 @@ public class EntryHandler<V extends IForgeRegistryEntry<V>> implements IEntryHan
     }
 
     public void addListener(IEventBus modEventBus) {
-        modEventBus.addGenericListener(entryClass, this::onRegisterEvent);
+        modEventBus.addListener(this::onRegisterEvent);
     }
 }

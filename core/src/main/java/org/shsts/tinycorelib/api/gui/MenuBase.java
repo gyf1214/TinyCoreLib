@@ -95,7 +95,7 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
         this.blockEntity = properties.blockEntity;
         this.inventory = properties.inventory;
         this.player = inventory.player;
-        this.world = player.level;
+        this.world = player.level();
         this.channel = properties.channel;
     }
 
@@ -127,7 +127,7 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
         var be = blockEntity;
         var level = be.getLevel();
         var pos = be.getBlockPos();
-        return level == player.getLevel() &&
+        return level == player.level() &&
             level.getBlockEntity(pos) == be &&
             player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0;
     }

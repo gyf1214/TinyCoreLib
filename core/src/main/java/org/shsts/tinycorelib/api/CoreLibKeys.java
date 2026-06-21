@@ -35,6 +35,6 @@ public final class CoreLibKeys {
     private CoreLibKeys() {}
 
     private static ResourceLocation modLoc(String id) {
-        return new ResourceLocation(ITinyCoreLib.ID, id);
+        return ResourceLocation.fromNamespaceAndPath(ITinyCoreLib.ID, id);
     }
 }

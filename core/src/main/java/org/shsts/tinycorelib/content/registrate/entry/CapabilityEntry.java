@@ -18,15 +18,15 @@ import java.util.Optional;
 @MethodsReturnNonnullByDefault
 public class CapabilityEntry<T> extends Entry<Capability<T>> implements ICapability<T> {
     public CapabilityEntry(String modid, CapabilityToken<T> token) {
-        super(new ResourceLocation(modid, ""), () -> CapabilityManager.get(token));
+        super(ResourceLocation.fromNamespaceAndPath(modid, ""), () -> CapabilityManager.get(token));
     }
 
     public CapabilityEntry(CapabilityToken<T> token) {
-        super(new ResourceLocation(""), () -> CapabilityManager.get(token));
+        super(ResourceLocation.parse(""), () -> CapabilityManager.get(token));
     }
 
     public CapabilityEntry(Capability<T> cap) {
-        super(new ResourceLocation(""), cap);
+        super(ResourceLocation.parse(""), cap);
     }
 
     @Override

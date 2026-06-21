@@ -7,7 +7,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IVanillaRecipeSerializer;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
@@ -15,7 +14,6 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class VanillaRecipeSerializer<C, R extends IRecipe<C>>
-    extends ForgeRegistryEntry<RecipeSerializer<?>>
     implements RecipeSerializer<SmartRecipe<C, R>> {
     private final IRecipeType<?> type;
     private final IVanillaRecipeSerializer<R> compose;

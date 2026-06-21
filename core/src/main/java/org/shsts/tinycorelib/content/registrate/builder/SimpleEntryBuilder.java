@@ -2,7 +2,6 @@ package org.shsts.tinycorelib.content.registrate.builder;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.registrate.builder.ISimpleEntryBuilder;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
@@ -11,7 +10,7 @@ import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SimpleEntryBuilder<T extends IForgeRegistryEntry<T>, U extends T, P>
+public class SimpleEntryBuilder<T, U extends T, P>
     extends EntryBuilder<T, U, P, ISimpleEntryBuilder<T, U, P>> implements ISimpleEntryBuilder<T, U, P> {
     private final Supplier<U> factory;
 

@@ -7,7 +7,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
@@ -45,7 +45,7 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B extends I
         IRecipeType.BuilderFactory<B> builderFactory) {
         super(parent);
         this.handler = registrate.recipeTypeHandler;
-        this.loc = new ResourceLocation(registrate.modid, id);
+        this.loc = ResourceLocation.fromNamespaceAndPath(registrate.modid, id);
         this.builderFactory = builderFactory;
         onBuild.add(this::register);
     }
@@ -79,12 +79,11 @@ public abstract class RecipeTypeBuilderBase<C, R extends IRecipe<C>, B extends I
         return (SmartRecipeType<C, R, B>) super.buildObject();
     }
 
-    public void registerSerializer(IForgeRegistry<RecipeSerializer<?>> registry) {
+    public void registerSerializer(RegisterEvent.RegisterHelper<RecipeSerializer<?>> helper) {
         assert entry != null;
-        LOGGER.trace("register object {} {}", registry.getRegistryName(), loc);
+        LOGGER.trace("register object {} {}", "recipe_serializer", loc);
         var object = createSerializer();
-        object.setRegistryName(loc);
-        registry.register(object);
+        helper.register(loc, object);
         entry.setSerializer(object);
     }
 

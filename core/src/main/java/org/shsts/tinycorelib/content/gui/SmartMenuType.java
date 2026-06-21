@@ -6,6 +6,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkHooks;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -31,7 +33,7 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
     @SuppressWarnings("DataFlowIssue")
     public SmartMenuType(@Nullable IChannel channel, Function<BlockEntity, Component> title,
         Function<MenuBase.Properties, M> factory) {
-        super(null);
+        super((containerId, inventory) -> null, FeatureFlags.VANILLA_SET);
         this.channel = channel;
         this.title = title;
         this.factory = factory;
@@ -56,7 +58,7 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
     }
 
     @Override
-    public M create(int containerId, Inventory inventory, FriendlyByteBuf data) {
+    public M create(int containerId, Inventory inventory, RegistryFriendlyByteBuf data) {
         var hasPos = data.readBoolean();
         if (hasPos) {
             var be = getBlockEntityFromData(data);
@@ -67,7 +69,7 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
     }
 
     public void open(ServerPlayer player, BlockPos pos) {
-        var be = player.level.getBlockEntity(pos);
+        var be = player.level().getBlockEntity(pos);
         if (be == null) {
             return;
         }
