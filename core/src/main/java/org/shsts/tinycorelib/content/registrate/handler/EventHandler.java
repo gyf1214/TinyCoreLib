@@ -7,15 +7,19 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 import org.shsts.tinycorelib.content.gui.SmartMenuType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
@@ -47,6 +51,20 @@ public class EventHandler<E> {
         public <T extends BlockEntity> void setBlockEntityRenderer(
             Supplier<BlockEntityType<? extends T>> type, BlockEntityRendererProvider<T> provider) {
             addCallback(event -> event.registerBlockEntityRenderer(type.get(), provider));
+        }
+    }
+
+    public static class Capability extends EventHandler<RegisterCapabilitiesEvent> {
+        public <T, BE extends SmartBlockEntity> void register(
+            BlockEntityType<BE> type, ICapability<T> capability) {
+            register(type, capability, be -> be.getCapability(capability));
+        }
+
+        public <T, BE extends SmartBlockEntity> void register(
+            BlockEntityType<BE> type, ICapability<T> capability,
+            Function<? super BE, T> provider) {
+            addCallback(event -> event.registerBlockEntity(capability.get(), type,
+                (be, $) -> provider.apply(be)));
         }
     }
 }

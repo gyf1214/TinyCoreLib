@@ -8,10 +8,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
-import org.shsts.tinycorelib.api.blockentity.ICapabilityFactory;
+import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
+import org.shsts.tinycorelib.api.blockentity.IEventManager;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+import org.shsts.tinycorelib.content.CoreContents;
+import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntityType;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;
@@ -22,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -31,10 +36,18 @@ public class BlockEntityTypeBuilder<P>
     extends EntryBuilder<BlockEntityType<?>, BlockEntityType<?>, P, IBlockEntityTypeBuilder<P>>
     implements IBlockEntityTypeBuilder<P> {
     private final Set<Supplier<? extends Block>> validBlocks = new HashSet<>();
-    private final Map<ResourceLocation, ICapabilityFactory> capabilities = new HashMap<>();
+    private final Set<ICapability<?>> capabilities = new HashSet<>();
+    private final Map<ResourceLocation, Function<BlockEntity, ICapabilityContainer>> containers =
+        new HashMap<>();
 
     public BlockEntityTypeBuilder(Registrate registrate, P parent, String id) {
         super(registrate, registrate.blockEntityTypeHandler, parent, id);
+        onCreateObject.add(type -> {
+            registerEventManager((SmartBlockEntityType) type);
+            for (var capability : capabilities) {
+                registerCapability((SmartBlockEntityType) type, capability);
+            }
+        });
     }
 
     @Override
@@ -50,15 +63,29 @@ public class BlockEntityTypeBuilder<P>
     }
 
     @Override
-    public IBlockEntityTypeBuilder<P> capability(
-        ResourceLocation loc, ICapabilityFactory factory) {
-        capabilities.put(loc, factory);
+    public IBlockEntityTypeBuilder<P> capability(ICapability<?>... caps) {
+        for (var cap : caps) {
+            if (!capabilities.add(cap)) {
+                throw new IllegalArgumentException("Duplicate capability declaration " + cap.loc());
+            }
+        }
         return self();
     }
 
     @Override
-    public IBlockEntityTypeBuilder<P> capability(String id, ICapabilityFactory factory) {
-        return capability(ResourceLocation.fromNamespaceAndPath(modid(), id), factory);
+    public IBlockEntityTypeBuilder<P> container(
+        ResourceLocation loc, Function<BlockEntity, ICapabilityContainer> factory) {
+        var old = containers.putIfAbsent(loc, factory);
+        if (old != null) {
+            throw new IllegalArgumentException("Duplicate container id " + loc);
+        }
+        return self();
+    }
+
+    @Override
+    public IBlockEntityTypeBuilder<P> container(
+        String id, Function<BlockEntity, ICapabilityContainer> factory) {
+        return container(ResourceLocation.fromNamespaceAndPath(modid(), id), factory);
     }
 
     @Override
@@ -79,6 +106,15 @@ public class BlockEntityTypeBuilder<P>
         return (IBlockEntityType) super.register();
     }
 
+    private void registerEventManager(SmartBlockEntityType type) {
+        registrate.capabilityHandler.register(type, CoreContents.EVENT_MANAGER,
+            be -> (IEventManager) be);
+    }
+
+    private <T> void registerCapability(SmartBlockEntityType type, ICapability<T> capability) {
+        registrate.capabilityHandler.register(type, capability);
+    }
+
     @Override
     protected BlockEntityType<?> createObject() {
         assert entry != null;
@@ -86,6 +122,6 @@ public class BlockEntityTypeBuilder<P>
         var validBlocks = this.validBlocks.stream()
             .map($ -> (Block) $.get())
             .collect(Collectors.toSet());
-        return new SmartBlockEntityType(entry1::create, validBlocks, new HashMap<>(capabilities));
+        return new SmartBlockEntityType(entry1::create, validBlocks, new HashMap<>(containers));
     }
 }

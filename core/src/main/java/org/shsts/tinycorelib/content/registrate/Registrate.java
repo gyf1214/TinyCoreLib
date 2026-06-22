@@ -41,7 +41,6 @@ import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
-import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CreativeTabHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EventHandler;
@@ -75,7 +74,7 @@ public class Registrate implements IRegistrate {
     public final RecipeTypeHandler recipeTypeHandler;
 
     // others
-    public final CapabilityHandler capabilityHandler;
+    public final EventHandler.Capability capabilityHandler;
     public final CreativeTabHandler creativeTabHandler;
 
     // client only
@@ -95,7 +94,7 @@ public class Registrate implements IRegistrate {
         this.blockEntityTypeHandler = createEntryHandler(BlockEntityTypeHandler::new);
         this.menuTypeHandler = createEntryHandler(MenuTypeHandler::new);
         this.recipeTypeHandler = new RecipeTypeHandler(this);
-        this.capabilityHandler = new CapabilityHandler(this);
+        this.capabilityHandler = new EventHandler.Capability();
         this.creativeTabHandler = new CreativeTabHandler();
 
         this.tintHandler = new TintHandler();
@@ -169,7 +168,7 @@ public class Registrate implements IRegistrate {
             handler.addListener(modEventBus);
         }
         recipeTypeHandler.addListener(modEventBus);
-        modEventBus.addListener(capabilityHandler::onRegisterEvent);
+        modEventBus.addListener(capabilityHandler::onEvent);
         modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
     }
 

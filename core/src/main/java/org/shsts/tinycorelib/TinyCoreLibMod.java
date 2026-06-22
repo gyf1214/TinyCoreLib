@@ -8,10 +8,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.NeoForge;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.content.CoreContents;
-import org.shsts.tinycorelib.content.ForgeEvents;
 import org.slf4j.Logger;
 
 import static org.shsts.tinycorelib.content.CoreContents.REGISTRATE;
@@ -41,7 +39,6 @@ public class TinyCoreLibMod {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             onConstructClient();
         }
-        NeoForge.EVENT_BUS.register(ForgeEvents.class);
     }
 
     private void onConstructClient() {
