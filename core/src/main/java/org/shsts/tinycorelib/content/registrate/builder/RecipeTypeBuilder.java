@@ -25,19 +25,13 @@ public class RecipeTypeBuilder<C, R extends IRecipe<C>, P>
     implements IRecipeTypeBuilder<R, P> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    @Nullable
-    private Class<R> recipeClass = null;
+    private final Class<R> recipeClass;
     @Nullable
     private MapCodec<R> serializer = null;
 
-    public RecipeTypeBuilder(Registrate registrate, P parent, String id) {
+    public RecipeTypeBuilder(Registrate registrate, P parent, String id, Class<R> clazz) {
         super(registrate, registrate.recipeTypeHandler, parent, id);
-    }
-
-    @Override
-    public IRecipeTypeBuilder<R, P> recipeClass(Class<R> clazz) {
-        recipeClass = clazz;
-        return self();
+        this.recipeClass = clazz;
     }
 
     @Override

@@ -91,7 +91,7 @@ public final class All {
         TEST_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_block_entity")
             .validBlock(TEST_BLOCK3)
             .capability(TEST_CAPABILITY, ITEM_HANDLER_CAPABILITY)
-            .container("test_capability", TestCapability::new)
+            .container("test_capability", TestContainer::new)
             .register();
 
         TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
@@ -104,17 +104,14 @@ public final class All {
         SERVER_TICK = EVENTS.getEntry(SERVER_TICK_LOC);
         TICK_SECOND = REGISTRATE.event("tick_second");
 
-        TEST_RECIPE = REGISTRATE.<TestRecipe>recipeType("test")
-            .recipeClass(TestRecipe.class)
+        TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.class)
             .serializer(TestRecipe.CODEC)
             .register();
 
-        TEST_COOKING_RECIPE = REGISTRATE.<TestCookingRecipe>recipeType("test_cooking")
-            .recipeClass(TestCookingRecipe.class)
+        TEST_COOKING_RECIPE = REGISTRATE.recipeType("test_cooking", TestCookingRecipe.class)
             .serializer(TestCookingRecipe.CODEC)
             .register();
     }
 
     public static void init() {}
-
 }

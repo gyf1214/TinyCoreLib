@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
-import org.shsts.tinycorelib.api.blockentity.IEventManager;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
@@ -106,8 +105,7 @@ public class BlockEntityTypeBuilder<P>
     }
 
     private void registerEventManager(SmartBlockEntityType type) {
-        registrate.capabilityHandler.register(type, CoreContents.EVENT_MANAGER,
-            be -> (IEventManager) be);
+        registrate.capabilityHandler.register(type, CoreContents.EVENT_MANAGER, be -> be);
     }
 
     private <T> void registerCapability(SmartBlockEntityType type, ICapability<T> capability) {
@@ -121,6 +119,6 @@ public class BlockEntityTypeBuilder<P>
         var validBlocks = this.validBlocks.stream()
             .map($ -> (Block) $.get())
             .collect(Collectors.toSet());
-        return new SmartBlockEntityType(entry1::create, validBlocks, new HashMap<>(containers));
+        return new SmartBlockEntityType(entry1::create, validBlocks, containers);
     }
 }

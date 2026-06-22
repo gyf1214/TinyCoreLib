@@ -134,10 +134,10 @@ public interface IRegistrate {
 
     <A, R> IEntry<IReturnEvent<A, R>> returnEvent(String id, R defaultResult);
 
-    <R extends IRecipe<?>, P> IRecipeTypeBuilder<R, P> recipeType(P parent, String id);
+    <R extends IRecipe<?>, P> IRecipeTypeBuilder<R, P> recipeType(P parent, String id, Class<R> clazz);
 
-    default <R extends IRecipe<?>> IRecipeTypeBuilder<R, IRegistrate> recipeType(String id) {
-        return recipeType(this, id);
+    default <R extends IRecipe<?>> IRecipeTypeBuilder<R, IRegistrate> recipeType(String id, Class<R> clazz) {
+        return recipeType(this, id, clazz);
     }
 
     void trackLang(String key);

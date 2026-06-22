@@ -306,9 +306,7 @@ public class SmartBlockEntity extends BlockEntity implements IEventManager {
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt,
         HolderLookup.Provider lookupProvider) {
         var tag = pkt.getTag();
-        if (tag != null) {
-            handleUpdateTag(tag, lookupProvider);
-        }
+        handleUpdateTag(tag, lookupProvider);
     }
 
     @Override

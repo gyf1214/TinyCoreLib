@@ -5,7 +5,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -54,9 +53,8 @@ public class TestEntityBlock extends Block implements EntityBlock {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level world, BlockPos pos,
-        Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos,
+        Player player, BlockHitResult hitResult) {
         if (!world.isClientSide && player instanceof ServerPlayer serverPlayer) {
             TEST_MENU.open(serverPlayer, pos);
             return InteractionResult.CONSUME;

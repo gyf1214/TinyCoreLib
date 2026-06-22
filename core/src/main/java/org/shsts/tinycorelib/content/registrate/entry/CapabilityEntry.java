@@ -10,7 +10,6 @@ import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @ParametersAreNonnullByDefault
@@ -31,7 +30,7 @@ public class CapabilityEntry<T> extends Entry<BlockCapability<T, ?>>
 
     @Override
     public T get(BlockEntity be) {
-        return tryGet(be).orElseThrow(NoSuchElementException::new);
+        return tryGet(be).orElseThrow();
     }
 
     @Override
@@ -46,6 +45,6 @@ public class CapabilityEntry<T> extends Entry<BlockCapability<T, ?>>
     @Nullable
     private static <T, C extends @Nullable Object> T getCapability(
         Level world, BlockCapability<T, C> cap, BlockPos pos) {
-        return world.getCapability(cap, pos, (C) null);
+        return world.getCapability(cap, pos, null);
     }
 }

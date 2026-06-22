@@ -28,7 +28,7 @@ import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class TestCapability implements ICapabilityContainer, IEventSubscriber, ITestCapability,
+public class TestContainer implements ICapabilityContainer, IEventSubscriber, ITestCapability,
     INBTSerializable<IntTag>, INBTUpdatable<IntTag> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -40,7 +40,7 @@ public class TestCapability implements ICapabilityContainer, IEventSubscriber, I
     private int ticks = 0;
     private int seconds = 0;
 
-    public TestCapability(BlockEntity blockEntity) {
+    public TestContainer(BlockEntity blockEntity) {
         this.blockEntity = blockEntity;
         this.itemHandler = new ItemStackHandler(1);
     }
@@ -130,5 +130,4 @@ public class TestCapability implements ICapabilityContainer, IEventSubscriber, I
         eventManager.subscribe(SERVER_TICK.get(), this::onTick);
         eventManager.subscribe(TICK_SECOND.get(), this::onTickSecond);
     }
-
 }

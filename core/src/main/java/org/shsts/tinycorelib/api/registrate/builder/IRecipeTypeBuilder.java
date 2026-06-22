@@ -11,8 +11,6 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 @MethodsReturnNonnullByDefault
 public interface IRecipeTypeBuilder<R extends IRecipe<?>, P>
     extends IEntryBuilder<RecipeType<?>, RecipeType<?>, P, IRecipeTypeBuilder<R, P>> {
-    IRecipeTypeBuilder<R, P> recipeClass(Class<R> clazz);
-
     IRecipeTypeBuilder<R, P> serializer(MapCodec<R> value);
 
     IRecipeType<R> register();
