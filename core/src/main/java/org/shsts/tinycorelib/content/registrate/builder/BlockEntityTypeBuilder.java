@@ -15,7 +15,6 @@ import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.content.CoreContents;
-import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntityType;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;

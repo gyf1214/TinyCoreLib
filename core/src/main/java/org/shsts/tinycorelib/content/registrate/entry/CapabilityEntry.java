@@ -1,13 +1,14 @@
 package org.shsts.tinycorelib.content.registrate.entry;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
