@@ -235,8 +235,7 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <T> ICapability<T> capability(
-        BlockCapability<T, @org.jetbrains.annotations.Nullable Void> capability) {
+    public <T> ICapability<T> capability(BlockCapability<T, ?> capability) {
         return new CapabilityEntry<>(capability);
     }
 

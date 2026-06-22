@@ -7,9 +7,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import org.jetbrains.annotations.Nullable;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
@@ -63,8 +65,13 @@ public class EventHandler<E> {
         public <T, BE extends SmartBlockEntity> void register(
             BlockEntityType<BE> type, ICapability<T> capability,
             Function<? super BE, T> provider) {
-            addCallback(event -> event.registerBlockEntity(capability.get(), type,
-                (be, $) -> provider.apply(be)));
+            addCallback(event -> registerBlockEntity(event, capability.get(), type, provider));
+        }
+
+        private static <T, C extends @Nullable Object, BE extends SmartBlockEntity>
+            void registerBlockEntity(RegisterCapabilitiesEvent event, BlockCapability<T, C> capability,
+                BlockEntityType<BE> type, Function<? super BE, T> provider) {
+            event.registerBlockEntity(capability, type, (be, $) -> provider.apply(be));
         }
     }
 }

@@ -2,9 +2,12 @@ package org.shsts.tinycorelib.content.registrate.entry;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import org.jetbrains.annotations.Nullable;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 
 import java.util.NoSuchElementException;
@@ -12,8 +15,7 @@ import java.util.Optional;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class CapabilityEntry<T>
-    extends Entry<BlockCapability<T, @org.jetbrains.annotations.Nullable Void>>
+public class CapabilityEntry<T> extends Entry<BlockCapability<T, ?>>
     implements ICapability<T> {
     public CapabilityEntry(String modid, String id, Class<T> typeClass) {
         this(ResourceLocation.fromNamespaceAndPath(modid, id), typeClass);
@@ -23,7 +25,7 @@ public class CapabilityEntry<T>
         super(loc, () -> BlockCapability.createVoid(loc, typeClass));
     }
 
-    public CapabilityEntry(BlockCapability<T, @org.jetbrains.annotations.Nullable Void> cap) {
+    public CapabilityEntry(BlockCapability<T, ?> cap) {
         super(cap.name(), cap);
     }
 
@@ -38,6 +40,12 @@ public class CapabilityEntry<T>
         if (world == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(world.getCapability(get(), be.getBlockPos()));
+        return Optional.ofNullable(getCapability(world, get(), be.getBlockPos()));
+    }
+
+    @Nullable
+    private static <T, C extends @Nullable Object> T getCapability(
+        Level world, BlockCapability<T, C> cap, BlockPos pos) {
+        return world.getCapability(cap, pos, (C) null);
     }
 }

@@ -9,7 +9,6 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
@@ -87,7 +86,7 @@ public final class All {
 
         TEST_CAPABILITY = REGISTRATE.capability("test_capability", ITestCapability.class);
 
-        ITEM_HANDLER_CAPABILITY = itemHandlerCapability();
+        ITEM_HANDLER_CAPABILITY = REGISTRATE.capability(Capabilities.ItemHandler.BLOCK);
 
         TEST_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_block_entity")
             .validBlock(TEST_BLOCK3)
@@ -118,8 +117,4 @@ public final class All {
 
     public static void init() {}
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static ICapability<IItemHandler> itemHandlerCapability() {
-        return REGISTRATE.capability((BlockCapability) Capabilities.ItemHandler.BLOCK);
-    }
 }

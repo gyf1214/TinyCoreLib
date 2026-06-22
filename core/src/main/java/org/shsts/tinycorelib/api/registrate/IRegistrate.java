@@ -125,8 +125,7 @@ public interface IRegistrate {
 
     <T> ICapability<T> capability(String id, Class<T> typeClass);
 
-    <T> ICapability<T> capability(
-        BlockCapability<T, @org.jetbrains.annotations.Nullable Void> capability);
+    <T> ICapability<T> capability(BlockCapability<T, ?> capability);
 
     <T, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory);
