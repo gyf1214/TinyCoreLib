@@ -4,7 +4,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -12,9 +11,10 @@ import java.util.function.Consumer;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IEventManager {
-    <T extends ICapabilityProvider> T getProvider(ResourceLocation loc, Class<T> clazz);
+    <T extends ICapabilityContainer> T getContainer(ResourceLocation loc, Class<T> clazz);
 
-    <T extends ICapabilityProvider> Optional<T> tryGetProvider(ResourceLocation loc, Class<T> clazz);
+    <T extends ICapabilityContainer> Optional<T> tryGetContainer(
+        ResourceLocation loc, Class<T> clazz);
 
     <A> void invoke(IEvent<A> event, A arg);
 

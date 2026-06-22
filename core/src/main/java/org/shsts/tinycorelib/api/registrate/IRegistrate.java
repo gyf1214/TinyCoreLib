@@ -9,9 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -65,10 +64,6 @@ public interface IRegistrate {
     IRecipeType<?> getRecipeType(ResourceLocation loc);
 
     IRecipeType<?> getRecipeType(String id);
-
-    <T> ICapability<T> getCapability(CapabilityToken<T> token);
-
-    <T> ICapability<T> getCapability(Capability<T> cap);
 
     void register(IEventBus modEventBus);
 
@@ -128,7 +123,10 @@ public interface IRegistrate {
 
     IRegistrate setDefaultChannel(@Nullable IChannel value);
 
-    <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token);
+    <T> ICapability<T> capability(String id, Class<T> typeClass);
+
+    <T> ICapability<T> capability(
+        BlockCapability<T, @org.jetbrains.annotations.Nullable Void> capability);
 
     <T, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory);
