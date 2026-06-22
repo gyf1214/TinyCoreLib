@@ -16,32 +16,28 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.common.extensions.IPlayerExtension;
 import org.shsts.tinycorelib.api.gui.MenuBase;
-import org.shsts.tinycorelib.api.network.IChannel;
 
 import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
-    @Nullable
-    private final IChannel channel;
     private final Function<BlockEntity, Component> title;
     private final Function<MenuBase.Properties, M> factory;
 
     @SuppressWarnings("DataFlowIssue")
-    public SmartMenuType(@Nullable IChannel channel, Function<BlockEntity, Component> title,
+    public SmartMenuType(Function<BlockEntity, Component> title,
         Function<MenuBase.Properties, M> factory) {
         super((containerId, inventory) -> null, FeatureFlags.VANILLA_SET);
-        this.channel = channel;
         this.title = title;
         this.factory = factory;
     }
 
     @Override
     public M create(int containerId, Inventory inventory) {
-        return factory.apply(new MenuBase.Properties(this, containerId, inventory, null, channel));
+        return factory.apply(new MenuBase.Properties(this, containerId, inventory, null));
     }
 
     private static BlockEntity getBlockEntityFromData(FriendlyByteBuf data) {
@@ -54,7 +50,7 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
     }
 
     private M create(int containerId, Inventory inventory, BlockEntity be) {
-        return factory.apply(new MenuBase.Properties(this, containerId, inventory, be, channel));
+        return factory.apply(new MenuBase.Properties(this, containerId, inventory, be));
     }
 
     @Override
@@ -85,7 +81,7 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
                 return create(containerId, inventory, be);
             }
         };
-        NetworkHooks.openGui(player, provider, buf -> {
+        ((IPlayerExtension) player).openMenu(provider, buf -> {
             buf.writeBoolean(true);
             buf.writeBlockPos(pos);
         });
@@ -104,6 +100,6 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
                 return create(containerId, inventory);
             }
         };
-        NetworkHooks.openGui(player, provider, buf -> buf.writeBoolean(false));
+        ((IPlayerExtension) player).openMenu(provider, buf -> buf.writeBoolean(false));
     }
 }

@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.content.gui.SimpleSyncSlotScheduler;
@@ -97,7 +96,7 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
     private final Map<IPacketType<?>, EventHandler<?>> eventHandlers = new HashMap<>();
 
     public record Properties(MenuType<?> menuType, int id, Inventory inventory,
-        @Nullable BlockEntity blockEntity, @Nullable IChannel channel) {}
+        @Nullable BlockEntity blockEntity) {}
 
     public MenuBase(Properties properties) {
         super(properties.menuType, properties.id);

@@ -11,7 +11,6 @@ import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
 import org.shsts.tinycorelib.api.gui.client.MenuScreenBase;
-import org.shsts.tinycorelib.api.network.IChannel;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 import org.shsts.tinycorelib.content.gui.SmartMenuType;
@@ -27,8 +26,6 @@ public class MenuBuilder<M extends MenuBase, P>
     extends EntryBuilder<MenuType<?>, MenuType<?>, P, IMenuBuilder<M, P>>
     implements IMenuBuilder<M, P> {
     private final Function<MenuBase.Properties, M> menuFactory;
-    @Nullable
-    private IChannel channel = null;
     private Function<BlockEntity, Component> title = $ -> Component.empty();
     @Nullable
     private DistLazy<IMenuScreenFactory<M, ?>> screenFactory = null;
@@ -37,12 +34,6 @@ public class MenuBuilder<M extends MenuBase, P>
         Function<MenuBase.Properties, M> menuFactory) {
         super(registrate, registrate.menuTypeHandler, parent, id);
         this.menuFactory = menuFactory;
-    }
-
-    @Override
-    public IMenuBuilder<M, P> channel(IChannel value) {
-        channel = value;
-        return self();
     }
 
     @Override
@@ -72,7 +63,7 @@ public class MenuBuilder<M extends MenuBase, P>
     @Override
     protected SmartMenuType<M> createObject() {
         assert screenFactory != null;
-        var type = new SmartMenuType<>(channel, title, menuFactory);
+        var type = new SmartMenuType<>(title, menuFactory);
         screenFactory.runOnDist(Dist.CLIENT, () -> factory ->
             registrate.menuScreenHandler.setMenuScreen(type, factory));
         return type;
