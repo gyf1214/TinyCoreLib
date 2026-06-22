@@ -40,6 +40,7 @@ import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
 import org.shsts.tinycorelib.content.network.PacketPayloadType;
 import org.shsts.tinycorelib.content.network.PacketType;
+import org.shsts.tinycorelib.content.network.PayloadHandler;
 import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
@@ -59,7 +60,6 @@ import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
-import org.shsts.tinycorelib.content.network.PayloadHandler;
 
 import java.util.HashMap;
 import java.util.Map;
