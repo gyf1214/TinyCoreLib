@@ -1,6 +1,5 @@
 package org.shsts.tinycorelib.content.registrate;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
@@ -12,16 +11,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
-import org.shsts.tinycorelib.api.network.IChannel;
+import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IPacketBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
@@ -36,6 +37,7 @@ import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.MenuBuilder;
+import org.shsts.tinycorelib.content.registrate.builder.PacketBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
@@ -50,6 +52,7 @@ import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
+import org.shsts.tinycorelib.content.network.PayloadHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,6 +79,8 @@ public class Registrate implements IRegistrate {
     // others
     public final EventHandler.Capability capabilityHandler;
     public final CreativeTabHandler creativeTabHandler;
+    public final EventHandler.Payload payloadHandler;
+    public final PayloadHandler payloads;
 
     // client only
     public final TintHandler tintHandler;
@@ -83,9 +88,6 @@ public class Registrate implements IRegistrate {
     public final EventHandler.Renderer rendererHandler;
 
     private final TrackedObjects trackedObjects;
-
-    @Nullable
-    private IChannel defaultChannel = null;
 
     public Registrate(String modid) {
         this.modid = modid;
@@ -96,6 +98,8 @@ public class Registrate implements IRegistrate {
         this.recipeTypeHandler = new RecipeTypeHandler(this);
         this.capabilityHandler = new EventHandler.Capability();
         this.creativeTabHandler = new CreativeTabHandler();
+        this.payloadHandler = new EventHandler.Payload();
+        this.payloads = new PayloadHandler();
 
         this.tintHandler = new TintHandler();
         this.menuScreenHandler = new EventHandler.MenuScreen();
@@ -170,6 +174,7 @@ public class Registrate implements IRegistrate {
         recipeTypeHandler.addListener(modEventBus);
         modEventBus.addListener(capabilityHandler::onEvent);
         modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
+        modEventBus.addListener((RegisterPayloadHandlersEvent event) -> payloadHandler.onEvent(event));
     }
 
     @Override
@@ -219,14 +224,13 @@ public class Registrate implements IRegistrate {
     @Override
     public <M extends MenuBase, P> IMenuBuilder<M, P> menu(P parent, String id,
         Function<MenuBase.Properties, M> menuFactory) {
-        var builder = new MenuBuilder<>(this, parent, id, menuFactory);
-        return defaultChannel == null ? builder : builder.channel(defaultChannel);
+        return new MenuBuilder<>(this, parent, id, menuFactory);
     }
 
     @Override
-    public IRegistrate setDefaultChannel(@Nullable IChannel value) {
-        defaultChannel = value;
-        return this;
+    public <T extends IPacket, P> IPacketBuilder<T, P> packet(P parent, String id,
+        Supplier<T> constructor) {
+        return new PacketBuilder<>(this, parent, id, constructor);
     }
 
     @Override

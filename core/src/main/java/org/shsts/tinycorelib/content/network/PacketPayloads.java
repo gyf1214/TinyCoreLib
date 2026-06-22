@@ -7,7 +7,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.shsts.tinycorelib.api.network.IPacket;
 
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
@@ -15,13 +14,11 @@ import java.util.function.Supplier;
 public final class PacketPayloads {
     private PacketPayloads() {}
 
-    public static <P extends IPacket, R extends CustomPacketPayload>
-        StreamCodec<RegistryFriendlyByteBuf, R> codec(
-            PacketType<P, R> type, Supplier<P> constructor,
-            BiFunction<PacketType<P, R>, P, R> payloadFactory) {
+    public static <P extends IPacket> StreamCodec<RegistryFriendlyByteBuf, GenericPacketPayload<P>>
+        genericCodec(PacketType<P, GenericPacketPayload<P>> type, Supplier<P> constructor) {
         return CustomPacketPayload.codec(
             (payload, buf) -> payloadContent(payload).serializeToBuf(buf),
-            buf -> payloadFactory.apply(type, read(constructor, buf)));
+            buf -> new GenericPacketPayload<>(type, read(constructor, buf)));
     }
 
     @SuppressWarnings("unchecked")

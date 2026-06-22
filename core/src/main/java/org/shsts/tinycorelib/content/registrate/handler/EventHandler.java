@@ -11,12 +11,15 @@ import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.Nullable;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 import org.shsts.tinycorelib.content.gui.SmartMenuType;
+import org.shsts.tinycorelib.content.network.PayloadHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +75,12 @@ public class EventHandler<E> {
             void registerBlockEntity(RegisterCapabilitiesEvent event, BlockCapability<T, C> capability,
                 BlockEntityType<BE> type, Function<? super BE, T> provider) {
             event.registerBlockEntity(capability, type, (be, $) -> provider.apply(be));
+        }
+    }
+
+    public static class Payload extends EventHandler<PayloadRegistrar> {
+        public void onEvent(RegisterPayloadHandlersEvent event) {
+            super.onEvent(event.registrar(PayloadHandler.NETWORK_VERSION));
         }
     }
 }
