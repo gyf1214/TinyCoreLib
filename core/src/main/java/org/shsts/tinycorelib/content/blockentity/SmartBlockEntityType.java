@@ -24,4 +24,8 @@ public class SmartBlockEntityType extends BlockEntityType<SmartBlockEntity> {
         super(factory, validBlocks, null);
         this.containers = Map.copyOf(containers);
     }
+
+    public Map<ResourceLocation, Function<BlockEntity, ICapabilityContainer>> containerFactories() {
+        return containers;
+    }
 }

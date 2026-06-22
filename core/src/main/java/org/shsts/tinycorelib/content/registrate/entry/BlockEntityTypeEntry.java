@@ -36,7 +36,7 @@ public class BlockEntityTypeEntry extends Entry<BlockEntityType<?>> implements I
 
     @Override
     public SmartBlockEntity create(BlockPos pos, BlockState state) {
-        return new SmartBlockEntity(get(), pos, state);
+        return SmartBlockEntity.create(get(), pos, state);
     }
 
     @Override
