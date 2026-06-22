@@ -5,9 +5,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.capabilities.CapabilityToken;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
-import org.shsts.tinycorelib.api.blockentity.IEventManager;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -30,7 +28,6 @@ public final class CoreLibKeys {
     public static final ResourceLocation SERVER_TICK_LOC = modLoc(SERVER_TICK_NAME);
     public static final ResourceLocation CLIENT_TICK_LOC = modLoc(CLIENT_TICK_NAME);
     public static final ResourceLocation EVENT_MANAGER_LOC = modLoc(EVENT_MANAGER_NAME);
-    public static final CapabilityToken<IEventManager> EVENT_MANAGER_TOKEN = new CapabilityToken<>() {};
 
     private CoreLibKeys() {}
 

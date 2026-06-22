@@ -13,7 +13,7 @@ import org.shsts.tinycorelib.content.registrate.Registrate;
 
 import static org.shsts.tinycorelib.api.CoreLibKeys.CLIENT_LOAD_NAME;
 import static org.shsts.tinycorelib.api.CoreLibKeys.CLIENT_TICK_NAME;
-import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_MANAGER_TOKEN;
+import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_MANAGER_NAME;
 import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_REGISTRY_NAME;
 import static org.shsts.tinycorelib.api.CoreLibKeys.REMOVED_BY_CHUNK_NAME;
 import static org.shsts.tinycorelib.api.CoreLibKeys.REMOVED_IN_WORLD_NAME;
@@ -48,7 +48,7 @@ public final class CoreContents {
         SERVER_TICK = REGISTRATE.event(SERVER_TICK_NAME);
         CLIENT_TICK = REGISTRATE.event(CLIENT_TICK_NAME);
 
-        EVENT_MANAGER = REGISTRATE.capability(IEventManager.class, EVENT_MANAGER_TOKEN);
+        EVENT_MANAGER = REGISTRATE.capability(EVENT_MANAGER_NAME, IEventManager.class);
     }
 
     public static void init() {}
