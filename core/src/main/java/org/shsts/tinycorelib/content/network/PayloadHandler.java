@@ -9,6 +9,8 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.api.network.PacketDirection;
+import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
+import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -29,6 +31,20 @@ public class PayloadHandler {
             case SERVERBOUND -> registrar.playToServer(type.type(), codec, payloadHandler);
             case BIDIRECTIONAL -> registrar.playBidirectional(type.type(), codec, payloadHandler);
         }
+    }
+
+    public <P extends IPacket> void registerMenuSync(
+        PayloadRegistrar registrar, PacketType<P, MenuSyncPacket<P>> type,
+        Supplier<P> constructor) {
+        registrar.playToClient(type.type(), MenuSyncPacket.codec(type, constructor),
+            (payload, context) -> payload.handle(context));
+    }
+
+    public <P extends IPacket> void registerMenuEvent(
+        PayloadRegistrar registrar, PacketType<P, MenuEventPacket<P>> type,
+        Supplier<P> constructor) {
+        registrar.playToServer(type.type(), MenuEventPacket.codec(type, constructor),
+            (payload, context) -> payload.handle(context));
     }
 
     public static <P extends IPacket> PacketType<P, GenericPacketPayload<P>> requireGeneric(
@@ -59,5 +75,21 @@ public class PayloadHandler {
         if (direction == PacketDirection.SERVERBOUND) {
             throw new IllegalArgumentException("Cannot send serverbound packet type to player");
         }
+    }
+
+    public static void requirePayloadType(IPacketType<?> packetType, PacketPayloadType payloadType) {
+        if (requireType(packetType).payloadType() != payloadType) {
+            throw new IllegalArgumentException("Packet type %s is not %s".formatted(
+                packetType.loc(), payloadType));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <P extends IPacket, R extends CustomPacketPayload> PacketType<P, R> requireType(
+        IPacketType<P> packetType) {
+        if (!(packetType instanceof PacketType<?, ?> type)) {
+            throw new IllegalArgumentException("Unsupported packet type %s".formatted(packetType.loc()));
+        }
+        return (PacketType<P, R>) type;
     }
 }

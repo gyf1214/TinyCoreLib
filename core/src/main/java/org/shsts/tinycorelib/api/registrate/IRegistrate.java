@@ -14,6 +14,7 @@ import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
@@ -127,6 +128,10 @@ public interface IRegistrate {
         String id, Supplier<T> constructor) {
         return packet(this, id, constructor);
     }
+
+    <T extends IPacket> IPacketType<T> menuSyncPacket(String id, Supplier<T> constructor);
+
+    <T extends IPacket> IPacketType<T> menuEventPacket(String id, Supplier<T> constructor);
 
     <T> ICapability<T> capability(String id, Class<T> typeClass);
 

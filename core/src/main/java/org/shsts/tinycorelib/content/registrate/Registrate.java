@@ -4,6 +4,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -16,6 +17,8 @@ import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.api.network.IPacketType;
+import org.shsts.tinycorelib.api.network.PacketDirection;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
@@ -33,6 +36,10 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 import org.shsts.tinycorelib.content.blockentity.Event;
 import org.shsts.tinycorelib.content.blockentity.ReturnEvent;
+import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
+import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
+import org.shsts.tinycorelib.content.network.PacketPayloadType;
+import org.shsts.tinycorelib.content.network.PacketType;
 import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
@@ -231,6 +238,24 @@ public class Registrate implements IRegistrate {
     public <T extends IPacket, P> IPacketBuilder<T, P> packet(P parent, String id,
         Supplier<T> constructor) {
         return new PacketBuilder<>(this, parent, id, constructor);
+    }
+
+    @Override
+    public <T extends IPacket> IPacketType<T> menuSyncPacket(String id, Supplier<T> constructor) {
+        var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
+        var type = new PacketType<T, MenuSyncPacket<T>>(loc, PacketDirection.CLIENTBOUND,
+            PacketPayloadType.MENU_SYNC, new CustomPacketPayload.Type<>(loc));
+        payloadHandler.addCallback(registrar -> payloads.registerMenuSync(registrar, type, constructor));
+        return type;
+    }
+
+    @Override
+    public <T extends IPacket> IPacketType<T> menuEventPacket(String id, Supplier<T> constructor) {
+        var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
+        var type = new PacketType<T, MenuEventPacket<T>>(loc, PacketDirection.SERVERBOUND,
+            PacketPayloadType.MENU_EVENT, new CustomPacketPayload.Type<>(loc));
+        payloadHandler.addCallback(registrar -> payloads.registerMenuEvent(registrar, type, constructor));
+        return type;
     }
 
     @Override
