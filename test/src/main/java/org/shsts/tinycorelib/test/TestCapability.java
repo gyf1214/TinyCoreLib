@@ -1,21 +1,18 @@
 package org.shsts.tinycorelib.test;
 
 import com.mojang.logging.LogUtils;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import org.shsts.tinycorelib.api.blockentity.ICapabilityBuilder;
+import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
 import org.shsts.tinycorelib.api.blockentity.IEventManager;
 import org.shsts.tinycorelib.api.blockentity.IEventSubscriber;
 import org.shsts.tinycorelib.api.blockentity.INBTUpdatable;
@@ -24,20 +21,19 @@ import org.slf4j.Logger;
 import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.SERVER_TICK;
 import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
+import static org.shsts.tinycorelib.test.All.TEST_COOKING_RECIPE;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
-import static org.shsts.tinycorelib.test.All.TEST_VANILLA_RECIPE;
 import static org.shsts.tinycorelib.test.All.TICK_SECOND;
 import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class TestCapability implements ICapabilityProvider, IEventSubscriber, ITestCapability,
+public class TestCapability implements ICapabilityContainer, IEventSubscriber, ITestCapability,
     INBTSerializable<IntTag>, INBTUpdatable<IntTag> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final BlockEntity blockEntity;
-    private final LazyOptional<ITestCapability> testCap;
-    private final LazyOptional<IItemHandler> itemCap;
+    private final ItemStackHandler itemHandler;
 
     private IEventManager eventManager;
     private boolean isUpdateForced = true;
@@ -46,10 +42,13 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
 
     public TestCapability(BlockEntity blockEntity) {
         this.blockEntity = blockEntity;
-        var itemHandler = new ItemStackHandler(1);
+        this.itemHandler = new ItemStackHandler(1);
+    }
 
-        this.testCap = LazyOptional.of(() -> this);
-        this.itemCap = LazyOptional.of(() -> itemHandler);
+    @Override
+    public void attachCapability(ICapabilityBuilder builder) {
+        builder.attach(TEST_CAPABILITY, this);
+        builder.attach(ITEM_HANDLER_CAPABILITY, itemHandler);
     }
 
     private void onTick(Level world) {
@@ -95,12 +94,12 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
     }
 
     @Override
-    public IntTag serializeNBT() {
+    public IntTag serializeNBT(HolderLookup.Provider provider) {
         return IntTag.valueOf(seconds);
     }
 
     @Override
-    public void deserializeNBT(IntTag intTag) {
+    public void deserializeNBT(HolderLookup.Provider provider, IntTag intTag) {
         seconds = intTag.getAsInt();
     }
 
@@ -114,13 +113,13 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
     }
 
     @Override
-    public IntTag serializeOnUpdate() {
+    public IntTag serializeOnUpdate(HolderLookup.Provider provider) {
         LOGGER.info("{}: serialize on update", this);
         return IntTag.valueOf(seconds);
     }
 
     @Override
-    public void deserializeOnUpdate(IntTag tag) {
+    public void deserializeOnUpdate(HolderLookup.Provider provider, IntTag tag) {
         LOGGER.info("{}: deserialize on update", this);
         seconds = tag.getAsInt();
     }
@@ -132,13 +131,4 @@ public class TestCapability implements ICapabilityProvider, IEventSubscriber, IT
         eventManager.subscribe(TICK_SECOND.get(), this::onTickSecond);
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction direction) {
-        if (cap == TEST_CAPABILITY.get()) {
-            return testCap.cast();
-        } else if (cap == ITEM_HANDLER_CAPABILITY.get()) {
-            return itemCap.cast();
-        }
-        return LazyOptional.empty();
-    }
 }

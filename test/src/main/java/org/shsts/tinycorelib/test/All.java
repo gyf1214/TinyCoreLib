@@ -9,9 +9,9 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
@@ -85,14 +85,15 @@ public final class All {
             .tint(0xFFFFFF00)
             .register();
 
+        TEST_CAPABILITY = REGISTRATE.capability("test_capability", ITestCapability.class);
+
+        ITEM_HANDLER_CAPABILITY = itemHandlerCapability();
+
         TEST_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_block_entity")
             .validBlock(TEST_BLOCK3)
-            .capability("test_capability", TestCapability::new)
+            .capability(TEST_CAPABILITY, ITEM_HANDLER_CAPABILITY)
+            .container("test_capability", TestCapability::new)
             .register();
-
-        TEST_CAPABILITY = REGISTRATE.capability(ITestCapability.class, new CapabilityToken<>() {});
-
-        ITEM_HANDLER_CAPABILITY = REGISTRATE.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
 
         TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
             .menu("test_menu", TestMenu::new)
@@ -116,4 +117,9 @@ public final class All {
     }
 
     public static void init() {}
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static ICapability<IItemHandler> itemHandlerCapability() {
+        return REGISTRATE.capability((BlockCapability) Capabilities.ItemHandler.BLOCK);
+    }
 }
