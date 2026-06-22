@@ -179,7 +179,7 @@ public class Registrate implements IRegistrate {
         for (var handler : entryHandlers.values()) {
             handler.addListener(modEventBus);
         }
-        recipeTypeHandler.addListeners(modEventBus);
+        recipeTypeHandler.addListener(modEventBus);
         modEventBus.addListener(capabilityHandler::onRegisterEvent);
         modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
     }

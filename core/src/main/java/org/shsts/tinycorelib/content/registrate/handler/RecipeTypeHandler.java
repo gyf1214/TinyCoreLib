@@ -6,7 +6,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.IEventBus;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
@@ -16,32 +16,28 @@ import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.RecipeTypeEntry;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
+import java.util.NoSuchElementException;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class RecipeTypeHandler {
+public class RecipeTypeHandler extends EntryHandler<RecipeType<?>> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private final String modid;
-    private final List<RecipeTypeBuilder<?, ?, ?>> builders = new ArrayList<>();
+    private boolean typeRegistered = false;
+    private boolean serializerRegistered = false;
 
     public RecipeTypeHandler(Registrate registrate) {
-        this.modid = registrate.modid;
+        super(registrate, Registries.RECIPE_TYPE, BuiltInRegistries.RECIPE_TYPE);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     public IRecipeType<?> getRecipeType(ResourceLocation loc) {
-        Supplier<SmartRecipeType> supplier = () -> {
+        return new RecipeTypeEntry<>(loc, () -> {
             var type = BuiltInRegistries.RECIPE_TYPE.get(loc);
             if (type == null) {
-                throw new IllegalStateException("Missing recipe type " + loc);
+                throw new NoSuchElementException();
             }
             return (SmartRecipeType<?, ?>) type;
-        };
-        return new RecipeTypeEntry(loc, supplier);
+        });
     }
 
     public IRecipeType<?> getRecipeType(String id) {
@@ -51,37 +47,32 @@ public class RecipeTypeHandler {
     public <C, R extends IRecipe<C>> RecipeTypeEntry<C, R> register(
         RecipeTypeBuilder<C, R, ?> builder) {
         builders.add(builder);
-        return new RecipeTypeEntry<>(builder.loc(), () -> {
-            var type = BuiltInRegistries.RECIPE_TYPE.get(builder.loc());
-            if (type == null) {
-                throw new IllegalStateException("Missing recipe type " + builder.loc());
-            }
-            return (SmartRecipeType<C, R>) type;
-        });
+        return new RecipeTypeEntry<>(builder.loc());
     }
 
     public void onRegisterEvent(RegisterEvent event) {
         if (builders.isEmpty()) {
             return;
         }
-        event.register(Registries.RECIPE_TYPE, helper -> {
-            LOGGER.info("Mod {} registry {} register {} objects", modid,
-                Registries.RECIPE_TYPE.location(), builders.size());
-            for (var builder : builders) {
-                helper.register(builder.loc(), builder.buildObject());
-            }
-        });
-        event.register(Registries.RECIPE_SERIALIZER, helper -> {
+
+        var registry = event.getRegistry(registryKey);
+        if (!typeRegistered && registry != null) {
+            registerBuilders(registry);
+            typeRegistered = true;
+        }
+
+        var serializerRegistry = event.getRegistry(Registries.RECIPE_SERIALIZER);
+        if (!serializerRegistered && serializerRegistry != null) {
             LOGGER.info("Mod {} registry {} register {} objects", modid,
                 Registries.RECIPE_SERIALIZER.location(), builders.size());
             for (var builder : builders) {
-                builder.registerSerializer(helper);
+                ((RecipeTypeBuilder<?, ?, ?>) builder).registerSerializer(serializerRegistry);
             }
-            builders.clear();
-        });
-    }
+            serializerRegistered = true;
+        }
 
-    public void addListeners(IEventBus modEventBus) {
-        modEventBus.addListener(this::onRegisterEvent);
+        if (typeRegistered && serializerRegistered) {
+            builders.clear();
+        }
     }
 }

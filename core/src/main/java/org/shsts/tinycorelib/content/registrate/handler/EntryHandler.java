@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
@@ -27,7 +28,7 @@ public class EntryHandler<V> implements IEntryHandler<V> {
 
     protected final String modid;
     protected final List<EntryBuilder<V, ?, ?, ?>> builders = new ArrayList<>();
-    private final ResourceKey<? extends Registry<V>> registryKey;
+    protected final ResourceKey<? extends Registry<V>> registryKey;
     @Nullable
     private final Supplier<Registry<V>> registrySupp;
     @Nullable
@@ -49,21 +50,24 @@ public class EntryHandler<V> implements IEntryHandler<V> {
         this.registrySupp = registry;
     }
 
-    private void onRegisterEvent(RegisterEvent event) {
-        if (builders.isEmpty()) {
-            return;
-        }
-        var registry = event.getRegistry(registryKey);
-        if (registry == null) {
-            return;
-        }
+    protected void registerBuilders(Registry<V> registry) {
         LOGGER.info("Mod {} registry {} register {} objects", modid,
             registryKey.location(), builders.size());
         for (var builder : builders) {
             builder.registerObject(registry);
         }
-        // free reference
-        builders.clear();
+    }
+
+    protected void onRegisterEvent(RegisterEvent event) {
+        if (builders.isEmpty()) {
+            return;
+        }
+        var registry = event.getRegistry(registryKey);
+        if (registry != null) {
+            registerBuilders(registry);
+            // free reference
+            builders.clear();
+        }
     }
 
     public Registry<V> getRegistry() {
@@ -80,12 +84,12 @@ public class EntryHandler<V> implements IEntryHandler<V> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <U extends V> IEntry<U> getEntry(ResourceLocation loc) {
         return new Entry<>(loc, () -> {
             var value = getRegistry().get(loc);
             if (value == null) {
-                throw new IllegalStateException("Missing registry entry " + loc +
-                    " in registry " + registryKey.location());
+                throw new NoSuchElementException(registryKey.location() + " " + loc);
             }
             return (U) value;
         });

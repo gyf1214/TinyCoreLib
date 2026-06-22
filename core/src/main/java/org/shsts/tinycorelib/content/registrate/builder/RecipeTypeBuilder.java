@@ -5,14 +5,12 @@ import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.neoforged.neoforge.registries.RegisterEvent;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
-import org.shsts.tinycorelib.content.common.Builder;
 import org.shsts.tinycorelib.content.recipe.SmartRecipeSerializer;
 import org.shsts.tinycorelib.content.recipe.SmartRecipeType;
 import org.shsts.tinycorelib.content.registrate.Registrate;
@@ -23,25 +21,17 @@ import org.slf4j.Logger;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class RecipeTypeBuilder<C, R extends IRecipe<C>, P>
-    extends Builder<RecipeType<?>, P, IRecipeTypeBuilder<R, P>>
+    extends EntryBuilder<RecipeType<?>, RecipeType<?>, P, IRecipeTypeBuilder<R, P>>
     implements IRecipeTypeBuilder<R, P> {
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    private final RecipeTypeHandler handler;
-    private final ResourceLocation loc;
 
     @Nullable
     private Class<R> recipeClass = null;
     @Nullable
     private MapCodec<R> serializer = null;
-    @Nullable
-    private RecipeTypeEntry<C, R> entry;
 
     public RecipeTypeBuilder(Registrate registrate, P parent, String id) {
-        super(parent);
-        this.handler = registrate.recipeTypeHandler;
-        this.loc = ResourceLocation.fromNamespaceAndPath(registrate.modid, id);
-        onBuild.add(this::register);
+        super(registrate, registrate.recipeTypeHandler, parent, id);
     }
 
     @Override
@@ -56,10 +46,12 @@ public class RecipeTypeBuilder<C, R extends IRecipe<C>, P>
         return self();
     }
 
+    @SuppressWarnings({"unchecked", "RedundantSuppression"})
     private RecipeSerializer<?> createSerializer() {
         assert entry != null;
         assert serializer != null;
-        return new SmartRecipeSerializer<>(entry, serializer);
+        var entry1 = (RecipeTypeEntry<C, R>) entry;
+        return new SmartRecipeSerializer<>(entry1, serializer);
     }
 
     @Override
@@ -74,23 +66,24 @@ public class RecipeTypeBuilder<C, R extends IRecipe<C>, P>
         return (SmartRecipeType<C, R>) super.buildObject();
     }
 
-    public void registerSerializer(RegisterEvent.RegisterHelper<RecipeSerializer<?>> helper) {
+    @SuppressWarnings({"unchecked", "RedundantSuppression"})
+    public void registerSerializer(Registry<RecipeSerializer<?>> registry) {
         assert entry != null;
         LOGGER.trace("register object {} {}", "recipe_serializer", loc);
         var object = createSerializer();
-        helper.register(loc, object);
-        entry.setSerializer(object);
+        Registry.register(registry, loc, object);
+        var entry1 = (RecipeTypeEntry<C, R>) entry;
+        entry1.setSerializer(object);
     }
 
     @Override
-    public ResourceLocation loc() {
-        return loc;
+    protected RecipeTypeEntry<C, R> createEntry() {
+        return ((RecipeTypeHandler) handler).register(this);
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "RedundantSuppression"})
     public IRecipeType<R> register() {
-        LOGGER.trace("create recipe type {} {}", getClass().getSimpleName(), loc);
-        entry = handler.register(this);
-        return entry;
+        return (IRecipeType<R>) super.register();
     }
 }

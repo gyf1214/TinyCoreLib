@@ -11,6 +11,7 @@ import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.content.recipe.SmartRecipeType;
 
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
@@ -25,6 +26,10 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>>
         super(loc, supplier::get);
     }
 
+    public RecipeTypeEntry(ResourceLocation loc) {
+        super(loc);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public SmartRecipeType<C, R> get() {
@@ -36,7 +41,7 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>>
         if (serializer == null) {
             serializer = BuiltInRegistries.RECIPE_SERIALIZER.get(loc());
             if (serializer == null) {
-                throw new IllegalStateException("Missing recipe serializer " + loc());
+                throw new NoSuchElementException("Recipe serializer " + loc());
             }
         }
         return serializer;
@@ -50,5 +55,4 @@ public class RecipeTypeEntry<C, R extends IRecipe<C>>
     public void setSerializer(RecipeSerializer<?> value) {
         serializer = value;
     }
-
 }

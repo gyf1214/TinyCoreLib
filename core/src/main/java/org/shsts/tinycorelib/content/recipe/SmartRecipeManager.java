@@ -29,7 +29,7 @@ public class SmartRecipeManager implements IRecipeManager {
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
     private <C, R extends IRecipe<C>> RecipeType<SmartRecipe<C, R>> getType(
         IRecipeType<R> type) {
-        return ((RecipeTypeEntry<C, R, ?>) type).get();
+        return ((RecipeTypeEntry<C, R>) type).get();
     }
 
     private <R extends IRecipe<?>> IEntry<R> unwrap(RecipeHolder<? extends SmartRecipe<?, R>> holder) {
@@ -54,17 +54,16 @@ public class SmartRecipeManager implements IRecipeManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <R extends IRecipe<?>> List<IEntry<R>> getAllRecipesFor(IRecipeType<R> type) {
-        return manager.getAllRecipesFor(getType(type))
-            .stream().map(this::unwrap)
-            .toList();
+        return (List<IEntry<R>>) (List<?>) getRawRecipesFor(type);
     }
 
     @Override
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
     public List<IEntry<? extends IRecipe<?>>> getRawRecipesFor(IRecipeType<?> type) {
         var ret = new ArrayList<IEntry<? extends IRecipe<?>>>();
-        var recipeType = (RecipeType<SmartRecipe<?, ? extends IRecipe<?>>>) type.get();
+        var recipeType = (SmartRecipeType<Object, IRecipe<Object>>) type.get();
         for (var recipe : manager.getAllRecipesFor(recipeType)) {
             ret.add(unwrap(recipe));
         }
