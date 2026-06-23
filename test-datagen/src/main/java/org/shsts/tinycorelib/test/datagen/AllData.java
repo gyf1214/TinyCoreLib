@@ -7,7 +7,7 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
@@ -140,11 +140,11 @@ public final class AllData {
     }
 
     private static ResourceLocation mcLoc(String id) {
-        return new ResourceLocation(id);
+        return ResourceLocation.parse(id);
     }
 
     private static ResourceLocation modLoc(String id) {
-        return new ResourceLocation(TinyCoreLibTest.ID, id);
+        return ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, id);
     }
 
     private static void testBlockModel(IDataContext<BlockModelProvider> ctx) {
@@ -165,11 +165,13 @@ public final class AllData {
     }
 
     private static TagKey<Block> blockTag(String id) {
-        return TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(TinyCoreLibTest.ID, id));
+        return TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, id));
     }
 
     private static TagKey<Item> itemTag(String id) {
-        return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(TinyCoreLibTest.ID, id));
+        return TagKey.create(Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, id));
     }
 
     private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... predicates) {

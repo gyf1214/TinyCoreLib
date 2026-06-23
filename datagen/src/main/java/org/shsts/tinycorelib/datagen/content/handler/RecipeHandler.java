@@ -5,7 +5,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 
 import java.util.function.Consumer;

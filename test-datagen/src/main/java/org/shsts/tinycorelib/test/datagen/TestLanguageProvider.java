@@ -2,8 +2,8 @@ package org.shsts.tinycorelib.test.datagen;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.common.data.LanguageProvider;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.common.data.LanguageProvider;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 
 @ParametersAreNonnullByDefault
@@ -13,7 +13,7 @@ public class TestLanguageProvider extends LanguageProvider {
     private final IDataGen dataGen;
 
     public TestLanguageProvider(IDataGen dataGen, GatherDataEvent event, String locale) {
-        super(event.getGenerator(), dataGen.modid(), locale);
+        super(event.getGenerator().getPackOutput(), dataGen.modid(), locale);
         this.dataGen = dataGen;
         dataGen.trackLocale(locale);
         this.locale = locale;

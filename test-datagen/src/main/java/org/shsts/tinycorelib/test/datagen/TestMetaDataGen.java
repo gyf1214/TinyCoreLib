@@ -4,8 +4,10 @@ import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.item.Item;
 import org.shsts.tinycorelib.api.meta.IMetaConsumer;
 import org.shsts.tinycorelib.api.meta.MetaLoadingException;
 import org.slf4j.Logger;
@@ -24,8 +26,8 @@ public class TestMetaDataGen implements IMetaConsumer {
         LOGGER.info("accept meta loc={}, desc={}", loc, val);
 
         var id = jo.get("id").getAsString();
-        var item = REGISTRATE.getHandler(ForgeRegistries.ITEMS).getEntry(id);
-        var tex = new ResourceLocation(jo.get("tex").getAsString());
+        var item = REGISTRATE.getHandler(Registries.ITEM, BuiltInRegistries.ITEM, Item.class).getEntry(id);
+        var tex = ResourceLocation.parse(jo.get("tex").getAsString());
         DATA_GEN.item(item)
             .model(ctx -> ctx.provider()
                 .withExistingParent(ctx.id(), "item/generated")

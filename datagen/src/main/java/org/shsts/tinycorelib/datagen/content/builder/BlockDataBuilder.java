@@ -12,8 +12,8 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;
@@ -128,7 +128,7 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
         assert blockState != null;
         if (itemModel == null) {
             itemModel = ctx -> ctx.provider().withExistingParent(ctx.id(),
-                new ResourceLocation(ctx.modid(), "block/" + ctx.id()));
+                ResourceLocation.fromNamespaceAndPath(ctx.modid(), "block/" + ctx.id()));
         }
         if (!hasDrop) {
             dropSelf();

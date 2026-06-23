@@ -5,8 +5,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.data.DataProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.generators.ModelProvider;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.client.model.generators.ModelProvider;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.content.DataGen;
@@ -39,7 +39,7 @@ public abstract class DataHandler<D extends DataProvider> implements IDataHandle
 
     @Override
     public <B, P> B builder(P parent, String id, BuilderFactory<B, D, P> factory) {
-        return factory.create(this, parent, new ResourceLocation(dataGen.modid, id));
+        return factory.create(this, parent, ResourceLocation.fromNamespaceAndPath(dataGen.modid, id));
     }
 
     @Override
@@ -58,16 +58,17 @@ public abstract class DataHandler<D extends DataProvider> implements IDataHandle
 
     public void onGatherData(GatherDataEvent event) {
         var prov = createProvider(event);
-        event.getGenerator().addProvider(prov);
+        event.addProvider(prov);
     }
 
     public static String modelPath(String path, String modid, String folder) {
-        var loc = path.contains(":") ? new ResourceLocation(path) : new ResourceLocation(modid, path);
+        var loc = path.contains(":") ? ResourceLocation.parse(path) :
+            ResourceLocation.fromNamespaceAndPath(modid, path);
         var newPath = loc.getPath();
         if (!newPath.startsWith(ModelProvider.BLOCK_FOLDER + "/") &&
             !newPath.startsWith(ModelProvider.ITEM_FOLDER + "/")) {
             newPath = folder + "/" + newPath;
         }
-        return (new ResourceLocation(loc.getNamespace(), newPath)).toString();
+        return ResourceLocation.fromNamespaceAndPath(loc.getNamespace(), newPath).toString();
     }
 }

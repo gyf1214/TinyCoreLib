@@ -3,8 +3,9 @@ package org.shsts.tinycorelib.datagen.content;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
@@ -13,9 +14,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -81,8 +83,8 @@ public class DataGen implements IDataGen {
         this.itemModelHandler = createDataHandler(ItemModelHandler::new);
         this.lootTableHandler = createDataHandler(LootTableHandler::new);
         this.recipeHandler = createDataHandler(RecipeHandler::new);
-        createTagsHandler(Registry.BLOCK);
-        createTagsHandler(Registry.ITEM);
+        createTagsHandler(BuiltInRegistries.BLOCK);
+        createTagsHandler(BuiltInRegistries.ITEM);
 
         this.blockTrackedContext = createTrackedContext(TrackedType.BLOCK);
         this.itemTrackedContext = createTrackedContext(TrackedType.ITEM);
@@ -217,10 +219,10 @@ public class DataGen implements IDataGen {
     public IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe, String suffix) {
         recipeHandler.registerRecipe(cons -> {
             var builder = recipe.get();
-            var loc = builder.getResult().getRegistryName();
-            assert loc != null;
+            var loc = BuiltInRegistries.ITEM.getKey(builder.getResult().asItem());
             var prefix = builder instanceof SimpleCookingRecipeBuilder ? "smelt" : "craft";
-            var recipeLoc = new ResourceLocation(modid, prefix + "/" + loc.getPath() + suffix);
+            var recipeLoc = ResourceLocation.fromNamespaceAndPath(
+                modid, prefix + "/" + loc.getPath() + suffix);
             builder.save(cons, recipeLoc);
         });
         return this;
@@ -261,16 +263,17 @@ public class DataGen implements IDataGen {
             handler.onGatherData(event);
         }
         for (var prov : dataProviders) {
-            event.getGenerator().addProvider(prov.apply(this, event));
+            event.addProvider(prov.apply(this, event));
         }
-        event.getGenerator().addProvider(new DataProvider() {
+        event.addProvider(new DataProvider() {
             @Override
-            public void run(HashCache cache) {
+            public CompletableFuture<?> run(CachedOutput cache) {
                 for (var trackedCtx : trackedContexts) {
                     if (!trackedCtx.postValidate() && failValidation) {
                         throw new IllegalStateException("Tracked validation failed");
                     }
                 }
+                return CompletableFuture.completedFuture(null);
             }
 
             @Override

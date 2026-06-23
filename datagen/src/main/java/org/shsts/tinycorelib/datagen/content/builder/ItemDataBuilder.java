@@ -6,7 +6,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;

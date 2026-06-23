@@ -3,7 +3,6 @@ package org.shsts.tinycorelib.datagen.content.context;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.common.util.Lazy;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.slf4j.Logger;
@@ -21,19 +20,19 @@ import java.util.stream.Collectors;
 public class TrackedContext<V> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private final Registrate registrate;
     private final TrackedType<V> type;
-    private final Supplier<Map<V, String>> tracked;
     private final Map<V, String> extraTracked = new HashMap<>();
     private final List<Supplier<? extends V>> processed;
 
     public TrackedContext(Registrate registrate, TrackedType<V> type) {
+        this.registrate = registrate;
         this.type = type;
-        this.tracked = Lazy.of(() -> registrate.getTracked(type));
         this.processed = new ArrayList<>();
     }
 
     public Map<V, String> getTrackedMap() {
-        var ret = new HashMap<>(tracked.get());
+        var ret = new HashMap<>(registrate.getTracked(type));
         ret.putAll(extraTracked);
         return ret;
     }

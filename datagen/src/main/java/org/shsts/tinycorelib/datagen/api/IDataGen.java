@@ -2,15 +2,16 @@ package org.shsts.tinycorelib.datagen.api;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.api.recipe.IRecipeDataConsumer;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
@@ -66,13 +67,11 @@ public interface IDataGen extends IRecipeDataConsumer {
     IDataGen nullRecipe(ResourceLocation loc);
 
     default IDataGen nullRecipe(String loc) {
-        return nullRecipe(new ResourceLocation(loc));
+        return nullRecipe(ResourceLocation.parse(loc));
     }
 
     default IDataGen nullRecipe(Item item) {
-        var loc = item.getRegistryName();
-        assert loc != null;
-        return nullRecipe(loc);
+        return nullRecipe(BuiltInRegistries.ITEM.getKey(item));
     }
 
     IDataGen trackLocale(String locale);

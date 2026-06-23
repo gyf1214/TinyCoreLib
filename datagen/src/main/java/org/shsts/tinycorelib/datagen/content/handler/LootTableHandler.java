@@ -28,7 +28,7 @@ import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 
 import java.util.HashMap;
@@ -138,27 +138,27 @@ public class LootTableHandler extends DataHandler<LootTableProvider> {
     }
 
     public void drop(ResourceLocation loc, Supplier<? extends ItemLike> item, float chance) {
-        var loc1 = new ResourceLocation(loc.getNamespace(), "blocks/" + loc.getPath());
+        var loc1 = loc.withPrefix("blocks/");
         addCallback(prov -> ((Provider) prov).blockLoot.drop(loc1, item.get(), chance));
     }
 
     public <V extends Comparable<V> & StringRepresentable> void dropOnState(
         ResourceLocation loc, Supplier<? extends ItemLike> item,
         Supplier<? extends Block> block, Property<V> prop, V value) {
-        var loc1 = new ResourceLocation(loc.getNamespace(), "blocks/" + loc.getPath());
+        var loc1 = loc.withPrefix("blocks/");
         addCallback(prov -> ((Provider) prov).blockLoot.dropOnState(
             loc1, item.get(), block.get(), prop, value));
     }
 
     public void dropOnState(ResourceLocation loc, Supplier<? extends ItemLike> item,
         Supplier<? extends Block> block, BooleanProperty prop, boolean value) {
-        var loc1 = new ResourceLocation(loc.getNamespace(), "blocks/" + loc.getPath());
+        var loc1 = loc.withPrefix("blocks/");
         addCallback(prov -> ((Provider) prov).blockLoot.dropOnState(
             loc1, item.get(), block.get(), prop, value));
     }
 
     public void dropOnTool(ResourceLocation loc, Supplier<? extends ItemLike> item, TagKey<Item> tool) {
-        var loc1 = new ResourceLocation(loc.getNamespace(), "blocks/" + loc.getPath());
+        var loc1 = loc.withPrefix("blocks/");
         addCallback(prov -> ((Provider) prov).blockLoot.dropOnTool(loc1, item.get(), tool));
     }
 }

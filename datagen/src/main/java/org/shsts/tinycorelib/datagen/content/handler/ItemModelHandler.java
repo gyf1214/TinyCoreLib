@@ -6,10 +6,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;
@@ -28,7 +28,7 @@ public class ItemModelHandler extends DataHandler<ItemModelProvider> {
 
     private class Provider extends ItemModelProvider {
         public Provider(GatherDataEvent event) {
-            super(event.getGenerator(), dataGen.modid, event.getExistingFileHelper());
+            super(event.getGenerator().getPackOutput(), dataGen.modid, event.getExistingFileHelper());
         }
 
         /**
