@@ -18,6 +18,7 @@ public final class CoreLibKeys {
     public static final String SERVER_TICK_NAME = "server_tick";
     public static final String CLIENT_TICK_NAME = "client_tick";
     public static final String EVENT_MANAGER_NAME = "event_manager";
+    public static final String NULL_RECIPE_NAME = "null";
 
     public static final ResourceKey<Registry<IEvent<?>>> EVENT_REGISTRY_KEY =
         ResourceKey.createRegistryKey(modLoc(EVENT_REGISTRY_NAME));
@@ -28,6 +29,7 @@ public final class CoreLibKeys {
     public static final ResourceLocation SERVER_TICK_LOC = modLoc(SERVER_TICK_NAME);
     public static final ResourceLocation CLIENT_TICK_LOC = modLoc(CLIENT_TICK_NAME);
     public static final ResourceLocation EVENT_MANAGER_LOC = modLoc(EVENT_MANAGER_NAME);
+    public static final ResourceLocation NULL_RECIPE_LOC = modLoc(NULL_RECIPE_NAME);
 
     private CoreLibKeys() {}
 

@@ -6,7 +6,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.resources.ResourceKey;
@@ -16,8 +15,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.conditions.FalseCondition;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.content.recipe.NullRecipe;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
@@ -230,7 +231,8 @@ public class DataGen implements IDataGen {
 
     @Override
     public IDataGen nullRecipe(ResourceLocation loc) {
-        recipeHandler.registerRecipe(() -> new NullRecipe(loc));
+        recipeHandler.registerRecipe(output -> output.accept(loc, NullRecipe.INSTANCE, null,
+            FalseCondition.INSTANCE));
         return this;
     }
 
@@ -250,11 +252,6 @@ public class DataGen implements IDataGen {
     public IDataGen processLang(String locale, String key) {
         langTrackedContext.process(locale, key);
         return this;
-    }
-
-    @Override
-    public void registerRecipe(ResourceLocation loc, Supplier<FinishedRecipe> recipe) {
-        recipeHandler.registerRecipe(recipe);
     }
 
     @Override
