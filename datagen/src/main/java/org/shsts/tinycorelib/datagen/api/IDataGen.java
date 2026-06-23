@@ -64,13 +64,9 @@ public interface IDataGen {
     IRecipeFactory<R, B> recipeFactory(
         IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory);
 
-    IDataGen replaceVanillaRecipe(Supplier<RecipeBuilder> recipe);
+    <B extends RecipeBuilder> B vanillaRecipe(String id, Supplier<B> factory);
 
-    default IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe) {
-        return vanillaRecipe(recipe, "");
-    }
-
-    IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe, String suffix);
+    <B extends RecipeBuilder> B vanillaRecipe(ResourceLocation loc, Supplier<B> factory);
 
     IDataGen nullRecipe(ResourceLocation loc);
 

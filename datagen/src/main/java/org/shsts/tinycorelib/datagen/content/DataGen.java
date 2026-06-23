@@ -7,7 +7,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.RecipeBuilder;
-import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -223,22 +222,15 @@ public class DataGen implements IDataGen {
     }
 
     @Override
-    public IDataGen replaceVanillaRecipe(Supplier<RecipeBuilder> recipe) {
-        recipeHandler.registerRecipe(cons -> recipe.get().save(cons));
-        return this;
+    public <B extends RecipeBuilder> B vanillaRecipe(String id, Supplier<B> factory) {
+        return vanillaRecipe(ResourceLocation.fromNamespaceAndPath(modid, id), factory);
     }
 
     @Override
-    public IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe, String suffix) {
-        recipeHandler.registerRecipe(cons -> {
-            var builder = recipe.get();
-            var loc = BuiltInRegistries.ITEM.getKey(builder.getResult().asItem());
-            var prefix = builder instanceof SimpleCookingRecipeBuilder ? "smelt" : "craft";
-            var recipeLoc = ResourceLocation.fromNamespaceAndPath(
-                modid, prefix + "/" + loc.getPath() + suffix);
-            builder.save(cons, recipeLoc);
-        });
-        return this;
+    public <B extends RecipeBuilder> B vanillaRecipe(ResourceLocation loc, Supplier<B> factory) {
+        var builder = factory.get();
+        recipeHandler.registerRecipe(output -> builder.save(output, loc));
+        return builder;
     }
 
     @Override

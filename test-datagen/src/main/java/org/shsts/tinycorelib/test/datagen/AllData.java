@@ -106,17 +106,18 @@ public final class AllData {
             .beginSeconds(10)
             .build();
 
-        DATA_GEN.vanillaRecipe(() -> ShapedRecipeBuilder.shaped(TEST_BLOCK3.get())
+        DATA_GEN.vanillaRecipe("craft/test_block3", () -> ShapedRecipeBuilder.shaped(TEST_BLOCK3.get()))
             .pattern("###").pattern("#X#")
             .define('#', Items.BIRCH_PLANKS)
             .define('X', TEST_PARENT_TAG)
-            .unlockedBy("has_test", has(TEST_PARENT_TAG)));
+            .unlockedBy("has_test", has(TEST_PARENT_TAG));
 
         DATA_GEN.nullRecipe(Items.OAK_PLANKS);
 
-        DATA_GEN.replaceVanillaRecipe(() -> ShapelessRecipeBuilder.shapeless(Items.BIRCH_PLANKS, 6)
+        DATA_GEN.vanillaRecipe(mcLoc("birch_planks"),
+            () -> ShapelessRecipeBuilder.shapeless(Items.BIRCH_PLANKS, 6))
             .requires(Items.BIRCH_LOG)
-            .unlockedBy("has_birch", has(Items.BIRCH_LOG)));
+            .unlockedBy("has_birch", has(Items.BIRCH_LOG));
 
         TEST_RESOURCES = DATA_GEN.createHandler(TestResourceProvider::new);
 
