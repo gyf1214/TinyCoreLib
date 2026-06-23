@@ -17,7 +17,10 @@ import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.conditions.FalseCondition;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import org.shsts.tinycorelib.api.core.IBuilder;
+import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.content.recipe.NullRecipe;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
@@ -26,6 +29,7 @@ import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
+import org.shsts.tinycorelib.datagen.api.recipe.IRecipeFactory;
 import org.shsts.tinycorelib.datagen.content.builder.BlockDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
@@ -36,6 +40,7 @@ import org.shsts.tinycorelib.datagen.content.handler.ItemModelHandler;
 import org.shsts.tinycorelib.datagen.content.handler.LootTableHandler;
 import org.shsts.tinycorelib.datagen.content.handler.RecipeHandler;
 import org.shsts.tinycorelib.datagen.content.handler.TagsHandler;
+import org.shsts.tinycorelib.datagen.content.recipe.RecipeFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -208,6 +213,13 @@ public class DataGen implements IDataGen {
     public IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons) {
         itemModelHandler.addModelCallback(cons);
         return this;
+    }
+
+    @Override
+    public <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>>
+    IRecipeFactory<R, B> recipeFactory(
+        IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory) {
+        return new RecipeFactory<>(this, type, factory);
     }
 
     @Override
