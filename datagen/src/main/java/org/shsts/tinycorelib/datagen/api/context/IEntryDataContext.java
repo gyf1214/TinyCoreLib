@@ -7,7 +7,7 @@ import org.shsts.tinycorelib.api.core.ILoc;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IEntryDataContext<T, U extends T, D extends DataProvider> extends ILoc, IDataContext<D> {
+public interface IEntryDataContext<U, D extends DataProvider> extends ILoc, IDataContext<D> {
     @Override
     String modid();
 

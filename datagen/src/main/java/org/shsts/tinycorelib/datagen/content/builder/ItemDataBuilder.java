@@ -20,14 +20,14 @@ import java.util.function.Supplier;
 public class ItemDataBuilder<U extends Item, P> extends EntryDataBuilder<Item, U, P, IItemDataBuilder<U, P>>
     implements IItemDataBuilder<U, P> {
     @Nullable
-    private Consumer<IEntryDataContext<Item, U, ItemModelProvider>> model = null;
+    private Consumer<IEntryDataContext<U, ItemModelProvider>> model = null;
 
     public ItemDataBuilder(DataGen dataGen, P parent, ResourceLocation loc, Supplier<U> object) {
         super(dataGen, parent, loc, dataGen.itemTrackedContext, object);
     }
 
     @Override
-    public IItemDataBuilder<U, P> model(Consumer<IEntryDataContext<Item, U, ItemModelProvider>> cons) {
+    public IItemDataBuilder<U, P> model(Consumer<IEntryDataContext<U, ItemModelProvider>> cons) {
         model = cons;
         return self();
     }

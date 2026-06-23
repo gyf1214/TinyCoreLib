@@ -61,13 +61,13 @@ public class ItemModelHandler extends DataHandler<ItemModelProvider> {
     }
 
     public <U extends Item> void addModelCallback(ResourceLocation loc, Supplier<U> item,
-        Consumer<IEntryDataContext<Item, U, ItemModelProvider>> cons) {
+        Consumer<IEntryDataContext<U, ItemModelProvider>> cons) {
         addCallback(prov -> cons.accept(new EntryDataContext<>(
             dataGen.modid, loc.getPath(), prov, item.get())));
     }
 
     public <U extends Block> void addBlockItemCallback(ResourceLocation loc, Supplier<U> block,
-        Consumer<IEntryDataContext<Item, ? super BlockItem, ItemModelProvider>> cons) {
+        Consumer<IEntryDataContext<? super BlockItem, ItemModelProvider>> cons) {
         addCallback(prov -> {
             if (block.get().asItem() instanceof BlockItem blockItem) {
                 cons.accept(new EntryDataContext<>(dataGen.modid,

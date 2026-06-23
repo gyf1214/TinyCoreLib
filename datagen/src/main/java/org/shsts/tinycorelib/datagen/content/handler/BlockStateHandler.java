@@ -113,7 +113,7 @@ public class BlockStateHandler extends DataHandler<BlockStateProvider> {
     }
 
     public <U extends Block> void addBlockStateCallback(ResourceLocation loc, Supplier<U> block,
-        Consumer<IEntryDataContext<Block, U, BlockStateProvider>> cons) {
+        Consumer<IEntryDataContext<U, BlockStateProvider>> cons) {
         addCallback(prov -> cons.accept(new EntryDataContext<>(dataGen.modid,
             loc.getPath(), prov, block.get())));
     }

@@ -23,10 +23,10 @@ import java.util.function.Supplier;
 public interface IBlockDataBuilder<U extends Block, P>
     extends IDataBuilder<P, IBlockDataBuilder<U, P>> {
     IBlockDataBuilder<U, P> blockState(
-        Consumer<IEntryDataContext<Block, U, BlockStateProvider>> cons);
+        Consumer<IEntryDataContext<U, BlockStateProvider>> cons);
 
     <U1 extends BlockItem> IBlockDataBuilder<U, P> itemModel(
-        Consumer<IEntryDataContext<Item, U1, ItemModelProvider>> cons);
+        Consumer<IEntryDataContext<U1, ItemModelProvider>> cons);
 
     IBlockDataBuilder<U, P> tag(List<TagKey<Block>> tags);
 

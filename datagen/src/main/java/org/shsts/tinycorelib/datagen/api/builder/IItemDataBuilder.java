@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IItemDataBuilder<U extends Item, P> extends IDataBuilder<P, IItemDataBuilder<U, P>> {
-    IItemDataBuilder<U, P> model(Consumer<IEntryDataContext<Item, U, ItemModelProvider>> cons);
+    IItemDataBuilder<U, P> model(Consumer<IEntryDataContext<U, ItemModelProvider>> cons);
 
     IItemDataBuilder<U, P> tag(List<TagKey<Item>> tags);
 

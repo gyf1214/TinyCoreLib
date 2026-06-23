@@ -28,9 +28,9 @@ import java.util.function.Supplier;
 public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block, U, P, IBlockDataBuilder<U, P>>
     implements IBlockDataBuilder<U, P> {
     @Nullable
-    private Consumer<IEntryDataContext<Block, U, BlockStateProvider>> blockState = null;
+    private Consumer<IEntryDataContext<U, BlockStateProvider>> blockState = null;
     @Nullable
-    private Consumer<IEntryDataContext<Item, ?, ItemModelProvider>> itemModel = null;
+    private Consumer<IEntryDataContext<?, ItemModelProvider>> itemModel = null;
     private boolean hasDrop = false;
 
     public BlockDataBuilder(DataGen dataGen, P parent, ResourceLocation loc, Supplier<U> object) {
@@ -39,7 +39,7 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
 
     @Override
     public IBlockDataBuilder<U, P> blockState(
-        Consumer<IEntryDataContext<Block, U, BlockStateProvider>> cons) {
+        Consumer<IEntryDataContext<U, BlockStateProvider>> cons) {
         blockState = cons;
         return self();
     }
@@ -47,8 +47,8 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
     @Override
     @SuppressWarnings("unchecked")
     public <U1 extends BlockItem> IBlockDataBuilder<U, P> itemModel(
-        Consumer<IEntryDataContext<Item, U1, ItemModelProvider>> cons) {
-        itemModel = ctx -> cons.accept((IEntryDataContext<Item, U1, ItemModelProvider>) ctx);
+        Consumer<IEntryDataContext<U1, ItemModelProvider>> cons) {
+        itemModel = ctx -> cons.accept((IEntryDataContext<U1, ItemModelProvider>) ctx);
         return self();
     }
 

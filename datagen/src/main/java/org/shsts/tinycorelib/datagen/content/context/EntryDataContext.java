@@ -8,8 +8,8 @@ import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class EntryDataContext<T, U extends T, D extends DataProvider> extends DataContext<D>
-    implements IEntryDataContext<T, U, D> {
+public class EntryDataContext<U, D extends DataProvider> extends DataContext<D>
+    implements IEntryDataContext<U, D> {
     public final ResourceLocation loc;
     public final U object;
 
