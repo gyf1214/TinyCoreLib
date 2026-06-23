@@ -12,6 +12,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -176,7 +179,7 @@ public class Registrate implements IRegistrate {
             handler.addListener(modEventBus);
         }
         recipeTypeHandler.addListener(modEventBus);
-        modEventBus.addListener(capabilityHandler::onEvent);
+        modEventBus.addListener((RegisterCapabilitiesEvent event) -> capabilityHandler.onEvent(event));
         modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
         modEventBus.addListener(payloadHandler::onRegisterPayload);
     }
@@ -185,8 +188,9 @@ public class Registrate implements IRegistrate {
     public void registerClient(IEventBus modEventBus) {
         modEventBus.addListener(tintHandler::onRegisterBlockColors);
         modEventBus.addListener(tintHandler::onRegisterItemColors);
-        modEventBus.addListener(rendererHandler::onEvent);
-        modEventBus.addListener(menuScreenHandler::onEvent);
+        modEventBus.addListener((EntityRenderersEvent.RegisterRenderers event) ->
+            rendererHandler.onEvent(event));
+        modEventBus.addListener((RegisterMenuScreensEvent event) -> menuScreenHandler.onEvent(event));
     }
 
     @Override

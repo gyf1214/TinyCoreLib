@@ -3,9 +3,9 @@ package org.shsts.tinycorelib.test.datagen;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
@@ -24,9 +24,8 @@ public class TinyDataGenTest {
     public static ITinyDataGen DATA_CORE;
     public static IDataGen DATA_GEN;
 
-    public TinyDataGenTest() {
+    public TinyDataGenTest(IEventBus modEventBus) {
         LOGGER.info("Construct TinyDataGen Test!");
-        var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::onConstruct);
         modEventBus.addListener(this::onGatherData);
     }

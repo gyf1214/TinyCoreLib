@@ -2,16 +2,16 @@ package org.shsts.tinycorelib.test.datagen;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -110,7 +110,8 @@ public final class AllData {
             .beginSeconds(10)
             .build();
 
-        DATA_GEN.vanillaRecipe("craft/test_block3", () -> ShapedRecipeBuilder.shaped(TEST_BLOCK3.get()))
+        DATA_GEN.<ShapedRecipeBuilder>vanillaRecipe("craft/test_block3",
+            () -> ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TEST_BLOCK3.get()))
             .pattern("###").pattern("#X#")
             .define('#', Items.BIRCH_PLANKS)
             .define('X', TEST_PARENT_TAG)
@@ -119,7 +120,7 @@ public final class AllData {
         DATA_GEN.nullRecipe(Items.OAK_PLANKS);
 
         DATA_GEN.vanillaRecipe(mcLoc("birch_planks"),
-            () -> ShapelessRecipeBuilder.shapeless(Items.BIRCH_PLANKS, 6))
+            () -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.BIRCH_PLANKS, 6))
             .requires(Items.BIRCH_LOG)
             .unlockedBy("has_birch", has(Items.BIRCH_LOG));
 
@@ -184,16 +185,11 @@ public final class AllData {
             .orElseThrow(() -> new IllegalArgumentException("Item is not registered: " + item));
     }
 
-    private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... predicates) {
-        return new InventoryChangeTrigger.TriggerInstance(EntityPredicate.Composite.ANY,
-            MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, predicates);
+    public static Criterion<InventoryChangeTrigger.TriggerInstance> has(TagKey<Item> tag) {
+        return InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(tag));
     }
 
-    public static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> tag) {
-        return inventoryTrigger(ItemPredicate.Builder.item().of(tag).build());
-    }
-
-    public static InventoryChangeTrigger.TriggerInstance has(Item item) {
-        return inventoryTrigger(ItemPredicate.Builder.item().of(item).build());
+    public static Criterion<InventoryChangeTrigger.TriggerInstance> has(Item item) {
+        return InventoryChangeTrigger.TriggerInstance.hasItems(item);
     }
 }
