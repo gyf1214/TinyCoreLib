@@ -60,9 +60,8 @@ public interface IDataGen {
 
     IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons);
 
-    <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>>
-    IRecipeFactory<R, B> recipeFactory(
-        IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory);
+    <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>> IRecipeFactory<R, B>
+        recipeFactory(IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory);
 
     <B extends RecipeBuilder> B vanillaRecipe(String id, Supplier<B> factory);
 
