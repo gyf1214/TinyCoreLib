@@ -1,13 +1,17 @@
 package org.shsts.tinycorelib.datagen.content.handler;
 
-import com.mojang.datafixers.util.Pair;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.ItemEnchantmentsPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemSubPredicates;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
@@ -19,10 +23,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
-import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
@@ -31,134 +32,99 @@ import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class LootTableHandler extends DataHandler<LootTableProvider> {
+    private final List<BlockLootEntry> blockLootEntries = new ArrayList<>();
+
     public LootTableHandler(DataGen dataGen) {
         super(dataGen);
     }
 
-    public static class Loot implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
-        private final Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
+    private record BlockLootEntry(ResourceKey<LootTable> key,
+        Function<HolderLookup.Provider, LootTable.Builder> factory) {}
 
-        private LootTable.Builder getBuilder(ResourceLocation loc) {
-            return tables.computeIfAbsent(loc, $ -> LootTable.lootTable());
-        }
-
-        public void drop(ResourceLocation loc, ItemLike item, float chance) {
-            var pool = LootPool.lootPool()
-                .when(ExplosionCondition.survivesExplosion())
-                .add(LootItem.lootTableItem(item));
-            if (chance < 1f) {
-                pool.when(LootItemRandomChanceCondition.randomChance(chance));
-            }
-            getBuilder(loc).withPool(pool);
-        }
-
-        private void dropOnState(ResourceLocation loc, ItemLike item, Block block,
-            StatePropertiesPredicate.Builder predicate) {
-            getBuilder(loc).withPool(LootPool.lootPool()
-                .when(ExplosionCondition.survivesExplosion())
-                .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
-                    .setProperties(predicate))
-                .add(LootItem.lootTableItem(item)));
-        }
-
-        public <V extends Comparable<V> & StringRepresentable> void dropOnState(
-            ResourceLocation loc, ItemLike item, Block block, Property<V> prop, V value) {
-            dropOnState(loc, item, block, StatePropertiesPredicate.Builder.properties()
-                .hasProperty(prop, value));
-        }
-
-        public void dropOnState(ResourceLocation loc, ItemLike item, Block block,
-            BooleanProperty prop, boolean value) {
-            dropOnState(loc, item, block, StatePropertiesPredicate.Builder.properties()
-                .hasProperty(prop, value));
-        }
-
-        public void dropOnTool(ResourceLocation loc, ItemLike item, TagKey<Item> tool) {
-            var pool = LootPool.lootPool()
-                .when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(tool))
-                    .or(MatchTool.toolMatches(ItemPredicate.Builder.item()
-                        .hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH,
-                            MinMaxBounds.Ints.atLeast(1))))))
-                .add(LootItem.lootTableItem(item));
-            getBuilder(loc).withPool(pool);
-        }
-
-        @Override
-        public void accept(BiConsumer<ResourceLocation, LootTable.Builder> writer) {
-            for (var table : tables.entrySet()) {
-                writer.accept(table.getKey(), table.getValue());
-            }
-        }
-
-        public Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>> toFactory() {
-            return () -> this;
-        }
+    private static ResourceKey<LootTable> blockLootKey(ResourceLocation loc) {
+        return ResourceKey.create(Registries.LOOT_TABLE, loc.withPrefix("blocks/"));
     }
 
-    public class Provider extends LootTableProvider {
-        private final Loot blockLoot = new Loot();
-        private final List<Pair<Supplier<Consumer<BiConsumer<
-            ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> tables;
-
-        public Provider(GatherDataEvent event) {
-            super(event.getGenerator());
-            var lootMaps = List.of(
-                Pair.of(blockLoot, LootContextParamSets.BLOCK));
-            tables = lootMaps.stream()
-                .map(p -> Pair.of(p.getFirst().toFactory(), p.getSecond()))
-                .toList();
+    private static LootTable.Builder dropTable(ItemLike item, float chance) {
+        var pool = LootPool.lootPool()
+            .when(ExplosionCondition.survivesExplosion())
+            .add(LootItem.lootTableItem(item));
+        if (chance < 1f) {
+            pool.when(LootItemRandomChanceCondition.randomChance(chance));
         }
+        return LootTable.lootTable().withPool(pool);
+    }
 
-        @Override
-        protected void validate(Map<ResourceLocation, LootTable> tables, ValidationContext ctx) {
-            tables.forEach((name, table) -> LootTables.validate(ctx, name, table));
-        }
+    private static LootTable.Builder dropOnStateTable(ItemLike item, Block block,
+        StatePropertiesPredicate.Builder predicate) {
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+            .when(ExplosionCondition.survivesExplosion())
+            .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+                .setProperties(predicate))
+            .add(LootItem.lootTableItem(item)));
+    }
 
-        @Override
-        protected List<Pair<Supplier<Consumer<BiConsumer<
-            ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
-            LootTableHandler.this.register(this);
-            return tables;
-        }
+    private static LootTable.Builder dropOnToolTable(HolderLookup.Provider holderLookup,
+        ItemLike item, TagKey<Item> tool) {
+        var silkTouch = holderLookup.lookupOrThrow(Registries.ENCHANTMENT)
+            .getOrThrow(Enchantments.SILK_TOUCH);
+        var pool = LootPool.lootPool()
+            .when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(tool))
+                .or(MatchTool.toolMatches(ItemPredicate.Builder.item()
+                    .withSubPredicate(ItemSubPredicates.ENCHANTMENTS,
+                        ItemEnchantmentsPredicate.enchantments(List.of(
+                            new EnchantmentPredicate(silkTouch,
+                                MinMaxBounds.Ints.atLeast(1))))))))
+            .add(LootItem.lootTableItem(item));
+        return LootTable.lootTable().withPool(pool);
     }
 
     @Override
     public LootTableProvider createProvider(GatherDataEvent event) {
-        return new Provider(event);
+        return new LootTableProvider(
+            event.getGenerator().getPackOutput(),
+            Set.of(),
+            List.of(new LootTableProvider.SubProviderEntry(
+                holderLookup -> output -> {
+                    for (var entry : blockLootEntries) {
+                        output.accept(entry.key(), entry.factory().apply(holderLookup));
+                    }
+                },
+                LootContextParamSets.BLOCK)),
+            event.getLookupProvider());
     }
 
     public void drop(ResourceLocation loc, Supplier<? extends ItemLike> item, float chance) {
-        var loc1 = loc.withPrefix("blocks/");
-        addCallback(prov -> ((Provider) prov).blockLoot.drop(loc1, item.get(), chance));
+        blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
+            $ -> dropTable(item.get(), chance)));
     }
 
     public <V extends Comparable<V> & StringRepresentable> void dropOnState(
         ResourceLocation loc, Supplier<? extends ItemLike> item,
         Supplier<? extends Block> block, Property<V> prop, V value) {
-        var loc1 = loc.withPrefix("blocks/");
-        addCallback(prov -> ((Provider) prov).blockLoot.dropOnState(
-            loc1, item.get(), block.get(), prop, value));
+        blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
+            $ -> dropOnStateTable(item.get(), block.get(),
+                StatePropertiesPredicate.Builder.properties().hasProperty(prop, value))));
     }
 
     public void dropOnState(ResourceLocation loc, Supplier<? extends ItemLike> item,
         Supplier<? extends Block> block, BooleanProperty prop, boolean value) {
-        var loc1 = loc.withPrefix("blocks/");
-        addCallback(prov -> ((Provider) prov).blockLoot.dropOnState(
-            loc1, item.get(), block.get(), prop, value));
+        blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
+            $ -> dropOnStateTable(item.get(), block.get(),
+                StatePropertiesPredicate.Builder.properties().hasProperty(prop, value))));
     }
 
     public void dropOnTool(ResourceLocation loc, Supplier<? extends ItemLike> item, TagKey<Item> tool) {
-        var loc1 = loc.withPrefix("blocks/");
-        addCallback(prov -> ((Provider) prov).blockLoot.dropOnTool(loc1, item.get(), tool));
+        blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
+            holderLookup -> dropOnToolTable(holderLookup, item.get(), tool)));
     }
 }
