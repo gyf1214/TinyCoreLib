@@ -5,6 +5,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -51,9 +52,9 @@ public interface IDataGen {
 
     IItemDataBuilder<Item, IDataGen> item(ItemLike item);
 
-    <T> IDataGen tag(Supplier<? extends T> object, List<TagKey<T>> tags);
+    <T> IDataGen tag(ResourceKey<T> object, List<TagKey<T>> tags);
 
-    <T> IDataGen tag(Supplier<? extends T> object, TagKey<T> tag);
+    <T> IDataGen tag(ResourceKey<T> object, TagKey<T> tag);
 
     <T> IDataGen tag(TagKey<T> object, TagKey<T> tag);
 

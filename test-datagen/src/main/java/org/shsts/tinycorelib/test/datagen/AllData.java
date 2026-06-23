@@ -7,7 +7,9 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -62,8 +64,8 @@ public final class AllData {
             .tag(TEST_ITEM_TAG)
             .build()
             .tag(TEST_ITEM_TAG, TEST_PARENT_TAG)
-            .tag(() -> Items.GLASS, TEST_ITEM_TAG)
-            .tag(() -> Items.SAND, List.of(TEST_ITEM_TAG, TEST_ITEM_TAG2))
+            .tag(itemKey(Items.GLASS), TEST_ITEM_TAG)
+            .tag(itemKey(Items.SAND), List.of(TEST_ITEM_TAG, TEST_ITEM_TAG2))
             .block(All.TEST_BLOCK1)
             .blockState(ctx -> {
                 var prov = ctx.provider();
@@ -175,6 +177,11 @@ public final class AllData {
     private static TagKey<Item> itemTag(String id) {
         return TagKey.create(Registries.ITEM,
             ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, id));
+    }
+
+    private static ResourceKey<Item> itemKey(Item item) {
+        return BuiltInRegistries.ITEM.getResourceKey(item)
+            .orElseThrow(() -> new IllegalArgumentException("Item is not registered: " + item));
     }
 
     private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... predicates) {

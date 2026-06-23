@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -67,26 +68,32 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
 
     @Override
     public IBlockDataBuilder<U, P> tag(List<TagKey<Block>> tags) {
-        callbacks.add(() -> dataGen.tag(objectSupplier(), tags));
+        callbacks.add(() -> dataGen.tag(key, tags));
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> tag(TagKey<Block> tag) {
-        callbacks.add(() -> dataGen.tag(objectSupplier(), tag));
+        callbacks.add(() -> dataGen.tag(key, tag));
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> itemTag(List<TagKey<Item>> tags) {
-        callbacks.add(() -> dataGen.tag(() -> object.asItem(), tags));
+        callbacks.add(() -> dataGen.tag(itemKey(), tags));
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> itemTag(TagKey<Item> tag) {
-        callbacks.add(() -> dataGen.tag(() -> object.asItem(), tag));
+        callbacks.add(() -> dataGen.tag(itemKey(), tag));
         return self();
+    }
+
+    private ResourceKey<Item> itemKey() {
+        var item = object.asItem();
+        return BuiltInRegistries.ITEM.getResourceKey(item)
+            .orElseThrow(() -> new IllegalArgumentException("Block item is not registered: " + item));
     }
 
     @Override

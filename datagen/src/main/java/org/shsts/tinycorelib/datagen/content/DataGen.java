@@ -185,21 +185,23 @@ public class DataGen implements IDataGen {
     }
 
     @Override
-    public <T> IDataGen tag(Supplier<? extends T> object, List<TagKey<T>> tags) {
-        assert !tags.isEmpty();
-        tagsHandler(tags.get(0).registry()).addTags(object, tags);
+    public <T> IDataGen tag(ResourceKey<T> object, List<TagKey<T>> tags) {
+        if (tags.isEmpty()) {
+            return this;
+        }
+        tagsHandler(object.registryKey()).addTags(object, tags);
         return this;
     }
 
     @Override
-    public <T> IDataGen tag(Supplier<? extends T> object, TagKey<T> tag) {
-        tagsHandler(tag.registry()).addTags(object, tag);
+    public <T> IDataGen tag(ResourceKey<T> object, TagKey<T> tag) {
+        tagsHandler(object.registryKey()).addTags(object, tag);
         return this;
     }
 
     @Override
     public <T> IDataGen tag(TagKey<T> object, TagKey<T> tag) {
-        tagsHandler(tag.registry()).addTag(object, tag);
+        tagsHandler(object.registry()).addTag(object, tag);
         return this;
     }
 
