@@ -28,8 +28,8 @@ import java.util.List;
 
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK2;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
+import static org.shsts.tinycorelib.test.All.TEST_COOKING_RECIPE;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
-import static org.shsts.tinycorelib.test.All.TEST_VANILLA_RECIPE;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.CORE;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
@@ -88,18 +88,20 @@ public final class AllData {
                 ctx.provider().models().cubeAll(ctx.id(), mcLoc("block/nether_bricks"))))
             .build();
 
-        TEST_RECIPE.recipe(DATA_GEN, "test_recipe1")
+        DATA_GEN.recipeFactory(TEST_RECIPE, TestRecipeBuilder::new)
+            .recipe("test_recipe1")
             .range(0, 10)
             .displayItem(Items.GLASS)
             .build();
 
-        TEST_VANILLA_RECIPE.recipe(DATA_GEN, "test_vanilla1")
+        DATA_GEN.recipeFactory(TEST_COOKING_RECIPE, TestCookingRecipeBuilder::new)
+            .recipe("test_vanilla1")
             .ingredient(TEST_ITEM_TAG)
             .result(TEST_BLOCK2)
             .cookingTime(100)
             .beginSeconds(0)
             .build()
-            .recipe(DATA_GEN, "test_vanilla2")
+            .recipe("test_vanilla2")
             .ingredient(() -> Blocks.STONE)
             .result(TEST_BLOCK3)
             .cookingTime(100)
