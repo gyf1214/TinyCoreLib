@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
@@ -164,23 +165,23 @@ public class DataGen implements IDataGen {
     }
 
     @Override
-    public <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item) {
-        return new BlockDataBuilder<>(this, this, loc, item);
-    }
-
-    @Override
     public <U extends Block> IBlockDataBuilder<U, IDataGen> block(IEntry<U> block) {
-        return new BlockDataBuilder<>(this, this, block.loc(), block);
+        return new BlockDataBuilder<>(this, this, block);
     }
 
     @Override
-    public <U extends Item> IItemDataBuilder<U, IDataGen> item(ResourceLocation loc, Supplier<U> item) {
-        return new ItemDataBuilder<>(this, this, loc, item);
+    public <U extends Block> IBlockDataBuilder<U, IDataGen> block(U block) {
+        return new BlockDataBuilder<>(this, this, BuiltInRegistries.BLOCK, block);
     }
 
     @Override
     public <U extends Item> IItemDataBuilder<U, IDataGen> item(IEntry<U> item) {
-        return new ItemDataBuilder<>(this, this, item.loc(), item);
+        return new ItemDataBuilder<>(this, this, item);
+    }
+
+    @Override
+    public IItemDataBuilder<Item, IDataGen> item(ItemLike item) {
+        return new ItemDataBuilder<>(this, this, BuiltInRegistries.ITEM, item.asItem());
     }
 
     @Override

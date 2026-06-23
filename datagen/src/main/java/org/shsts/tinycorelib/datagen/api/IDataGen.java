@@ -8,6 +8,7 @@ import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
@@ -42,13 +43,13 @@ public interface IDataGen {
      */
     <D extends DataProvider> IDataGen addProvider(BiFunction<IDataGen, GatherDataEvent, D> factory);
 
-    <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item);
-
     <U extends Block> IBlockDataBuilder<U, IDataGen> block(IEntry<U> block);
 
-    <U extends Item> IItemDataBuilder<U, IDataGen> item(ResourceLocation loc, Supplier<U> item);
+    <U extends Block> IBlockDataBuilder<U, IDataGen> block(U block);
 
     <U extends Item> IItemDataBuilder<U, IDataGen> item(IEntry<U> item);
+
+    IItemDataBuilder<Item, IDataGen> item(ItemLike item);
 
     <T> IDataGen tag(Supplier<? extends T> object, List<TagKey<T>> tags);
 

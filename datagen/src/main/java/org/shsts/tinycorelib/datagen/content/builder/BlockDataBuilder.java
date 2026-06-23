@@ -3,6 +3,9 @@ package org.shsts.tinycorelib.datagen.content.builder;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
@@ -14,6 +17,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;
@@ -33,8 +37,17 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
     private Consumer<IEntryDataContext<?, ItemModelProvider>> itemModel = null;
     private boolean hasDrop = false;
 
-    public BlockDataBuilder(DataGen dataGen, P parent, ResourceLocation loc, Supplier<U> object) {
-        super(dataGen, parent, loc, dataGen.blockTrackedContext, object);
+    public BlockDataBuilder(DataGen dataGen, P parent, IEntry<U> block) {
+        this(dataGen, parent, Registries.BLOCK, block);
+    }
+
+    public BlockDataBuilder(DataGen dataGen, P parent,
+        ResourceKey<? extends Registry<Block>> registryKey, IEntry<U> block) {
+        super(dataGen, parent, registryKey, block, dataGen.blockTrackedContext);
+    }
+
+    public BlockDataBuilder(DataGen dataGen, P parent, Registry<Block> registry, U block) {
+        super(dataGen, parent, registry, block, dataGen.blockTrackedContext);
     }
 
     @Override
@@ -54,25 +67,25 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
 
     @Override
     public IBlockDataBuilder<U, P> tag(List<TagKey<Block>> tags) {
-        callbacks.add(() -> dataGen.tag(object, tags));
+        callbacks.add(() -> dataGen.tag(objectSupplier(), tags));
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> tag(TagKey<Block> tag) {
-        callbacks.add(() -> dataGen.tag(object, tag));
+        callbacks.add(() -> dataGen.tag(objectSupplier(), tag));
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> itemTag(List<TagKey<Item>> tags) {
-        callbacks.add(() -> dataGen.tag(() -> object.get().asItem(), tags));
+        callbacks.add(() -> dataGen.tag(() -> object.asItem(), tags));
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> itemTag(TagKey<Item> tag) {
-        callbacks.add(() -> dataGen.tag(() -> object.get().asItem(), tag));
+        callbacks.add(() -> dataGen.tag(() -> object.asItem(), tag));
         return self();
     }
 
@@ -100,26 +113,26 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
 
     @Override
     public IBlockDataBuilder<U, P> dropSelf() {
-        return drop(() -> object.get().asItem());
+        return drop(() -> object.asItem());
     }
 
     @Override
     public IBlockDataBuilder<U, P> dropOnState(Supplier<? extends ItemLike> item,
         BooleanProperty prop, boolean value) {
-        getDrop().dropOnState(loc, item, object, prop, value);
+        getDrop().dropOnState(loc, item, objectSupplier(), prop, value);
         return self();
     }
 
     @Override
     public <V extends Comparable<V> & StringRepresentable> IBlockDataBuilder<U, P> dropOnState(
         Supplier<? extends ItemLike> item, Property<V> prop, V value) {
-        getDrop().dropOnState(loc, item, object, prop, value);
+        getDrop().dropOnState(loc, item, objectSupplier(), prop, value);
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> dropSelfOnTool(TagKey<Item> tool) {
-        getDrop().dropOnTool(loc, () -> object.get().asItem(), tool);
+        getDrop().dropOnTool(loc, () -> object.asItem(), tool);
         return self();
     }
 
@@ -133,7 +146,7 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
         if (!hasDrop) {
             dropSelf();
         }
-        dataGen.blockStateHandler.addBlockStateCallback(loc, object, blockState);
-        dataGen.itemModelHandler.addBlockItemCallback(loc, object, ctx -> itemModel.accept(ctx));
+        dataGen.blockStateHandler.addBlockStateCallback(loc, objectSupplier(), blockState);
+        dataGen.itemModelHandler.addBlockItemCallback(loc, objectSupplier(), ctx -> itemModel.accept(ctx));
     }
 }
