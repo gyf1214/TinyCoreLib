@@ -12,11 +12,11 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -38,17 +38,27 @@ public interface IBlockDataBuilder<U extends Block, P>
 
     IBlockDataBuilder<U, P> noDrop();
 
-    IBlockDataBuilder<U, P> drop(Supplier<? extends ItemLike> item, float chance);
+    IBlockDataBuilder<U, P> drop(ItemLike item, float chance);
 
-    IBlockDataBuilder<U, P> drop(Supplier<? extends ItemLike> item);
+    IBlockDataBuilder<U, P> drop(IEntry<? extends ItemLike> item, float chance);
+
+    IBlockDataBuilder<U, P> drop(ItemLike item);
+
+    IBlockDataBuilder<U, P> drop(IEntry<? extends ItemLike> item);
 
     IBlockDataBuilder<U, P> dropSelf();
 
-    IBlockDataBuilder<U, P> dropOnState(Supplier<? extends ItemLike> item,
+    IBlockDataBuilder<U, P> dropOnState(ItemLike item,
+        BooleanProperty prop, boolean value);
+
+    IBlockDataBuilder<U, P> dropOnState(IEntry<? extends ItemLike> item,
         BooleanProperty prop, boolean value);
 
     <V extends Comparable<V> & StringRepresentable> IBlockDataBuilder<U, P> dropOnState(
-        Supplier<? extends ItemLike> item, Property<V> prop, V value);
+        ItemLike item, Property<V> prop, V value);
+
+    <V extends Comparable<V> & StringRepresentable> IBlockDataBuilder<U, P> dropOnState(
+        IEntry<? extends ItemLike> item, Property<V> prop, V value);
 
     IBlockDataBuilder<U, P> dropSelfOnTool(TagKey<Item> tool);
 }

@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -103,28 +102,27 @@ public class LootTableHandler extends DataHandler<LootTableProvider> {
             event.getLookupProvider());
     }
 
-    public void drop(ResourceLocation loc, Supplier<? extends ItemLike> item, float chance) {
+    public void drop(ResourceLocation loc, ItemLike item, float chance) {
         blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
-            $ -> dropTable(item.get(), chance)));
+            $ -> dropTable(item, chance)));
     }
 
     public <V extends Comparable<V> & StringRepresentable> void dropOnState(
-        ResourceLocation loc, Supplier<? extends ItemLike> item,
-        Supplier<? extends Block> block, Property<V> prop, V value) {
+        ResourceLocation loc, ItemLike item, Block block, Property<V> prop, V value) {
         blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
-            $ -> dropOnStateTable(item.get(), block.get(),
+            $ -> dropOnStateTable(item, block,
                 StatePropertiesPredicate.Builder.properties().hasProperty(prop, value))));
     }
 
-    public void dropOnState(ResourceLocation loc, Supplier<? extends ItemLike> item,
-        Supplier<? extends Block> block, BooleanProperty prop, boolean value) {
+    public void dropOnState(ResourceLocation loc, ItemLike item,
+        Block block, BooleanProperty prop, boolean value) {
         blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
-            $ -> dropOnStateTable(item.get(), block.get(),
+            $ -> dropOnStateTable(item, block,
                 StatePropertiesPredicate.Builder.properties().hasProperty(prop, value))));
     }
 
-    public void dropOnTool(ResourceLocation loc, Supplier<? extends ItemLike> item, TagKey<Item> tool) {
+    public void dropOnTool(ResourceLocation loc, ItemLike item, TagKey<Item> tool) {
         blockLootEntries.add(new BlockLootEntry(blockLootKey(loc),
-            holderLookup -> dropOnToolTable(holderLookup, item.get(), tool)));
+            holderLookup -> dropOnToolTable(holderLookup, item, tool)));
     }
 }

@@ -73,7 +73,7 @@ public final class AllData {
                 prov.simpleBlock(ctx.object(), models.cubeAll(
                     ctx.id(), mcLoc("block/birch_planks")));
             }).tag(blockTag("test_block_tag"))
-            .drop(() -> Items.BIRCH_PLANKS)
+            .drop(Items.BIRCH_PLANKS)
             .build()
             .block(All.TEST_BLOCK2)
             .blockState(ctx -> {
@@ -104,7 +104,7 @@ public final class AllData {
             .beginSeconds(0)
             .build()
             .recipe("test_vanilla2")
-            .ingredient(() -> Blocks.STONE)
+            .ingredient(Blocks.STONE)
             .result(TEST_BLOCK3)
             .cookingTime(100)
             .beginSeconds(10)

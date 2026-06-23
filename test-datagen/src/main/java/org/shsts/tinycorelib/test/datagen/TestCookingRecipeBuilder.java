@@ -10,11 +10,10 @@ import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.ItemLike;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.content.common.Builder;
 import org.shsts.tinycorelib.datagen.api.recipe.IRecipeFactory;
 import org.shsts.tinycorelib.test.TestCookingRecipe;
-
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -24,7 +23,7 @@ public class TestCookingRecipeBuilder
     @Nullable
     private Ingredient ingredient = null;
     @Nullable
-    private Supplier<? extends ItemLike> result = null;
+    private ItemLike result = null;
     private int cookingTime = 200;
     private int beginSeconds = 0;
 
@@ -37,14 +36,22 @@ public class TestCookingRecipeBuilder
         return self();
     }
 
-    public TestCookingRecipeBuilder ingredient(Supplier<? extends ItemLike> value) {
-        ingredient = Ingredient.of(value.get());
+    public TestCookingRecipeBuilder ingredient(ItemLike value) {
+        ingredient = Ingredient.of(value);
         return self();
     }
 
-    public TestCookingRecipeBuilder result(Supplier<? extends ItemLike> value) {
+    public TestCookingRecipeBuilder ingredient(IEntry<? extends ItemLike> value) {
+        return ingredient(value.get());
+    }
+
+    public TestCookingRecipeBuilder result(ItemLike value) {
         result = value;
         return self();
+    }
+
+    public TestCookingRecipeBuilder result(IEntry<? extends ItemLike> value) {
+        return result(value.get());
     }
 
     public TestCookingRecipeBuilder cookingTime(int value) {
@@ -62,7 +69,7 @@ public class TestCookingRecipeBuilder
         assert ingredient != null;
         assert result != null;
         var recipe = new SmeltingRecipe("", CookingBookCategory.MISC, ingredient,
-            new ItemStack(result.get()), 0f, cookingTime);
+            new ItemStack(result), 0f, cookingTime);
         return new TestCookingRecipe(recipe, beginSeconds);
     }
 }

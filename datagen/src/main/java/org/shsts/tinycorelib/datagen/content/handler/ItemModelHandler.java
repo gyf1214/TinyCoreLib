@@ -17,7 +17,6 @@ import org.shsts.tinycorelib.datagen.content.context.DataContext;
 import org.shsts.tinycorelib.datagen.content.context.EntryDataContext;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -60,16 +59,16 @@ public class ItemModelHandler extends DataHandler<ItemModelProvider> {
         return new Provider(event);
     }
 
-    public <U extends Item> void addModelCallback(ResourceLocation loc, Supplier<U> item,
+    public <U extends Item> void addModelCallback(ResourceLocation loc, U item,
         Consumer<IEntryDataContext<U, ItemModelProvider>> cons) {
         addCallback(prov -> cons.accept(new EntryDataContext<>(
-            dataGen.modid, loc.getPath(), prov, item.get())));
+            dataGen.modid, loc.getPath(), prov, item)));
     }
 
-    public <U extends Block> void addBlockItemCallback(ResourceLocation loc, Supplier<U> block,
+    public <U extends Block> void addBlockItemCallback(ResourceLocation loc, U block,
         Consumer<IEntryDataContext<? super BlockItem, ItemModelProvider>> cons) {
         addCallback(prov -> {
-            if (block.get().asItem() instanceof BlockItem blockItem) {
+            if (block.asItem() instanceof BlockItem blockItem) {
                 cons.accept(new EntryDataContext<>(dataGen.modid,
                     loc.getPath(), prov, blockItem));
             }

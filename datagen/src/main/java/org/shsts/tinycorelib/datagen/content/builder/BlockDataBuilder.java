@@ -26,7 +26,6 @@ import org.shsts.tinycorelib.datagen.content.handler.LootTableHandler;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -108,38 +107,60 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
     }
 
     @Override
-    public IBlockDataBuilder<U, P> drop(Supplier<? extends ItemLike> item, float chance) {
+    public IBlockDataBuilder<U, P> drop(ItemLike item, float chance) {
         getDrop().drop(loc, item, chance);
         return self();
     }
 
     @Override
-    public IBlockDataBuilder<U, P> drop(Supplier<? extends ItemLike> item) {
+    public IBlockDataBuilder<U, P> drop(IEntry<? extends ItemLike> item, float chance) {
+        return drop(item.get(), chance);
+    }
+
+    @Override
+    public IBlockDataBuilder<U, P> drop(ItemLike item) {
         return drop(item, 1f);
     }
 
     @Override
-    public IBlockDataBuilder<U, P> dropSelf() {
-        return drop(() -> object.asItem());
+    public IBlockDataBuilder<U, P> drop(IEntry<? extends ItemLike> item) {
+        return drop(item.get());
     }
 
     @Override
-    public IBlockDataBuilder<U, P> dropOnState(Supplier<? extends ItemLike> item,
+    public IBlockDataBuilder<U, P> dropSelf() {
+        return drop(object.asItem());
+    }
+
+    @Override
+    public IBlockDataBuilder<U, P> dropOnState(ItemLike item,
         BooleanProperty prop, boolean value) {
-        getDrop().dropOnState(loc, item, objectSupplier(), prop, value);
+        getDrop().dropOnState(loc, item, object, prop, value);
+        return self();
+    }
+
+    @Override
+    public IBlockDataBuilder<U, P> dropOnState(IEntry<? extends ItemLike> item,
+        BooleanProperty prop, boolean value) {
+        return dropOnState(item.get(), prop, value);
+    }
+
+    @Override
+    public <V extends Comparable<V> & StringRepresentable> IBlockDataBuilder<U, P> dropOnState(
+        ItemLike item, Property<V> prop, V value) {
+        getDrop().dropOnState(loc, item, object, prop, value);
         return self();
     }
 
     @Override
     public <V extends Comparable<V> & StringRepresentable> IBlockDataBuilder<U, P> dropOnState(
-        Supplier<? extends ItemLike> item, Property<V> prop, V value) {
-        getDrop().dropOnState(loc, item, objectSupplier(), prop, value);
-        return self();
+        IEntry<? extends ItemLike> item, Property<V> prop, V value) {
+        return dropOnState(item.get(), prop, value);
     }
 
     @Override
     public IBlockDataBuilder<U, P> dropSelfOnTool(TagKey<Item> tool) {
-        getDrop().dropOnTool(loc, () -> object.asItem(), tool);
+        getDrop().dropOnTool(loc, object.asItem(), tool);
         return self();
     }
 
@@ -153,7 +174,7 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
         if (!hasDrop) {
             dropSelf();
         }
-        dataGen.blockStateHandler.addBlockStateCallback(loc, objectSupplier(), blockState);
-        dataGen.itemModelHandler.addBlockItemCallback(loc, objectSupplier(), ctx -> itemModel.accept(ctx));
+        dataGen.blockStateHandler.addBlockStateCallback(loc, object, blockState);
+        dataGen.itemModelHandler.addBlockItemCallback(loc, object, ctx -> itemModel.accept(ctx));
     }
 }

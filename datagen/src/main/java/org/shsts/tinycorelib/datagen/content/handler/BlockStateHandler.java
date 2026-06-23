@@ -18,7 +18,6 @@ import org.shsts.tinycorelib.datagen.content.context.DataContext;
 import org.shsts.tinycorelib.datagen.content.context.EntryDataContext;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -112,10 +111,10 @@ public class BlockStateHandler extends DataHandler<BlockStateProvider> {
         return new Provider(event);
     }
 
-    public <U extends Block> void addBlockStateCallback(ResourceLocation loc, Supplier<U> block,
+    public <U extends Block> void addBlockStateCallback(ResourceLocation loc, U block,
         Consumer<IEntryDataContext<U, BlockStateProvider>> cons) {
         addCallback(prov -> cons.accept(new EntryDataContext<>(dataGen.modid,
-            loc.getPath(), prov, block.get())));
+            loc.getPath(), prov, block)));
     }
 
     public void addBlockModelCallback(Consumer<IDataContext<BlockModelProvider>> cons) {

@@ -58,6 +58,6 @@ public class ItemDataBuilder<U extends Item, P> extends EntryDataBuilder<Item, U
     @Override
     protected void doRegister() {
         assert model != null;
-        dataGen.itemModelHandler.addModelCallback(loc, objectSupplier(), model);
+        dataGen.itemModelHandler.addModelCallback(loc, object, model);
     }
 }

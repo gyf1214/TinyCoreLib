@@ -11,7 +11,6 @@ import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -42,10 +41,6 @@ public abstract class EntryDataBuilder<T, U extends T, P, S extends IDataBuilder
         this.key = key;
         this.trackedCtx = ctx;
         this.object = object;
-    }
-
-    protected Supplier<U> objectSupplier() {
-        return () -> object;
     }
 
     protected abstract void doRegister();

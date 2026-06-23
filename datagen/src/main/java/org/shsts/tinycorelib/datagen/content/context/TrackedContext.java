@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
@@ -23,7 +22,7 @@ public class TrackedContext<V> {
     private final Registrate registrate;
     private final TrackedType<V> type;
     private final Map<V, String> extraTracked = new HashMap<>();
-    private final List<Supplier<? extends V>> processed;
+    private final List<V> processed;
 
     public TrackedContext(Registrate registrate, TrackedType<V> type) {
         this.registrate = registrate;
@@ -42,10 +41,6 @@ public class TrackedContext<V> {
     }
 
     public void process(V obj) {
-        processed.add(() -> obj);
-    }
-
-    public void process(Supplier<? extends V> obj) {
         processed.add(obj);
     }
 
@@ -54,9 +49,7 @@ public class TrackedContext<V> {
     }
 
     public boolean postValidate() {
-        var processed = this.processed.stream()
-            .map($ -> (V) $.get())
-            .collect(Collectors.toSet());
+        var processed = this.processed.stream().collect(Collectors.toSet());
         var tracked = getTrackedMap();
 
         var missing = 0;
