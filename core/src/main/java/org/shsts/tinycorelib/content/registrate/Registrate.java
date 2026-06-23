@@ -179,7 +179,7 @@ public class Registrate implements IRegistrate {
             handler.addListener(modEventBus);
         }
         recipeTypeHandler.addListener(modEventBus);
-        modEventBus.addListener((RegisterCapabilitiesEvent event) -> capabilityHandler.onEvent(event));
+        modEventBus.addListener(RegisterCapabilitiesEvent.class, capabilityHandler::onEvent);
         modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
         modEventBus.addListener(payloadHandler::onRegisterPayload);
     }
@@ -188,9 +188,8 @@ public class Registrate implements IRegistrate {
     public void registerClient(IEventBus modEventBus) {
         modEventBus.addListener(tintHandler::onRegisterBlockColors);
         modEventBus.addListener(tintHandler::onRegisterItemColors);
-        modEventBus.addListener((EntityRenderersEvent.RegisterRenderers event) ->
-            rendererHandler.onEvent(event));
-        modEventBus.addListener((RegisterMenuScreensEvent event) -> menuScreenHandler.onEvent(event));
+        modEventBus.addListener(EntityRenderersEvent.RegisterRenderers.class, rendererHandler::onEvent);
+        modEventBus.addListener(RegisterMenuScreensEvent.class, menuScreenHandler::onEvent);
     }
 
     @Override
