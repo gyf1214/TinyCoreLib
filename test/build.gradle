@@ -21,6 +21,15 @@ neoForge {
             systemProperty 'forge.logging.console.level', 'debug'
             jvmArgument '-ea'
         }
+
+        gameTestServer {
+            type = 'gameTestServer'
+            gameDirectory = project.file('run/game-test-server')
+
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+            jvmArgument '-ea'
+        }
     }
 
     mods {
