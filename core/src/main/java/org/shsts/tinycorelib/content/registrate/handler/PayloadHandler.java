@@ -1,8 +1,9 @@
-package org.shsts.tinycorelib.content.network;
+package org.shsts.tinycorelib.content.registrate.handler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -11,40 +12,48 @@ import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.api.network.PacketDirection;
 import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
+import org.shsts.tinycorelib.content.network.GenericPacketPayload;
+import org.shsts.tinycorelib.content.network.PacketPayloadType;
+import org.shsts.tinycorelib.content.network.PacketPayloads;
+import org.shsts.tinycorelib.content.network.PacketType;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class PayloadHandler {
+public class PayloadHandler extends EventHandler<PayloadRegistrar> {
     public static final String NETWORK_VERSION = "1";
 
     public <P extends IPacket> void registerGeneric(
-        PayloadRegistrar registrar, PacketType<P, GenericPacketPayload<P>> type,
+        PacketType<P, GenericPacketPayload<P>> type,
         Supplier<P> constructor, BiConsumer<P, IPayloadContext> handler) {
-        var codec = PacketPayloads.genericCodec(type, constructor);
-        IPayloadHandler<GenericPacketPayload<P>> payloadHandler = (payload, context) ->
-            handler.accept(payload.content(), context);
-        switch (type.direction()) {
-            case CLIENTBOUND -> registrar.playToClient(type.type(), codec, payloadHandler);
-            case SERVERBOUND -> registrar.playToServer(type.type(), codec, payloadHandler);
-            case BIDIRECTIONAL -> registrar.playBidirectional(type.type(), codec, payloadHandler);
-        }
+        addCallback(registrar -> {
+            var codec = PacketPayloads.genericCodec(type, constructor);
+            IPayloadHandler<GenericPacketPayload<P>> payloadHandler = (payload, context) ->
+                handler.accept(payload.content(), context);
+            switch (type.direction()) {
+                case CLIENTBOUND -> registrar.playToClient(type.type(), codec, payloadHandler);
+                case SERVERBOUND -> registrar.playToServer(type.type(), codec, payloadHandler);
+                case BIDIRECTIONAL -> registrar.playBidirectional(type.type(), codec, payloadHandler);
+            }
+        });
     }
 
     public <P extends IPacket> void registerMenuSync(
-        PayloadRegistrar registrar, PacketType<P, MenuSyncPacket<P>> type,
+        PacketType<P, MenuSyncPacket<P>> type,
         Supplier<P> constructor) {
-        registrar.playToClient(type.type(), MenuSyncPacket.codec(type, constructor),
-            (payload, context) -> payload.handle(context));
+        addCallback(registrar -> registrar.playToClient(type.type(),
+            MenuSyncPacket.codec(type, constructor),
+            MenuSyncPacket::handle));
     }
 
     public <P extends IPacket> void registerMenuEvent(
-        PayloadRegistrar registrar, PacketType<P, MenuEventPacket<P>> type,
+        PacketType<P, MenuEventPacket<P>> type,
         Supplier<P> constructor) {
-        registrar.playToServer(type.type(), MenuEventPacket.codec(type, constructor),
-            (payload, context) -> payload.handle(context));
+        addCallback(registrar -> registrar.playToServer(type.type(),
+            MenuEventPacket.codec(type, constructor),
+            MenuEventPacket::handle));
     }
 
     public static <P extends IPacket> PacketType<P, GenericPacketPayload<P>> requireGeneric(
@@ -91,5 +100,9 @@ public class PayloadHandler {
             throw new IllegalArgumentException("Unsupported packet type %s".formatted(packetType.loc()));
         }
         return (PacketType<P, R>) type;
+    }
+
+    public void onRegisterPayload(RegisterPayloadHandlersEvent event) {
+        onEvent(event.registrar(PayloadHandler.NETWORK_VERSION));
     }
 }

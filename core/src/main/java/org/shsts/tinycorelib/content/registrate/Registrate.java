@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -40,7 +39,6 @@ import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
 import org.shsts.tinycorelib.content.network.PacketPayloadType;
 import org.shsts.tinycorelib.content.network.PacketType;
-import org.shsts.tinycorelib.content.network.PayloadHandler;
 import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
@@ -55,6 +53,7 @@ import org.shsts.tinycorelib.content.registrate.handler.CreativeTabHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EventHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
+import org.shsts.tinycorelib.content.registrate.handler.PayloadHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RecipeTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
@@ -86,8 +85,7 @@ public class Registrate implements IRegistrate {
     // others
     public final EventHandler.Capability capabilityHandler;
     public final CreativeTabHandler creativeTabHandler;
-    public final EventHandler.Payload payloadHandler;
-    public final PayloadHandler payloads;
+    public final PayloadHandler payloadHandler;
 
     // client only
     public final TintHandler tintHandler;
@@ -105,8 +103,7 @@ public class Registrate implements IRegistrate {
         this.recipeTypeHandler = new RecipeTypeHandler(this);
         this.capabilityHandler = new EventHandler.Capability();
         this.creativeTabHandler = new CreativeTabHandler();
-        this.payloadHandler = new EventHandler.Payload();
-        this.payloads = new PayloadHandler();
+        this.payloadHandler = new PayloadHandler();
 
         this.tintHandler = new TintHandler();
         this.menuScreenHandler = new EventHandler.MenuScreen();
@@ -181,7 +178,7 @@ public class Registrate implements IRegistrate {
         recipeTypeHandler.addListener(modEventBus);
         modEventBus.addListener(capabilityHandler::onEvent);
         modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
-        modEventBus.addListener((RegisterPayloadHandlersEvent event) -> payloadHandler.onEvent(event));
+        modEventBus.addListener(payloadHandler::onRegisterPayload);
     }
 
     @Override
@@ -245,7 +242,7 @@ public class Registrate implements IRegistrate {
         var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
         var type = new PacketType<T, MenuSyncPacket<T>>(loc, PacketDirection.CLIENTBOUND,
             PacketPayloadType.MENU_SYNC, new CustomPacketPayload.Type<>(loc));
-        payloadHandler.addCallback(registrar -> payloads.registerMenuSync(registrar, type, constructor));
+        payloadHandler.registerMenuSync(type, constructor);
         return type;
     }
 
@@ -254,7 +251,7 @@ public class Registrate implements IRegistrate {
         var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
         var type = new PacketType<T, MenuEventPacket<T>>(loc, PacketDirection.SERVERBOUND,
             PacketPayloadType.MENU_EVENT, new CustomPacketPayload.Type<>(loc));
-        payloadHandler.addCallback(registrar -> payloads.registerMenuEvent(registrar, type, constructor));
+        payloadHandler.registerMenuEvent(type, constructor);
         return type;
     }
 

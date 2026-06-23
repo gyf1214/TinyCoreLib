@@ -21,10 +21,10 @@ public record MenuSyncPacket<P extends IPacket>(
     int syncSlotId,
     P content
 ) implements CustomPacketPayload {
-    public static <P extends IPacket> StreamCodec<RegistryFriendlyByteBuf, MenuSyncPacket<P>>
-        codec(PacketType<P, MenuSyncPacket<P>> type, Supplier<P> constructor) {
+    public static <P extends IPacket> StreamCodec<RegistryFriendlyByteBuf, MenuSyncPacket<P>> codec(
+        PacketType<P, MenuSyncPacket<P>> type, Supplier<P> constructor) {
         return CustomPacketPayload.codec(
-            (payload, buf) -> payload.write(buf),
+            MenuSyncPacket::write,
             buf -> read(type, constructor, buf));
     }
 

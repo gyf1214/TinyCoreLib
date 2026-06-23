@@ -20,10 +20,10 @@ public record MenuEventPacket<P extends IPacket>(
     int containerId,
     P content
 ) implements CustomPacketPayload {
-    public static <P extends IPacket> StreamCodec<RegistryFriendlyByteBuf, MenuEventPacket<P>>
-        codec(PacketType<P, MenuEventPacket<P>> type, Supplier<P> constructor) {
+    public static <P extends IPacket> StreamCodec<RegistryFriendlyByteBuf, MenuEventPacket<P>> codec(
+        PacketType<P, MenuEventPacket<P>> type, Supplier<P> constructor) {
         return CustomPacketPayload.codec(
-            (payload, buf) -> payload.write(buf),
+            MenuEventPacket::write,
             buf -> read(type, constructor, buf));
     }
 

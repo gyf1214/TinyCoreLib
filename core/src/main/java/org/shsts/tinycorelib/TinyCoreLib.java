@@ -17,9 +17,9 @@ import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.content.meta.MetaExecutor;
 import org.shsts.tinycorelib.content.meta.MetaLocator;
 import org.shsts.tinycorelib.content.network.GenericPacketPayload;
-import org.shsts.tinycorelib.content.network.PayloadHandler;
 import org.shsts.tinycorelib.content.recipe.SmartRecipeManager;
 import org.shsts.tinycorelib.content.registrate.Registrate;
+import org.shsts.tinycorelib.content.registrate.handler.PayloadHandler;
 import org.slf4j.Logger;
 
 @ParametersAreNonnullByDefault

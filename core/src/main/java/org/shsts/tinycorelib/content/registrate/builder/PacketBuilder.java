@@ -61,8 +61,7 @@ public class PacketBuilder<T extends IPacket, P>
         }
         var type = new PacketType<T, GenericPacketPayload<T>>(loc, direction,
             PacketPayloadType.GENERIC, new CustomPacketPayload.Type<>(loc));
-        registrate.payloadHandler.addCallback(registrar ->
-            registrate.payloads.registerGeneric(registrar, type, constructor, handler));
+        registrate.payloadHandler.registerGeneric(type, constructor, handler);
         return type;
     }
 

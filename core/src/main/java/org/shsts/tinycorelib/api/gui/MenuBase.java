@@ -18,7 +18,7 @@ import org.shsts.tinycorelib.content.gui.SimpleSyncSlotScheduler;
 import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
 import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
 import org.shsts.tinycorelib.content.network.PacketPayloadType;
-import org.shsts.tinycorelib.content.network.PayloadHandler;
+import org.shsts.tinycorelib.content.registrate.handler.PayloadHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
