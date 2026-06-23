@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -51,8 +50,8 @@ public class EventHandler<E> {
     public static class Renderer extends EventHandler<EntityRenderersEvent.RegisterRenderers> {
         @OnlyIn(Dist.CLIENT)
         public <T extends BlockEntity> void setBlockEntityRenderer(
-            Supplier<BlockEntityType<? extends T>> type, BlockEntityRendererProvider<T> provider) {
-            addCallback(event -> event.registerBlockEntityRenderer(type.get(), provider));
+            BlockEntityType<? extends T> type, BlockEntityRendererProvider<T> provider) {
+            addCallback(event -> event.registerBlockEntityRenderer(type, provider));
         }
     }
 
