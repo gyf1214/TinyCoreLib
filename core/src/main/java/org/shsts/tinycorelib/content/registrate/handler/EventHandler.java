@@ -68,8 +68,8 @@ public class EventHandler<E> {
             addCallback(event -> registerBlockEntity(event, capability.get(), type, provider));
         }
 
-        private static <T, C extends @Nullable Object, BE extends SmartBlockEntity>
-        void registerBlockEntity(RegisterCapabilitiesEvent event, BlockCapability<T, C> capability,
+        private static <T, C extends @Nullable Object, BE extends SmartBlockEntity> void registerBlockEntity(
+            RegisterCapabilitiesEvent event, BlockCapability<T, C> capability,
             BlockEntityType<BE> type, Function<? super BE, T> provider) {
             event.registerBlockEntity(capability, type, (be, $) -> provider.apply(be));
         }
