@@ -2,25 +2,18 @@ package org.shsts.tinycorelib.test;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.data.worldgen.biome.OverworldBiomes;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Material;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.world.ForgeWorldPreset;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.MapColor;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
-import org.shsts.tinycorelib.api.gui.IMenuEvent;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
-import org.shsts.tinycorelib.api.network.IChannel;
+import org.shsts.tinycorelib.api.network.IPacketType;
+import org.shsts.tinycorelib.api.network.PacketDirection;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
@@ -36,8 +29,6 @@ import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public final class All {
-    public static final IChannel CHANNEL;
-
     public static final IMetaExecutor TEST_META;
 
     public static final IEntry<Block> TEST_BLOCK1;
@@ -54,59 +45,57 @@ public final class All {
     public static final IEntry<IEvent<Level>> SERVER_TICK;
     public static final IEntry<IEvent<Unit>> TICK_SECOND;
 
-    public static final IMenuEvent<TestPacket> TEST_MENU_EVENT;
+    public static final IPacketType<TestPacket> TEST_PACKET;
+    public static final IPacketType<TestPacket> TEST_MENU_SYNC;
+    public static final IPacketType<TestPacket> TEST_MENU_EVENT;
 
-    public static final IRecipeType<TestRecipe.Builder> TEST_RECIPE;
-    public static final IRecipeType<TestVanillaRecipe.Builder> TEST_VANILLA_RECIPE;
-
-    public static final ResourceKey<Biome> VOID_BIOME;
-    public static final IEntry<VoidPreset> VOID_PRESET;
+    public static final IRecipeType<TestRecipe> TEST_RECIPE;
+    public static final IRecipeType<TestCookingRecipe> TEST_COOKING_RECIPE;
 
     static {
-        CHANNEL = CORE.createChannel(new ResourceLocation(TinyCoreLibTest.ID, "channel"), "1");
-
         TEST_META = CORE.registerMeta("test", new TestMetaConsumer());
 
-        TEST_MENU_EVENT = CHANNEL
-            .registerMenuSyncPacket(TestPacket.class, TestPacket::new)
-            .registerMenuEventPacket(TestPacket.class, TestPacket::new);
+        TEST_PACKET = REGISTRATE.packet("test_packet", TestPacket::new)
+            .direction(PacketDirection.BIDIRECTIONAL)
+            .handler((packet, context) -> {})
+            .register();
+        TEST_MENU_SYNC = REGISTRATE.menuSyncPacket("test_menu_sync", TestPacket::new);
+        TEST_MENU_EVENT = REGISTRATE.menuEventPacket("test_menu_event", TestPacket::new);
 
         TEST_BLOCK1 = REGISTRATE.block("test_block1", Block::new)
-            .material(Material.DIRT)
+            .properties(p -> p.mapColor(MapColor.DIRT))
             .noBlockItem()
             .register();
 
         TEST_BLOCK2 = REGISTRATE.block("test_block2", TestBlock::new)
-            .material(Material.STONE)
-            .properties(p -> p.strength(5f).requiresCorrectToolForDrops())
+            .properties(p -> p.mapColor(MapColor.STONE).strength(5f).requiresCorrectToolForDrops())
             .tint(0xFF00FFFF)
-            .translucent()
             .blockItem()
-            .properties(p -> p.tab(CreativeModeTab.TAB_DECORATIONS))
+            .creativeTab(CreativeModeTabs.BUILDING_BLOCKS)
             .end()
             .register();
 
         TEST_BLOCK3 = REGISTRATE.block("test_block3", TestEntityBlock::new)
-            .material(Material.STONE)
+            .properties(p -> p.mapColor(MapColor.STONE))
             .register();
 
         TEST_ITEM = REGISTRATE.item("test_item", TestItem::new)
-            .properties(p -> p.tab(CreativeModeTab.TAB_COMBAT))
+            .creativeTab(CreativeModeTabs.COMBAT)
             .tint(0xFFFFFF00)
             .register();
 
+        TEST_CAPABILITY = REGISTRATE.capability("test_capability", ITestCapability.class);
+
+        ITEM_HANDLER_CAPABILITY = REGISTRATE.capability(Capabilities.ItemHandler.BLOCK);
+
         TEST_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_block_entity")
             .validBlock(TEST_BLOCK3)
-            .capability("test_capability", TestCapability::new)
+            .capability(TEST_CAPABILITY, ITEM_HANDLER_CAPABILITY)
+            .container("test_capability", TestContainer::new)
             .register();
 
-        TEST_CAPABILITY = REGISTRATE.capability(ITestCapability.class, new CapabilityToken<>() {});
-
-        ITEM_HANDLER_CAPABILITY = REGISTRATE.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
-
-        TEST_MENU = REGISTRATE.setDefaultChannel(CHANNEL)
-            .menu("test_menu", TestMenu::new)
-            .title($ -> new TextComponent("Test Title"))
+        TEST_MENU = REGISTRATE.menu("test_menu", TestMenu::new)
+            .title($ -> Component.literal("Test Title"))
             .screen(() -> () -> TestScreen::new)
             .register();
 
@@ -114,21 +103,13 @@ public final class All {
         SERVER_TICK = EVENTS.getEntry(SERVER_TICK_LOC);
         TICK_SECOND = REGISTRATE.event("tick_second");
 
-        TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.Builder::new)
-            .recipeClass(TestRecipe.class)
-            .serializer(TestRecipe.SERIALIZER)
+        TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.class)
+            .serializer(TestRecipe.CODEC)
             .register();
 
-        TEST_VANILLA_RECIPE = REGISTRATE.vanillaRecipeType("test_vanilla", TestVanillaRecipe.Builder::new)
-            .recipeClass(TestVanillaRecipe.class)
-            .serializer(TestVanillaRecipe.SERIALIZER)
+        TEST_COOKING_RECIPE = REGISTRATE.recipeType("test_cooking", TestCookingRecipe.class)
+            .serializer(TestCookingRecipe.CODEC)
             .register();
-
-        VOID_BIOME = REGISTRATE.createDynamicHandler(ForgeRegistries.BIOMES, OverworldBiomes::theVoid)
-            .dynamicEntry(ForgeRegistries.BIOMES, "void");
-
-        var presetHandler = REGISTRATE.getHandler(ForgeRegistries.Keys.WORLD_TYPES, ForgeWorldPreset.class);
-        VOID_PRESET = REGISTRATE.registryEntry(presetHandler, "void", VoidPreset::new);
     }
 
     public static void init() {}

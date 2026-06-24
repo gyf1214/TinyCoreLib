@@ -1,36 +1,35 @@
 package org.shsts.tinycorelib.content.registrate;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
-import org.shsts.tinycorelib.api.network.IChannel;
+import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.api.network.IPacketType;
+import org.shsts.tinycorelib.api.network.PacketDirection;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilder;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
-import org.shsts.tinycorelib.api.recipe.IVanillaRecipeBuilder;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IMenuBuilder;
+import org.shsts.tinycorelib.api.registrate.builder.IPacketBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
-import org.shsts.tinycorelib.api.registrate.builder.IVanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
@@ -39,25 +38,27 @@ import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 import org.shsts.tinycorelib.content.blockentity.Event;
 import org.shsts.tinycorelib.content.blockentity.ReturnEvent;
+import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
+import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
+import org.shsts.tinycorelib.content.network.PacketPayloadType;
+import org.shsts.tinycorelib.content.network.PacketType;
 import org.shsts.tinycorelib.content.registrate.builder.BlockBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.ItemBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.MenuBuilder;
+import org.shsts.tinycorelib.content.registrate.builder.PacketBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
-import org.shsts.tinycorelib.content.registrate.builder.VanillaRecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
-import org.shsts.tinycorelib.content.registrate.handler.CapabilityHandler;
-import org.shsts.tinycorelib.content.registrate.handler.DynamicHandler;
+import org.shsts.tinycorelib.content.registrate.handler.CreativeTabHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
-import org.shsts.tinycorelib.content.registrate.handler.MenuScreenHandler;
+import org.shsts.tinycorelib.content.registrate.handler.EventHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
+import org.shsts.tinycorelib.content.registrate.handler.PayloadHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RecipeTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RegistryHandler;
-import org.shsts.tinycorelib.content.registrate.handler.RenderTypeHandler;
-import org.shsts.tinycorelib.content.registrate.handler.RendererHandler;
 import org.shsts.tinycorelib.content.registrate.handler.TintHandler;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedObjects;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
@@ -75,7 +76,6 @@ public class Registrate implements IRegistrate {
     public final String modid;
 
     private final Map<ResourceLocation, EntryHandler<?>> entryHandlers = new HashMap<>();
-    private final Map<ResourceLocation, DynamicHandler<?>> dynamicHandlers = new HashMap<>();
 
     // registry
     public final RegistryHandler registryHandler;
@@ -86,18 +86,16 @@ public class Registrate implements IRegistrate {
     public final RecipeTypeHandler recipeTypeHandler;
 
     // others
-    public final CapabilityHandler capabilityHandler;
+    public final EventHandler.Capability capabilityHandler;
+    public final CreativeTabHandler creativeTabHandler;
+    public final PayloadHandler payloadHandler;
 
     // client only
-    public final RenderTypeHandler renderTypeHandler;
     public final TintHandler tintHandler;
-    public final MenuScreenHandler menuScreenHandler;
-    public final RendererHandler rendererHandler;
+    public final EventHandler.MenuScreen menuScreenHandler;
+    public final EventHandler.Renderer rendererHandler;
 
     private final TrackedObjects trackedObjects;
-
-    @Nullable
-    private IChannel defaultChannel = null;
 
     public Registrate(String modid) {
         this.modid = modid;
@@ -106,42 +104,42 @@ public class Registrate implements IRegistrate {
         this.blockEntityTypeHandler = createEntryHandler(BlockEntityTypeHandler::new);
         this.menuTypeHandler = createEntryHandler(MenuTypeHandler::new);
         this.recipeTypeHandler = new RecipeTypeHandler(this);
-        this.capabilityHandler = new CapabilityHandler(this);
+        this.capabilityHandler = new EventHandler.Capability();
+        this.creativeTabHandler = new CreativeTabHandler();
+        this.payloadHandler = new PayloadHandler();
 
-        this.renderTypeHandler = new RenderTypeHandler();
         this.tintHandler = new TintHandler();
-        this.menuScreenHandler = new MenuScreenHandler();
-        this.rendererHandler = new RendererHandler();
+        this.menuScreenHandler = new EventHandler.MenuScreen();
+        this.rendererHandler = new EventHandler.Renderer();
 
         this.trackedObjects = new TrackedObjects();
     }
 
-    public <V extends IForgeRegistryEntry<V>> void addEntryHandler(ResourceLocation loc,
+    public <V> void addEntryHandler(ResourceLocation loc,
         EntryHandler<V> handler) {
         entryHandlers.put(loc, handler);
     }
 
     private <H extends EntryHandler<?>> H createEntryHandler(Function<Registrate, H> factory) {
         var handler = factory.apply(this);
-        entryHandlers.put(handler.getRegistry().getRegistryName(), handler);
+        entryHandlers.put(handler.registryKey().location(), handler);
         return handler;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IForgeRegistryEntry<V>> EntryHandler<V> getHandler(
-        IForgeRegistry<V> registry) {
-        return (EntryHandler<V>) entryHandlers.computeIfAbsent(registry.getRegistryName(),
-            $ -> new EntryHandler<>(this, registry));
+    public <V> EntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key,
+        Registry<V> registry, Class<V> entryClass) {
+        return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
+            $ -> new EntryHandler<>(this, key, registry));
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IForgeRegistryEntry<V>> EntryHandler<V> getHandler(
-        ResourceKey<Registry<V>> key, Class<?> entryClass) {
+    public <V> EntryHandler<V> getHandler(
+        ResourceKey<? extends Registry<V>> key, Class<?> entryClass) {
         return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
-            $ -> new EntryHandler<>(this, (Class<V>) entryClass,
-                () -> registryHandler.getRegistry(key)));
+            $ -> new EntryHandler<>(this, key, () -> registryHandler.getRegistry(key)));
     }
 
     @Override
@@ -165,33 +163,13 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(ResourceLocation loc) {
-        return (IRecipeType<B>) recipeTypeHandler.getRecipeType(loc);
+    public IRecipeType<?> getRecipeType(ResourceLocation loc) {
+        return recipeTypeHandler.getRecipeType(loc);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <B extends IRecipeBuilderBase<?>> IRecipeType<B> getRecipeType(String id) {
-        return (IRecipeType<B>) recipeTypeHandler.getRecipeType(id);
-    }
-
-    @Override
-    public <T> ICapability<T> getCapability(CapabilityToken<T> token) {
-        return new CapabilityEntry<>(token);
-    }
-
-    @Override
-    public <T> ICapability<T> getCapability(Capability<T> cap) {
-        return new CapabilityEntry<>(cap);
-    }
-
-    @Override
-    public <T extends IForgeRegistryEntry<T>> IRegistrate createDynamicHandler(
-        IForgeRegistry<T> registry, Supplier<T> dummy) {
-        var handler = new DynamicHandler<>(registry.getRegistrySuperType(), dummy);
-        dynamicHandlers.put(registry.getRegistryName(), handler);
-        return this;
+    public IRecipeType<?> getRecipeType(String id) {
+        return recipeTypeHandler.getRecipeType(id);
     }
 
     @Override
@@ -200,35 +178,29 @@ public class Registrate implements IRegistrate {
         for (var handler : entryHandlers.values()) {
             handler.addListener(modEventBus);
         }
-        for (var handler : dynamicHandlers.values()) {
-            handler.addListener(modEventBus);
-        }
-        recipeTypeHandler.addListeners(modEventBus);
-        modEventBus.addListener(capabilityHandler::onRegisterEvent);
-    }
-
-    private void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(renderTypeHandler::onClientSetup);
-        event.enqueueWork(menuScreenHandler::onClientSetup);
+        recipeTypeHandler.addListener(modEventBus);
+        modEventBus.addListener(RegisterCapabilitiesEvent.class, capabilityHandler::onEvent);
+        modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
+        modEventBus.addListener(payloadHandler::onRegisterPayload);
     }
 
     @Override
     public void registerClient(IEventBus modEventBus) {
         modEventBus.addListener(tintHandler::onRegisterBlockColors);
         modEventBus.addListener(tintHandler::onRegisterItemColors);
-        modEventBus.addListener(rendererHandler::onRegisterRenderers);
-        modEventBus.addListener(this::onClientSetup);
+        modEventBus.addListener(EntityRenderersEvent.RegisterRenderers.class, rendererHandler::onEvent);
+        modEventBus.addListener(RegisterMenuScreensEvent.class, menuScreenHandler::onEvent);
     }
 
     @Override
-    public <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> registry(
+    public <V, P> IRegistryBuilder<V, P> registry(
         P parent, String id, Class<V> entryClass) {
         return new RegistryBuilderWrapper<>(this, parent, id, entryClass);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IForgeRegistryEntry<V>, P> IRegistryBuilder<V, P> genericRegistry(
+    public <V, P> IRegistryBuilder<V, P> genericRegistry(
         P parent, String id, Class<?> entryClass) {
         return new RegistryBuilderWrapper<>(this, parent, id, (Class<V>) entryClass);
     }
@@ -259,34 +231,48 @@ public class Registrate implements IRegistrate {
     @Override
     public <M extends MenuBase, P> IMenuBuilder<M, P> menu(P parent, String id,
         Function<MenuBase.Properties, M> menuFactory) {
-        var builder = new MenuBuilder<>(this, parent, id, menuFactory);
-        return defaultChannel == null ? builder : builder.channel(defaultChannel);
+        return new MenuBuilder<>(this, parent, id, menuFactory);
     }
 
     @Override
-    public IRegistrate setDefaultChannel(@Nullable IChannel value) {
-        defaultChannel = value;
-        return this;
+    public <T extends IPacket, P> IPacketBuilder<T, P> packet(P parent, String id,
+        Supplier<T> constructor) {
+        return new PacketBuilder<>(this, parent, id, constructor);
     }
 
     @Override
-    public <T> ICapability<T> capability(Class<T> clazz, CapabilityToken<T> token) {
-        return capabilityHandler.register(clazz, token);
+    public <T extends IPacket> IPacketType<T> menuSyncPacket(String id, Supplier<T> constructor) {
+        var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
+        var type = new PacketType<T, MenuSyncPacket<T>>(loc, PacketDirection.CLIENTBOUND,
+            PacketPayloadType.MENU_SYNC, new CustomPacketPayload.Type<>(loc));
+        payloadHandler.registerMenuSync(type, constructor);
+        return type;
     }
 
     @Override
-    public <T extends IForgeRegistryEntry<T>, U extends T> IEntry<U> registryEntry(
+    public <T extends IPacket> IPacketType<T> menuEventPacket(String id, Supplier<T> constructor) {
+        var loc = ResourceLocation.fromNamespaceAndPath(modid, id);
+        var type = new PacketType<T, MenuEventPacket<T>>(loc, PacketDirection.SERVERBOUND,
+            PacketPayloadType.MENU_EVENT, new CustomPacketPayload.Type<>(loc));
+        payloadHandler.registerMenuEvent(type, constructor);
+        return type;
+    }
+
+    @Override
+    public <T> ICapability<T> capability(String id, Class<T> typeClass) {
+        return new CapabilityEntry<>(modid, id, typeClass);
+    }
+
+    @Override
+    public <T> ICapability<T> capability(BlockCapability<T, ?> capability) {
+        return new CapabilityEntry<>(capability);
+    }
+
+    @Override
+    public <T, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory) {
         return new SimpleEntryBuilder<>(this, (EntryHandler<T>) handler, this, id, factory)
             .register();
-    }
-
-    @Override
-    public <T extends IForgeRegistryEntry<T>> ResourceKey<T> dynamicEntry(
-        IForgeRegistry<T> registry, String id) {
-        var loc = new ResourceLocation(modid, id);
-        dynamicHandlers.get(registry.getRegistryName()).register(loc);
-        return ResourceKey.create(registry.getRegistryKey(), loc);
     }
 
     private EntryHandler<IEvent<?>> getEventHandler() {
@@ -305,17 +291,9 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <C, R extends IRecipe<C>, B extends IRecipeBuilder<R, B>,
-        P> IRecipeTypeBuilder<R, B, P> recipeType(P parent, String id,
-        IRecipeType.BuilderFactory<B> builderFactory) {
-        return new RecipeTypeBuilder<>(this, parent, id, builderFactory);
-    }
-
-    @Override
-    public <C, R extends IRecipe<C>, B extends IVanillaRecipeBuilder<R, B>,
-        P> IVanillaRecipeTypeBuilder<R, B, P> vanillaRecipeType(P parent,
-        String id, IRecipeType.BuilderFactory<B> builderFactory) {
-        return new VanillaRecipeTypeBuilder<>(this, parent, id, builderFactory);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <R extends IRecipe<?>, P> IRecipeTypeBuilder<R, P> recipeType(P parent, String id, Class<R> clazz) {
+        return (IRecipeTypeBuilder<R, P>) new RecipeTypeBuilder(this, parent, id, clazz);
     }
 
     @Override
@@ -324,15 +302,13 @@ public class Registrate implements IRegistrate {
     }
 
     public void trackBlock(Block block) {
-        var loc = block.getRegistryName();
-        assert loc != null;
+        var loc = BuiltInRegistries.BLOCK.getKey(block);
         trackedObjects.put(TrackedType.BLOCK, block, loc.toString());
         trackLang(block.getDescriptionId());
     }
 
     public void trackItem(Item item) {
-        var loc = item.getRegistryName();
-        assert loc != null;
+        var loc = BuiltInRegistries.ITEM.getKey(item);
         trackedObjects.put(TrackedType.ITEM, item, loc.toString());
         trackLang(item.getDescriptionId());
     }

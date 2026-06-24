@@ -2,53 +2,54 @@ package org.shsts.tinycorelib.content.gui.sync;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.network.FriendlyByteBuf;
-import org.shsts.tinycorelib.api.gui.IMenuEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.shsts.tinycorelib.api.gui.IMenuEventHandler;
 import org.shsts.tinycorelib.api.network.IPacket;
-import org.shsts.tinycorelib.content.network.Channel;
+import org.shsts.tinycorelib.content.network.PacketPayloads;
+import org.shsts.tinycorelib.content.network.PacketType;
+
+import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class MenuEventPacket implements IPacket {
-    private final Channel channel;
-    private int containerId;
-    private IMenuEvent<?> event;
-    private IPacket content;
-
-    public MenuEventPacket(Channel channel) {
-        this.channel = channel;
+public record MenuEventPacket<P extends IPacket>(
+    PacketType<P, ?> packetType,
+    int containerId,
+    P content
+) implements CustomPacketPayload {
+    public static <P extends IPacket> StreamCodec<RegistryFriendlyByteBuf, MenuEventPacket<P>> codec(
+        PacketType<P, MenuEventPacket<P>> type, Supplier<P> constructor) {
+        return CustomPacketPayload.codec(
+            MenuEventPacket::write,
+            buf -> read(type, constructor, buf));
     }
 
-    public MenuEventPacket(Channel channel, int containerId, IMenuEvent<?> event, IPacket content) {
-        this.channel = channel;
-        this.containerId = containerId;
-        this.event = event;
-        this.content = content;
+    private static <P extends IPacket> MenuEventPacket<P> read(
+        PacketType<P, MenuEventPacket<P>> type, Supplier<P> constructor,
+        RegistryFriendlyByteBuf buf) {
+        var containerId = buf.readVarInt();
+        var content = PacketPayloads.read(constructor, buf);
+        return new MenuEventPacket<>(type, containerId, content);
     }
 
-    @Override
-    public void serializeToBuf(FriendlyByteBuf buf) {
+    private void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(containerId);
-        channel.eventPackets.serialize(event, content, buf);
+        content.serializeToBuf(buf);
     }
 
     @Override
-    public void deserializeFromBuf(FriendlyByteBuf buf) {
-        containerId = buf.readVarInt();
-        var entry = channel.eventPackets.deserialize(buf);
-        event = entry.key();
-        content = entry.packet();
+    public Type<? extends CustomPacketPayload> type() {
+        return packetType.type();
     }
 
-    public int getContainerId() {
-        return containerId;
-    }
-
-    public IMenuEvent<?> getEvent() {
-        return event;
-    }
-
-    public IPacket getContent() {
-        return content;
+    public void handle(IPayloadContext context) {
+        var player = context.player();
+        if (player.containerMenu.containerId == containerId &&
+            player.containerMenu instanceof IMenuEventHandler menu) {
+            menu.handleEventPacket(packetType, content);
+        }
     }
 }

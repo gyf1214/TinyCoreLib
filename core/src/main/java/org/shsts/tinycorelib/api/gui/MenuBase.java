@@ -11,9 +11,14 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.shsts.tinycorelib.api.network.IChannel;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.content.gui.SimpleSyncSlotScheduler;
+import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
+import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
+import org.shsts.tinycorelib.content.network.PacketPayloadType;
+import org.shsts.tinycorelib.content.registrate.handler.PayloadHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +36,6 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
     protected final BlockEntity blockEntity;
     protected final Player player;
     protected final Inventory inventory;
-    @Nullable
-    private final IChannel channel;
 
     private class SyncSlot<P extends IPacket> {
         private final int index;
@@ -47,11 +50,14 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
         }
 
         public void sync() {
-            if (channel != null && player instanceof ServerPlayer serverPlayer) {
+            if (player instanceof ServerPlayer serverPlayer) {
                 if (scheduler.shouldSend()) {
                     var packet = scheduler.createPacket();
-                    var syncPacket = channel.createMenuSyncPacket(containerId, index, packet);
-                    channel.sendToPlayer(serverPlayer, syncPacket);
+                    var type = PayloadHandler.<P, MenuSyncPacket<P>>requireType(
+                        scheduler.packetType());
+                    PayloadHandler.requirePayloadType(type, PacketPayloadType.MENU_SYNC);
+                    PacketDistributor.sendToPlayer(serverPlayer,
+                        new MenuSyncPacket<>(type, containerId, index, packet));
                 }
             }
         }
@@ -68,35 +74,36 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
             callbacks.add(cb);
         }
 
-        public <P1 extends IPacket> Optional<P1> getPacket(Class<P1> clazz) {
-            return clazz.isInstance(packet) ? Optional.of(clazz.cast(packet)) :
-                Optional.empty();
+        @SuppressWarnings("unchecked")
+        public <P1 extends IPacket> Optional<P1> getPacket(IPacketType<P1> type) {
+            return scheduler.packetType().equals(type) && packet != null ?
+                Optional.of((P1) packet) : Optional.empty();
         }
     }
 
     private final List<SyncSlot<?>> syncSlots = new ArrayList<>();
     private final Map<String, SyncSlot<?>> syncSlotNames = new HashMap<>();
 
-    private record EventHandler<P extends IPacket>(Class<P> clazz, Consumer<P> handler) {
-        public void handle(IPacket packet) {
-            if (clazz.isInstance(packet)) {
-                handler.accept(clazz.cast(packet));
+    private record EventHandler<P extends IPacket>(IPacketType<P> type, Consumer<P> handler) {
+        @SuppressWarnings("unchecked")
+        public void handle(IPacketType<?> packetType, IPacket packet) {
+            if (type.equals(packetType)) {
+                handler.accept((P) packet);
             }
         }
     }
 
-    private final Map<IMenuEvent<?>, EventHandler<?>> eventHandlers = new HashMap<>();
+    private final Map<IPacketType<?>, EventHandler<?>> eventHandlers = new HashMap<>();
 
     public record Properties(MenuType<?> menuType, int id, Inventory inventory,
-        @Nullable BlockEntity blockEntity, @Nullable IChannel channel) {}
+        @Nullable BlockEntity blockEntity) {}
 
     public MenuBase(Properties properties) {
         super(properties.menuType, properties.id);
         this.blockEntity = properties.blockEntity;
         this.inventory = properties.inventory;
         this.player = inventory.player;
-        this.world = player.level;
-        this.channel = properties.channel;
+        this.world = player.level();
     }
 
     public BlockEntity blockEntity() {
@@ -127,7 +134,7 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
         var be = blockEntity;
         var level = be.getLevel();
         var pos = be.getBlockPos();
-        return level == player.getLevel() &&
+        return level == player.level() &&
             level.getBlockEntity(pos) == be &&
             player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0;
     }
@@ -143,8 +150,8 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
         return createSyncSlot(scheduler).index;
     }
 
-    protected <P extends IPacket> int addSyncSlot(Supplier<P> factory) {
-        return addSyncSlot(new SimpleSyncSlotScheduler<>(factory));
+    protected <P extends IPacket> int addSyncSlot(IPacketType<P> type, Supplier<P> factory) {
+        return addSyncSlot(new SimpleSyncSlotScheduler<>(type, factory));
     }
 
     protected <P extends IPacket> void addSyncSlot(String name, ISyncSlotScheduler<P> scheduler) {
@@ -153,22 +160,23 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
         syncSlotNames.put(name, slot);
     }
 
-    protected <P extends IPacket> void addSyncSlot(String name, Supplier<P> factory) {
-        addSyncSlot(name, new SimpleSyncSlotScheduler<>(factory));
+    protected <P extends IPacket> void addSyncSlot(String name, IPacketType<P> type,
+        Supplier<P> factory) {
+        addSyncSlot(name, new SimpleSyncSlotScheduler<>(type, factory));
     }
 
     /**
      * Called by Client to get the latest sync packet.
      */
-    public <P extends IPacket> Optional<P> getSyncPacket(int index, Class<P> clazz) {
-        return syncSlots.get(index).getPacket(clazz);
+    public <P extends IPacket> Optional<P> getSyncPacket(int index, IPacketType<P> type) {
+        return syncSlots.get(index).getPacket(type);
     }
 
     /**
      * Called by Client to get the latest sync packet.
      */
-    public <P extends IPacket> Optional<P> getSyncPacket(String name, Class<P> clazz) {
-        return syncSlotNames.get(name).getPacket(clazz);
+    public <P extends IPacket> Optional<P> getSyncPacket(String name, IPacketType<P> type) {
+        return syncSlotNames.get(name).getPacket(type);
     }
 
     /**
@@ -192,33 +200,36 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
     /**
      * Callback added by Server.
      */
-    protected <P extends IPacket> void onEventPacket(IMenuEvent<P> event, Consumer<P> cb) {
-        eventHandlers.put(event, new EventHandler<>(event.clazz(), cb));
+    protected <P extends IPacket> void onEventPacket(IPacketType<P> type, Consumer<P> cb) {
+        PayloadHandler.requirePayloadType(type, PacketPayloadType.MENU_EVENT);
+        eventHandlers.put(type, new EventHandler<>(type, cb));
     }
 
     /**
      * Trigger an event from Client.
      */
-    public <P extends IPacket> void triggerEvent(IMenuEvent<P> event, Supplier<P> factory) {
-        if (channel != null) {
-            var packet = channel.createMenuEventPacket(containerId, event, factory.get());
-            channel.sendToServer(packet);
-        }
+    public <P extends IPacket> void triggerEvent(IPacketType<P> type, Supplier<P> factory) {
+        var packetType = PayloadHandler.<P, MenuEventPacket<P>>requireType(type);
+        PayloadHandler.requirePayloadType(type, PacketPayloadType.MENU_EVENT);
+        PacketDistributor.sendToServer(new MenuEventPacket<>(packetType, containerId, factory.get()));
     }
 
     @Override
-    public void handleSyncPacket(int index, IPacket packet) {
+    public <P extends IPacket> void handleSyncPacket(IPacketType<P> type, int index, P packet) {
+        if (index < 0 || index >= syncSlots.size()) {
+            return;
+        }
         var slot = syncSlots.get(index);
-        if (slot == null) {
+        if (!slot.scheduler.packetType().equals(type)) {
             return;
         }
         slot.setPacket(packet);
     }
 
     @Override
-    public void handleEventPacket(IMenuEvent<?> event, IPacket packet) {
-        if (eventHandlers.containsKey(event)) {
-            eventHandlers.get(event).handle(packet);
+    public <P extends IPacket> void handleEventPacket(IPacketType<P> type, P packet) {
+        if (eventHandlers.containsKey(type)) {
+            eventHandlers.get(type).handle(type, packet);
         }
     }
 

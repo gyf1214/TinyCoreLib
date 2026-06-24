@@ -1,45 +1,47 @@
-archivesBaseName = "tinydatagen_test"
+base {
+    archivesName = "tinydatagen_test"
+}
 
-minecraft {
+neoForge {
     runs {
         data {
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            jvmArgs '-ea'
+            data()
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+            jvmArgument '-ea'
 
-            ideaModule rootProject.getName() + '.test.test'
+            gameDirectory = project.file('run/data')
+            programArguments.addAll '--mod', 'tinydatagen_test', '--all', '--output', rootProject.project(':test').file('src/generated/resources/').absolutePath
+            programArguments.addAll '--existing', rootProject.project(':test').file('src/main/resources/').absolutePath
+            programArguments.addAll '--existing', file('src/main/resources/').absolutePath
+        }
+    }
 
-            mods {
-                tinycorelib {
-                    source project(':core').sourceSets.main
-                }
+    mods {
+        tinycorelib {
+            sourceSet project(':core').sourceSets.main
+        }
 
-                tinydatagen {
-                    source project(':datagen').sourceSets.main
-                }
+        tinydatagen {
+            sourceSet project(':datagen').sourceSets.main
+        }
 
-                tinycorelib_test {
-                    source project(':test').sourceSets.main
-                }
+        tinycorelib_test {
+            sourceSet project(':test').sourceSets.main
+        }
 
-                tinydatagen_test {
-                    source sourceSets.main
-                }
-            }
-
-            workingDirectory project.file('run/data')
-            args '--mod', 'tinydatagen_test', '--all', '--output', project(':test').file('src/generated/resources/')
-            args '--existing', project(':test').file('src/main/resources/')
-            args '--existing', file('src/main/resources/')
+        tinydatagen_test {
+            sourceSet sourceSets.main
         }
     }
 }
 
 dependencies {
-    compileOnly project(path: ':core', configuration: 'api')
-    compileOnly project(path: ':datagen', configuration: 'api')
-    runtimeOnly project(path: ':datagen', configuration: 'dev')
+    compileOnly project(path: ':core')
+    compileOnly project(path: ':datagen')
+    runtimeOnly project(path: ':core')
+    runtimeOnly project(path: ':datagen')
 
     compileOnly project(path: ':test')
-    runtimeOnly project(path: ':test', configuration: 'dev')
+    runtimeOnly project(path: ':test')
 }

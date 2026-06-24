@@ -3,16 +3,13 @@ package org.shsts.tinycorelib;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.content.CoreContents;
-import org.shsts.tinycorelib.content.ForgeEvents;
 import org.slf4j.Logger;
 
 import static org.shsts.tinycorelib.content.CoreContents.REGISTRATE;
@@ -26,8 +23,8 @@ public class TinyCoreLibMod {
     private final TinyCoreLib core;
     private final IEventBus modEventBus;
 
-    public TinyCoreLibMod() {
-        this.modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public TinyCoreLibMod(IEventBus modEventBus) {
+        this.modEventBus = modEventBus;
         this.core = TinyCoreLibProvider.getCore();
 
         modEventBus.addListener(this::onConstruct);
@@ -39,8 +36,9 @@ public class TinyCoreLibMod {
         CoreContents.init();
 
         REGISTRATE.register(modEventBus);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::onConstructClient);
-        MinecraftForge.EVENT_BUS.register(ForgeEvents.class);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            onConstructClient();
+        }
     }
 
     private void onConstructClient() {

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.shsts.tinycorelib.api.core.IBuilder;
 import org.shsts.tinycorelib.api.core.ILoc;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;

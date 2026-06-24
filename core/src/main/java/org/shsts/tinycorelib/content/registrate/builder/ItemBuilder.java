@@ -4,10 +4,12 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
@@ -21,19 +23,28 @@ import java.util.function.Function;
 public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IItemBuilder<U, P>>
     implements IItemBuilder<U, P> {
     private final Function<Item.Properties, U> factory;
-    private Transformer<Item.Properties> properties = $ -> $.tab(CreativeModeTab.TAB_MISC);
+    private Transformer<Item.Properties> properties = $ -> $;
+    @Nullable
+    private ResourceKey<CreativeModeTab> creativeTab = null;
     @Nullable
     protected DistLazy<ItemColor> tint = null;
 
     public ItemBuilder(Registrate registrate, P parent, String id,
         Function<Item.Properties, U> factory) {
-        super(registrate, registrate.getHandler(ForgeRegistries.ITEMS), parent, id);
+        super(registrate, registrate.getHandler(Registries.ITEM, BuiltInRegistries.ITEM,
+            Item.class), parent, id);
         this.factory = factory;
     }
 
     @Override
     public IItemBuilder<U, P> properties(Transformer<Item.Properties> trans) {
         properties = properties.chain(trans);
+        return self();
+    }
+
+    @Override
+    public IItemBuilder<U, P> creativeTab(ResourceKey<CreativeModeTab> tab) {
+        creativeTab = tab;
         return self();
     }
 
@@ -54,6 +65,10 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
         if (tint != null) {
             onCreateObject.add(item -> tint.runOnDist(Dist.CLIENT, () -> itemColor ->
                 registrate.tintHandler.addItemColor(item, itemColor)));
+        }
+        var creativeTab = this.creativeTab;
+        if (creativeTab != null) {
+            onCreateObject.add(item -> registrate.creativeTabHandler.setCreativeTab(() -> item, creativeTab));
         }
         return super.createEntry();
     }

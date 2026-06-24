@@ -2,11 +2,12 @@ package org.shsts.tinycorelib.api;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.meta.IMetaConsumer;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
-import org.shsts.tinycorelib.api.network.IChannel;
+import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.api.recipe.IRecipeManager;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 
@@ -22,7 +23,9 @@ public interface ITinyCoreLib {
 
     IMetaExecutor registerMeta(String folder, IMetaConsumer consumer);
 
-    IChannel createChannel(ResourceLocation loc, String version);
+    <P extends IPacket> void sendToServer(IPacketType<P> type, P packet);
+
+    <P extends IPacket> void sendToPlayer(ServerPlayer player, IPacketType<P> type, P packet);
 
     IRecipeManager recipeManager(Level world);
 

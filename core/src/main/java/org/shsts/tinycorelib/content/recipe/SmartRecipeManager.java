@@ -3,12 +3,14 @@ package org.shsts.tinycorelib.content.recipe;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
-import org.shsts.tinycorelib.api.recipe.IRecipeBuilderBase;
 import org.shsts.tinycorelib.api.recipe.IRecipeManager;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
+import org.shsts.tinycorelib.content.registrate.entry.Entry;
 import org.shsts.tinycorelib.content.registrate.entry.RecipeTypeEntry;
 
 import java.util.ArrayList;
@@ -25,61 +27,64 @@ public class SmartRecipeManager implements IRecipeManager {
     }
 
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    private <C, R extends IRecipe<C>,
-        B extends IRecipeBuilderBase<R>> RecipeType<SmartRecipe<C, R>> getType(
-        IRecipeType<B> type) {
-        return ((RecipeTypeEntry<C, R, B>) type).get();
+    private <C, R extends IRecipe<C>> RecipeType<SmartRecipe<C, R>> getType(
+        IRecipeType<R> type) {
+        return ((RecipeTypeEntry<C, R>) type).get();
+    }
+
+    private <R extends IRecipe<?>> IEntry<R> unwrap(RecipeHolder<? extends SmartRecipe<?, R>> holder) {
+        return new Entry<>(holder.id(), holder.value().compose);
     }
 
     @Override
     @SuppressWarnings("DataFlowIssue")
-    public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> Optional<R> getRecipeFor(
-        IRecipeType<B> type, C container) {
+    public <C, R extends IRecipe<C>> Optional<IEntry<R>> getRecipeFor(
+        IRecipeType<R> type, C container) {
         return manager.getRecipeFor(getType(type), new ContainerWrapper<>(container), null)
-            .map($ -> $.compose);
+            .map(this::unwrap);
     }
 
     @Override
     @SuppressWarnings("DataFlowIssue")
-    public <C, R extends IRecipe<C>, B extends IRecipeBuilderBase<R>> List<R> getRecipesFor(
-        IRecipeType<B> type, C container) {
+    public <C, R extends IRecipe<C>> List<IEntry<R>> getRecipesFor(
+        IRecipeType<R> type, C container) {
         return manager.getRecipesFor(getType(type), new ContainerWrapper<>(container), null)
-            .stream().map($ -> $.compose)
+            .stream().map(this::unwrap)
             .toList();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> List<R> getAllRecipesFor(
-        IRecipeType<B> type) {
-        return (List<R>) getRawRecipesFor(type);
+    public <R extends IRecipe<?>> List<IEntry<R>> getAllRecipesFor(IRecipeType<R> type) {
+        return (List<IEntry<R>>) (List<?>) getRawRecipesFor(type);
     }
 
     @Override
-    public List<IRecipe<?>> getRawRecipesFor(IRecipeType<?> type) {
-        var ret = new ArrayList<IRecipe<?>>();
-        for (var recipe : manager.getAllRecipesFor((SmartRecipeType<?, ?, ?>) type.get())) {
-            ret.add(recipe.compose);
+    @SuppressWarnings({"unchecked", "RedundantSuppression"})
+    public List<IEntry<? extends IRecipe<?>>> getRawRecipesFor(IRecipeType<?> type) {
+        var ret = new ArrayList<IEntry<? extends IRecipe<?>>>();
+        var recipeType = (SmartRecipeType<Object, IRecipe<Object>>) type.get();
+        for (var recipe : manager.getAllRecipesFor(recipeType)) {
+            ret.add(unwrap(recipe));
         }
         return ret;
     }
 
     @Override
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <R extends IRecipe<?>, B extends IRecipeBuilderBase<R>> Optional<R> byLoc(
-        IRecipeType<B> type, ResourceLocation loc) {
-        var clazz = ((RecipeTypeEntry<?, R, B>) type).recipeClass();
+    public <R extends IRecipe<?>> Optional<IEntry<R>> byLoc(
+        IRecipeType<R> type, ResourceLocation loc) {
+        var clazz = type.recipeClass();
         return manager.byKey(loc)
-            .flatMap($ -> $ instanceof SmartRecipe<?, ?> smartRecipe &&
+            .flatMap($ -> $.value() instanceof SmartRecipe<?, ?> smartRecipe &&
                 smartRecipe.getType() == type.get() ?
-                Optional.of(smartRecipe.compose) : Optional.empty())
-            .map(clazz::cast);
+                Optional.of(new Entry<>(loc, clazz.cast(smartRecipe.compose))) : Optional.empty());
     }
 
     @Override
-    public Optional<IRecipe<?>> byLoc(ResourceLocation loc) {
+    public Optional<IEntry<? extends IRecipe<?>>> byLoc(ResourceLocation loc) {
         return manager.byKey(loc)
-            .flatMap($ -> $ instanceof SmartRecipe<?, ?> smartRecipe ?
-                Optional.of(smartRecipe.compose) : Optional.empty());
+            .flatMap($ -> $.value() instanceof SmartRecipe<?, ?> smartRecipe ?
+                Optional.of(new Entry<>(loc, smartRecipe.compose)) : Optional.empty());
     }
 }

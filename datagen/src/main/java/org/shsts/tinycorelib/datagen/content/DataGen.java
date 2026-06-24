@@ -3,20 +3,25 @@ package org.shsts.tinycorelib.datagen.content;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
-import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.conditions.FalseCondition;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+import org.shsts.tinycorelib.api.core.IBuilder;
+import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
+import org.shsts.tinycorelib.content.recipe.NullRecipe;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
@@ -24,6 +29,7 @@ import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.builder.IItemDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
+import org.shsts.tinycorelib.datagen.api.recipe.IRecipeFactory;
 import org.shsts.tinycorelib.datagen.content.builder.BlockDataBuilder;
 import org.shsts.tinycorelib.datagen.content.builder.ItemDataBuilder;
 import org.shsts.tinycorelib.datagen.content.context.TrackedContext;
@@ -34,12 +40,14 @@ import org.shsts.tinycorelib.datagen.content.handler.ItemModelHandler;
 import org.shsts.tinycorelib.datagen.content.handler.LootTableHandler;
 import org.shsts.tinycorelib.datagen.content.handler.RecipeHandler;
 import org.shsts.tinycorelib.datagen.content.handler.TagsHandler;
+import org.shsts.tinycorelib.datagen.content.recipe.RecipeFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -81,8 +89,8 @@ public class DataGen implements IDataGen {
         this.itemModelHandler = createDataHandler(ItemModelHandler::new);
         this.lootTableHandler = createDataHandler(LootTableHandler::new);
         this.recipeHandler = createDataHandler(RecipeHandler::new);
-        createTagsHandler(Registry.BLOCK);
-        createTagsHandler(Registry.ITEM);
+        createTagsHandler(BuiltInRegistries.BLOCK);
+        createTagsHandler(BuiltInRegistries.ITEM);
 
         this.blockTrackedContext = createTrackedContext(TrackedType.BLOCK);
         this.itemTrackedContext = createTrackedContext(TrackedType.ITEM);
@@ -157,41 +165,43 @@ public class DataGen implements IDataGen {
     }
 
     @Override
-    public <U extends Block> IBlockDataBuilder<U, IDataGen> block(ResourceLocation loc, Supplier<U> item) {
-        return new BlockDataBuilder<>(this, this, loc, item);
-    }
-
-    @Override
     public <U extends Block> IBlockDataBuilder<U, IDataGen> block(IEntry<U> block) {
-        return new BlockDataBuilder<>(this, this, block.loc(), block);
+        return new BlockDataBuilder<>(this, this, block);
     }
 
     @Override
-    public <U extends Item> IItemDataBuilder<U, IDataGen> item(ResourceLocation loc, Supplier<U> item) {
-        return new ItemDataBuilder<>(this, this, loc, item);
+    public <U extends Block> IBlockDataBuilder<U, IDataGen> block(U block) {
+        return new BlockDataBuilder<>(this, this, BuiltInRegistries.BLOCK, block);
     }
 
     @Override
     public <U extends Item> IItemDataBuilder<U, IDataGen> item(IEntry<U> item) {
-        return new ItemDataBuilder<>(this, this, item.loc(), item);
+        return new ItemDataBuilder<>(this, this, item);
     }
 
     @Override
-    public <T> IDataGen tag(Supplier<? extends T> object, List<TagKey<T>> tags) {
-        assert !tags.isEmpty();
-        tagsHandler(tags.get(0).registry()).addTags(object, tags);
+    public IItemDataBuilder<Item, IDataGen> item(ItemLike item) {
+        return new ItemDataBuilder<>(this, this, BuiltInRegistries.ITEM, item.asItem());
+    }
+
+    @Override
+    public <T> IDataGen tag(ResourceKey<T> object, List<TagKey<T>> tags) {
+        if (tags.isEmpty()) {
+            return this;
+        }
+        tagsHandler(object.registryKey()).addTags(object, tags);
         return this;
     }
 
     @Override
-    public <T> IDataGen tag(Supplier<? extends T> object, TagKey<T> tag) {
-        tagsHandler(tag.registry()).addTags(object, tag);
+    public <T> IDataGen tag(ResourceKey<T> object, TagKey<T> tag) {
+        tagsHandler(object.registryKey()).addTags(object, tag);
         return this;
     }
 
     @Override
     public <T> IDataGen tag(TagKey<T> object, TagKey<T> tag) {
-        tagsHandler(tag.registry()).addTag(object, tag);
+        tagsHandler(object.registry()).addTag(object, tag);
         return this;
     }
 
@@ -208,27 +218,27 @@ public class DataGen implements IDataGen {
     }
 
     @Override
-    public IDataGen replaceVanillaRecipe(Supplier<RecipeBuilder> recipe) {
-        recipeHandler.registerRecipe(cons -> recipe.get().save(cons));
-        return this;
+    public <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>> IRecipeFactory<R, B>
+        recipeFactory(IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory) {
+        return new RecipeFactory<>(this, type, factory);
     }
 
     @Override
-    public IDataGen vanillaRecipe(Supplier<RecipeBuilder> recipe, String suffix) {
-        recipeHandler.registerRecipe(cons -> {
-            var builder = recipe.get();
-            var loc = builder.getResult().getRegistryName();
-            assert loc != null;
-            var prefix = builder instanceof SimpleCookingRecipeBuilder ? "smelt" : "craft";
-            var recipeLoc = new ResourceLocation(modid, prefix + "/" + loc.getPath() + suffix);
-            builder.save(cons, recipeLoc);
-        });
-        return this;
+    public <B extends RecipeBuilder> B vanillaRecipe(String id, Supplier<B> factory) {
+        return vanillaRecipe(ResourceLocation.fromNamespaceAndPath(modid, id), factory);
+    }
+
+    @Override
+    public <B extends RecipeBuilder> B vanillaRecipe(ResourceLocation loc, Supplier<B> factory) {
+        var builder = factory.get();
+        recipeHandler.registerRecipe(output -> builder.save(output, loc));
+        return builder;
     }
 
     @Override
     public IDataGen nullRecipe(ResourceLocation loc) {
-        recipeHandler.registerRecipe(() -> new NullRecipe(loc));
+        recipeHandler.registerRecipe(output -> output.accept(loc, NullRecipe.INSTANCE, null,
+            FalseCondition.INSTANCE));
         return this;
     }
 
@@ -251,26 +261,22 @@ public class DataGen implements IDataGen {
     }
 
     @Override
-    public void registerRecipe(ResourceLocation loc, Supplier<FinishedRecipe> recipe) {
-        recipeHandler.registerRecipe(recipe);
-    }
-
-    @Override
     public void onGatherData(GatherDataEvent event) {
         for (var handler : dataHandlers) {
             handler.onGatherData(event);
         }
         for (var prov : dataProviders) {
-            event.getGenerator().addProvider(prov.apply(this, event));
+            event.addProvider(prov.apply(this, event));
         }
-        event.getGenerator().addProvider(new DataProvider() {
+        event.addProvider(new DataProvider() {
             @Override
-            public void run(HashCache cache) {
+            public CompletableFuture<?> run(CachedOutput cache) {
                 for (var trackedCtx : trackedContexts) {
                     if (!trackedCtx.postValidate() && failValidation) {
                         throw new IllegalStateException("Tracked validation failed");
                     }
                 }
+                return CompletableFuture.completedFuture(null);
             }
 
             @Override

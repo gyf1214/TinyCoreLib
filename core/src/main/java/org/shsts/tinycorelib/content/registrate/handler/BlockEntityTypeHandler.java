@@ -2,10 +2,10 @@ package org.shsts.tinycorelib.content.registrate.handler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;
@@ -14,15 +14,15 @@ import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;
 @MethodsReturnNonnullByDefault
 public class BlockEntityTypeHandler extends EntryHandler<BlockEntityType<?>> {
     public BlockEntityTypeHandler(Registrate registrate) {
-        super(registrate, ForgeRegistries.BLOCK_ENTITIES);
+        super(registrate, Registries.BLOCK_ENTITY_TYPE, BuiltInRegistries.BLOCK_ENTITY_TYPE);
     }
 
     public BlockEntityTypeEntry getTypeEntry(ResourceLocation loc) {
-        return new BlockEntityTypeEntry(loc, () -> RegistryObject.create(loc, getRegistry()).get());
+        return new BlockEntityTypeEntry(loc, () -> getEntry(loc).get());
     }
 
     public BlockEntityTypeEntry getTypeEntry(String id) {
-        return getTypeEntry(new ResourceLocation(modid, id));
+        return getTypeEntry(ResourceLocation.fromNamespaceAndPath(modid, id));
     }
 
     public BlockEntityTypeEntry registerType(BlockEntityTypeBuilder<?> builder) {

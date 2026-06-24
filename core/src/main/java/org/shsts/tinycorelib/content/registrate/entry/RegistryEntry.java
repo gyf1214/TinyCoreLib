@@ -3,16 +3,15 @@ package org.shsts.tinycorelib.content.registrate.entry;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.shsts.tinycorelib.api.registrate.entry.IRegistry;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class RegistryEntry<V extends IForgeRegistryEntry<V>> extends Entry<IForgeRegistry<V>>
+public class RegistryEntry<V> extends Entry<Registry<V>>
     implements IRegistry<V> {
     @Nullable
     private EntryHandler<V> handler;

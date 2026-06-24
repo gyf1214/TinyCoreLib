@@ -1,47 +1,48 @@
-archivesBaseName = "tinydatagen"
-
-tasks.withType(JavaCompile).configureEach {
-    options.release = 17
+base {
+    archivesName = "tinydatagen"
 }
 
 configurations {
     api
-    dev
 }
 
-task apiJar(type: Jar) {
+neoForge {
+    mods {
+        tinydatagen {
+            sourceSet sourceSets.main
+            sourceSet project(':core').sourceSets.main
+        }
+    }
+}
+
+tasks.register('apiJar', Jar) {
     archiveClassifier = 'api'
     include "org/shsts/tinycorelib/datagen/api/**"
     from sourceSets.main.output
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
-task devJar(type: Jar) {
-    archiveClassifier = 'dev'
-    from sourceSets.main.output
-}
-
 artifacts {
-    api apiJar
-    dev devJar
+    api tasks.named('apiJar')
 }
 
 dependencies {
     compileOnly project(path: ':core')
 }
 
-build.dependsOn apiJar, sourcesJar
+build.dependsOn tasks.named('apiJar'), tasks.named('sourcesJar')
 
 publishing {
     publications {
         maven(MavenPublication) {
             artifact jar
-            artifact apiJar
-            artifact sourcesJar
+            artifact tasks.named('apiJar')
+            artifact tasks.named('sourcesJar')
         }
     }
 }

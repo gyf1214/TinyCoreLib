@@ -1,25 +1,21 @@
 package org.shsts.tinycorelib.test.datagen;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.api.IDataGen;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -29,16 +25,16 @@ public class TestResourceProvider implements DataProvider {
 
     private final String modid;
     private final IDataHandler<TestResourceProvider> handler;
-    private final DataGenerator generator;
+    private final PackOutput.PathProvider pathProvider;
     private final ExistingFileHelper existingFileHelper;
-    private final Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
     private final List<TestResourceBuilder<?>> builders = new ArrayList<>();
 
     public TestResourceProvider(IDataGen dataGen,
         IDataHandler<TestResourceProvider> handler, GatherDataEvent event) {
         this.modid = dataGen.modid();
         this.handler = handler;
-        this.generator = event.getGenerator();
+        this.pathProvider = event.getGenerator().getPackOutput()
+            .createPathProvider(PackOutput.Target.DATA_PACK, "test_resources");
         this.existingFileHelper = event.getExistingFileHelper();
     }
 
@@ -48,28 +44,18 @@ public class TestResourceProvider implements DataProvider {
     }
 
     private Path getPath(ResourceLocation loc) {
-        return generator.getOutputFolder()
-            .resolve("data/" + loc.getNamespace() + "/test_resources/" + loc.getPath() + ".json");
+        return pathProvider.json(loc);
     }
 
     @Override
-    public void run(HashCache cache) throws IOException {
+    public CompletableFuture<?> run(CachedOutput output) {
         handler.register(this);
-        for (var builder : builders) {
+        var futures = builders.stream().map(builder -> {
             builder.validate(existingFileHelper);
             var jo = builder.buildObject();
-            var path = getPath(builder.loc());
-            var s = gson.toJson(jo);
-            var hash = SHA1.hashUnencodedChars(s).toString();
-
-            if (!Files.exists(path) || !Objects.equals(cache.getHash(path), hash)) {
-                Files.createDirectories(path.getParent());
-                try (var bw = Files.newBufferedWriter(path)) {
-                    bw.write(s);
-                }
-            }
-            cache.putNew(path, hash);
-        }
+            return DataProvider.saveStable(output, jo, getPath(builder.loc()));
+        }).toArray(CompletableFuture[]::new);
+        return CompletableFuture.allOf(futures);
     }
 
     @Override

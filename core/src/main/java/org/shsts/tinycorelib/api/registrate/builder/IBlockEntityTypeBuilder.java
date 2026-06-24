@@ -7,11 +7,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import org.shsts.tinycorelib.api.blockentity.ICapabilityFactory;
+import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
+import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
@@ -22,9 +24,13 @@ public interface IBlockEntityTypeBuilder<P>
 
     IBlockEntityTypeBuilder<P> validBlock(List<Supplier<? extends Block>> blocks);
 
-    IBlockEntityTypeBuilder<P> capability(ResourceLocation loc, ICapabilityFactory factory);
+    IBlockEntityTypeBuilder<P> capability(ICapability<?>... caps);
 
-    IBlockEntityTypeBuilder<P> capability(String id, ICapabilityFactory factory);
+    IBlockEntityTypeBuilder<P> container(
+        ResourceLocation loc, Function<BlockEntity, ICapabilityContainer> factory);
+
+    IBlockEntityTypeBuilder<P> container(
+        String id, Function<BlockEntity, ICapabilityContainer> factory);
 
     IBlockEntityTypeBuilder<P> renderer(DistLazy<BlockEntityRendererProvider<BlockEntity>> renderer);
 

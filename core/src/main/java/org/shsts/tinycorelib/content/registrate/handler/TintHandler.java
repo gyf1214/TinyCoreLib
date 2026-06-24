@@ -6,7 +6,7 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,16 +25,16 @@ public class TintHandler {
         itemColors.put(item, itemColor);
     }
 
-    public void onRegisterBlockColors(ColorHandlerEvent.Block event) {
+    public void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
         for (var entry : blockColors.entrySet()) {
-            event.getBlockColors().register(entry.getValue(), entry.getKey());
+            event.register(entry.getValue(), entry.getKey());
         }
         blockColors.clear();
     }
 
-    public void onRegisterItemColors(ColorHandlerEvent.Item event) {
+    public void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
         for (var entry : itemColors.entrySet()) {
-            event.getItemColors().register(entry.getValue(), entry.getKey());
+            event.register(entry.getValue(), entry.getKey());
         }
         itemColors.clear();
     }

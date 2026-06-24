@@ -5,18 +5,26 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import org.shsts.tinycorelib.api.gui.ISyncSlotScheduler;
 import org.shsts.tinycorelib.api.network.IPacket;
+import org.shsts.tinycorelib.api.network.IPacketType;
 
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SimpleSyncSlotScheduler<P extends IPacket> implements ISyncSlotScheduler<P> {
+    private final IPacketType<P> packetType;
     private final Supplier<P> packetFactory;
     @Nullable
     private P packet = null;
 
-    public SimpleSyncSlotScheduler(Supplier<P> packetFactory) {
+    public SimpleSyncSlotScheduler(IPacketType<P> packetType, Supplier<P> packetFactory) {
+        this.packetType = packetType;
         this.packetFactory = packetFactory;
+    }
+
+    @Override
+    public IPacketType<P> packetType() {
+        return packetType;
     }
 
     @Override

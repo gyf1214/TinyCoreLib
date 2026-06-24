@@ -3,7 +3,7 @@ package org.shsts.tinycorelib.datagen;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.datagen.api.IDataGen;

@@ -2,14 +2,16 @@ package org.shsts.tinycorelib.test.datagen;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -17,7 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
@@ -28,8 +30,8 @@ import java.util.List;
 
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK2;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
+import static org.shsts.tinycorelib.test.All.TEST_COOKING_RECIPE;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
-import static org.shsts.tinycorelib.test.All.TEST_VANILLA_RECIPE;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.CORE;
 import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
@@ -62,8 +64,8 @@ public final class AllData {
             .tag(TEST_ITEM_TAG)
             .build()
             .tag(TEST_ITEM_TAG, TEST_PARENT_TAG)
-            .tag(() -> Items.GLASS, TEST_ITEM_TAG)
-            .tag(() -> Items.SAND, List.of(TEST_ITEM_TAG, TEST_ITEM_TAG2))
+            .tag(itemKey(Items.GLASS), TEST_ITEM_TAG)
+            .tag(itemKey(Items.SAND), List.of(TEST_ITEM_TAG, TEST_ITEM_TAG2))
             .block(All.TEST_BLOCK1)
             .blockState(ctx -> {
                 var prov = ctx.provider();
@@ -71,7 +73,7 @@ public final class AllData {
                 prov.simpleBlock(ctx.object(), models.cubeAll(
                     ctx.id(), mcLoc("block/birch_planks")));
             }).tag(blockTag("test_block_tag"))
-            .drop(() -> Items.BIRCH_PLANKS)
+            .drop(Items.BIRCH_PLANKS)
             .build()
             .block(All.TEST_BLOCK2)
             .blockState(ctx -> {
@@ -88,35 +90,39 @@ public final class AllData {
                 ctx.provider().models().cubeAll(ctx.id(), mcLoc("block/nether_bricks"))))
             .build();
 
-        TEST_RECIPE.recipe(DATA_GEN, "test_recipe1")
+        DATA_GEN.recipeFactory(TEST_RECIPE, TestRecipeBuilder::new)
+            .recipe("test_recipe1")
             .range(0, 10)
             .displayItem(Items.GLASS)
             .build();
 
-        TEST_VANILLA_RECIPE.recipe(DATA_GEN, "test_vanilla1")
+        DATA_GEN.recipeFactory(TEST_COOKING_RECIPE, TestCookingRecipeBuilder::new)
+            .recipe("test_vanilla1")
             .ingredient(TEST_ITEM_TAG)
             .result(TEST_BLOCK2)
             .cookingTime(100)
             .beginSeconds(0)
             .build()
-            .recipe(DATA_GEN, "test_vanilla2")
-            .ingredient(() -> Blocks.STONE)
+            .recipe("test_vanilla2")
+            .ingredient(Blocks.STONE)
             .result(TEST_BLOCK3)
             .cookingTime(100)
             .beginSeconds(10)
             .build();
 
-        DATA_GEN.vanillaRecipe(() -> ShapedRecipeBuilder.shaped(TEST_BLOCK3.get())
+        DATA_GEN.<ShapedRecipeBuilder>vanillaRecipe("craft/test_block3",
+            () -> ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TEST_BLOCK3.get()))
             .pattern("###").pattern("#X#")
             .define('#', Items.BIRCH_PLANKS)
             .define('X', TEST_PARENT_TAG)
-            .unlockedBy("has_test", has(TEST_PARENT_TAG)));
+            .unlockedBy("has_test", has(TEST_PARENT_TAG));
 
         DATA_GEN.nullRecipe(Items.OAK_PLANKS);
 
-        DATA_GEN.replaceVanillaRecipe(() -> ShapelessRecipeBuilder.shapeless(Items.BIRCH_PLANKS, 6)
+        DATA_GEN.vanillaRecipe(mcLoc("birch_planks"),
+            () -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.BIRCH_PLANKS, 6))
             .requires(Items.BIRCH_LOG)
-            .unlockedBy("has_birch", has(Items.BIRCH_LOG)));
+            .unlockedBy("has_birch", has(Items.BIRCH_LOG));
 
         TEST_RESOURCES = DATA_GEN.createHandler(TestResourceProvider::new);
 
@@ -140,11 +146,11 @@ public final class AllData {
     }
 
     private static ResourceLocation mcLoc(String id) {
-        return new ResourceLocation(id);
+        return ResourceLocation.parse(id);
     }
 
     private static ResourceLocation modLoc(String id) {
-        return new ResourceLocation(TinyCoreLibTest.ID, id);
+        return ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, id);
     }
 
     private static void testBlockModel(IDataContext<BlockModelProvider> ctx) {
@@ -165,23 +171,25 @@ public final class AllData {
     }
 
     private static TagKey<Block> blockTag(String id) {
-        return TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(TinyCoreLibTest.ID, id));
+        return TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, id));
     }
 
     private static TagKey<Item> itemTag(String id) {
-        return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(TinyCoreLibTest.ID, id));
+        return TagKey.create(Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(TinyCoreLibTest.ID, id));
     }
 
-    private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... predicates) {
-        return new InventoryChangeTrigger.TriggerInstance(EntityPredicate.Composite.ANY,
-            MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, predicates);
+    private static ResourceKey<Item> itemKey(Item item) {
+        return BuiltInRegistries.ITEM.getResourceKey(item)
+            .orElseThrow(() -> new IllegalArgumentException("Item is not registered: " + item));
     }
 
-    public static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> tag) {
-        return inventoryTrigger(ItemPredicate.Builder.item().of(tag).build());
+    public static Criterion<InventoryChangeTrigger.TriggerInstance> has(TagKey<Item> tag) {
+        return InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(tag));
     }
 
-    public static InventoryChangeTrigger.TriggerInstance has(Item item) {
-        return inventoryTrigger(ItemPredicate.Builder.item().of(item).build());
+    public static Criterion<InventoryChangeTrigger.TriggerInstance> has(Item item) {
+        return InventoryChangeTrigger.TriggerInstance.hasItems(item);
     }
 }

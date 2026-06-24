@@ -2,33 +2,37 @@ package org.shsts.tinycorelib.datagen.content.handler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
 
     private final Registry<T> registry;
+    private final ResourceKey<? extends Registry<T>> registryKey;
 
     public TagsHandler(DataGen dataGen, Registry<T> registry) {
         super(dataGen);
         this.registry = registry;
+        this.registryKey = registry.key();
     }
 
     private class Provider extends TagsProvider<T> {
         public Provider(GatherDataEvent event) {
-            super(event.getGenerator(), TagsHandler.this.registry,
+            super(event.getGenerator().getPackOutput(), TagsHandler.this.registryKey,
+                event.getLookupProvider(),
                 dataGen.modid, event.getExistingFileHelper());
         }
 
-        public void addTag(TagKey<T> key, T object) {
+        public void addTag(TagKey<T> key, ResourceKey<T> object) {
             tag(key).add(object);
         }
 
@@ -37,7 +41,7 @@ public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
         }
 
         @Override
-        protected void addTags() {
+        protected void addTags(HolderLookup.Provider provider) {
             TagsHandler.this.register(this);
         }
 
@@ -47,17 +51,31 @@ public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
         }
     }
 
-    public void addTags(Supplier<? extends T> object, List<TagKey<T>> tags) {
-        for (var tag : tags) {
-            callbacks.add(prov -> ((Provider) prov).addTag(tag, object.get()));
+    private void validateTag(TagKey<T> tag) {
+        if (!tag.registry().equals(registryKey)) {
+            throw new IllegalArgumentException(
+                "Tag %s does not match registry %s".formatted(tag, registryKey.location()));
         }
     }
 
-    public void addTags(Supplier<? extends T> object, TagKey<T> tag) {
-        callbacks.add(prov -> ((Provider) prov).addTag(tag, object.get()));
+    public void addTags(ResourceKey<T> object, List<TagKey<T>> tags) {
+        if (!object.isFor(registryKey)) {
+            throw new IllegalArgumentException(
+                "Object %s does not match registry %s".formatted(object, registryKey.location()));
+        }
+        for (var tag : tags) {
+            validateTag(tag);
+            callbacks.add(prov -> ((Provider) prov).addTag(tag, object));
+        }
+    }
+
+    public void addTags(ResourceKey<T> object, TagKey<T> tag) {
+        addTags(object, List.of(tag));
     }
 
     public void addTag(TagKey<T> object, TagKey<T> tag) {
+        validateTag(object);
+        validateTag(tag);
         callbacks.add(prov -> ((Provider) prov).addTag(tag, object));
     }
 

@@ -6,10 +6,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;
@@ -17,7 +17,6 @@ import org.shsts.tinycorelib.datagen.content.context.DataContext;
 import org.shsts.tinycorelib.datagen.content.context.EntryDataContext;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -28,7 +27,7 @@ public class ItemModelHandler extends DataHandler<ItemModelProvider> {
 
     private class Provider extends ItemModelProvider {
         public Provider(GatherDataEvent event) {
-            super(event.getGenerator(), dataGen.modid, event.getExistingFileHelper());
+            super(event.getGenerator().getPackOutput(), dataGen.modid, event.getExistingFileHelper());
         }
 
         /**
@@ -60,16 +59,16 @@ public class ItemModelHandler extends DataHandler<ItemModelProvider> {
         return new Provider(event);
     }
 
-    public <U extends Item> void addModelCallback(ResourceLocation loc, Supplier<U> item,
-        Consumer<IEntryDataContext<Item, U, ItemModelProvider>> cons) {
+    public <U extends Item> void addModelCallback(ResourceLocation loc, U item,
+        Consumer<IEntryDataContext<U, ItemModelProvider>> cons) {
         addCallback(prov -> cons.accept(new EntryDataContext<>(
-            dataGen.modid, loc.getPath(), prov, item.get())));
+            dataGen.modid, loc.getPath(), prov, item)));
     }
 
-    public <U extends Block> void addBlockItemCallback(ResourceLocation loc, Supplier<U> block,
-        Consumer<IEntryDataContext<Item, ? super BlockItem, ItemModelProvider>> cons) {
+    public <U extends Block> void addBlockItemCallback(ResourceLocation loc, U block,
+        Consumer<IEntryDataContext<? super BlockItem, ItemModelProvider>> cons) {
         addCallback(prov -> {
-            if (block.get().asItem() instanceof BlockItem blockItem) {
+            if (block.asItem() instanceof BlockItem blockItem) {
                 cons.accept(new EntryDataContext<>(dataGen.modid,
                     loc.getPath(), prov, blockItem));
             }

@@ -4,13 +4,14 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.inventory.Slot;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.slf4j.Logger;
 
 import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.TEST_MENU_EVENT;
+import static org.shsts.tinycorelib.test.All.TEST_MENU_SYNC;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -44,7 +45,7 @@ public class TestMenu extends MenuBase {
 
         assert blockEntity != null;
 
-        addSyncSlot("seconds", () -> new TestPacket(blockEntity));
+        addSyncSlot("seconds", TEST_MENU_SYNC, () -> new TestPacket(blockEntity));
 
         var itemHandler = ITEM_HANDLER_CAPABILITY.get(blockEntity);
         var slot = new SlotItemHandler(itemHandler, 0, 111, 32);

@@ -2,6 +2,7 @@ package org.shsts.tinycorelib.api.blockentity;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 
 @ParametersAreNonnullByDefault
@@ -9,12 +10,12 @@ import net.minecraft.nbt.Tag;
 public interface INBTUpdatable<T extends Tag> {
     boolean shouldSendUpdate();
 
-    T serializeOnUpdate();
+    T serializeOnUpdate(HolderLookup.Provider provider);
 
-    void deserializeOnUpdate(T tag);
+    void deserializeOnUpdate(HolderLookup.Provider provider, T tag);
 
     @SuppressWarnings("unchecked")
-    default void deserializeTagOnUpdate(Tag tag) {
-        deserializeOnUpdate((T) tag);
+    default void deserializeTagOnUpdate(HolderLookup.Provider provider, Tag tag) {
+        deserializeOnUpdate(provider, (T) tag);
     }
 }

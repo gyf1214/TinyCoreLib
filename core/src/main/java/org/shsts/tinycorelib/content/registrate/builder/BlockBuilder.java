@@ -5,15 +5,13 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockBuilder;
@@ -30,10 +28,6 @@ import java.util.function.IntUnaryOperator;
 public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, IBlockBuilder<U, P>>
     implements IBlockBuilder<U, P> {
     private final Function<BlockBehaviour.Properties, U> factory;
-    @Nullable
-    private Material material = null;
-    @Nullable
-    private MaterialColor materialColor = null;
     private Transformer<BlockBehaviour.Properties> properties = $ -> $;
 
     @Nullable
@@ -44,34 +38,16 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
 
     public BlockBuilder(Registrate registrate, P parent, String id,
         Function<BlockBehaviour.Properties, U> factory) {
-        super(registrate, registrate.getHandler(ForgeRegistries.BLOCKS), parent, id);
+        super(registrate, registrate.getHandler(Registries.BLOCK, BuiltInRegistries.BLOCK,
+            Block.class), parent, id);
         this.factory = factory;
         onCreateObject.add(registrate::trackBlock);
-    }
-
-    @Override
-    public IBlockBuilder<U, P> material(Material value, MaterialColor color) {
-        material = value;
-        materialColor = color;
-        return self();
     }
 
     @Override
     public IBlockBuilder<U, P> properties(Transformer<BlockBehaviour.Properties> trans) {
         properties = properties.chain(trans);
         return self();
-    }
-
-    @Override
-    public IBlockBuilder<U, P> renderType(DistLazy<RenderType> value) {
-        onCreateObject.add(block -> value.runOnDist(Dist.CLIENT, () -> type ->
-            registrate.renderTypeHandler.setRenderType(block, type)));
-        return self();
-    }
-
-    @Override
-    public IBlockBuilder<U, P> translucent() {
-        return renderType(() -> RenderType::cutoutMipped);
     }
 
     @Override
@@ -94,10 +70,7 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     private class BlockItemBuilder extends ItemBuilder<BlockItem, IBlockBuilder<U, P>> {
         public BlockItemBuilder(BiFunction<Block, Item.Properties, BlockItem> factory) {
             super(BlockBuilder.this.registrate, BlockBuilder.this, BlockBuilder.this.id(),
-                properties -> {
-                    assert BlockBuilder.this.entry != null;
-                    return factory.apply(BlockBuilder.this.entry.get(), properties);
-                });
+                properties -> factory.apply(BlockBuilder.this.getObject(), properties));
         }
 
         @Override
@@ -158,8 +131,6 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
 
     @Override
     protected U createObject() {
-        assert material != null;
-        assert materialColor != null;
-        return factory.apply(properties.apply(BlockBehaviour.Properties.of(material, materialColor)));
+        return factory.apply(properties.apply(BlockBehaviour.Properties.of()));
     }
 }

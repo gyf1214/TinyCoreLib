@@ -4,13 +4,13 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.model.generators.BlockModelBuilder;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
+import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;
@@ -18,7 +18,6 @@ import org.shsts.tinycorelib.datagen.content.context.DataContext;
 import org.shsts.tinycorelib.datagen.content.context.EntryDataContext;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -29,7 +28,7 @@ public class BlockStateHandler extends DataHandler<BlockStateProvider> {
 
     private static class BlockProvider extends BlockModelProvider {
         public BlockProvider(GatherDataEvent event, String modid) {
-            super(event.getGenerator(), modid, event.getExistingFileHelper());
+            super(event.getGenerator().getPackOutput(), modid, event.getExistingFileHelper());
         }
 
         /**
@@ -56,7 +55,7 @@ public class BlockStateHandler extends DataHandler<BlockStateProvider> {
 
     private static class ItemProvider extends ItemModelProvider {
         public ItemProvider(GatherDataEvent event, String modid) {
-            super(event.getGenerator(), modid, event.getExistingFileHelper());
+            super(event.getGenerator().getPackOutput(), modid, event.getExistingFileHelper());
         }
 
         /**
@@ -86,7 +85,7 @@ public class BlockStateHandler extends DataHandler<BlockStateProvider> {
         private final BlockModelProvider blockModels;
 
         public Provider(GatherDataEvent event) {
-            super(event.getGenerator(), dataGen.modid, event.getExistingFileHelper());
+            super(event.getGenerator().getPackOutput(), dataGen.modid, event.getExistingFileHelper());
             this.blockModels = new BlockProvider(event, dataGen.modid);
             this.itemModels = new ItemProvider(event, dataGen.modid);
         }
@@ -112,10 +111,10 @@ public class BlockStateHandler extends DataHandler<BlockStateProvider> {
         return new Provider(event);
     }
 
-    public <U extends Block> void addBlockStateCallback(ResourceLocation loc, Supplier<U> block,
-        Consumer<IEntryDataContext<Block, U, BlockStateProvider>> cons) {
+    public <U extends Block> void addBlockStateCallback(ResourceLocation loc, U block,
+        Consumer<IEntryDataContext<U, BlockStateProvider>> cons) {
         addCallback(prov -> cons.accept(new EntryDataContext<>(dataGen.modid,
-            loc.getPath(), prov, block.get())));
+            loc.getPath(), prov, block)));
     }
 
     public void addBlockModelCallback(Consumer<IDataContext<BlockModelProvider>> cons) {

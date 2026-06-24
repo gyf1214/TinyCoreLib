@@ -3,7 +3,6 @@ package org.shsts.tinycorelib.datagen.content.context;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraftforge.common.util.Lazy;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.tracking.TrackedType;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
@@ -21,19 +19,19 @@ import java.util.stream.Collectors;
 public class TrackedContext<V> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private final Registrate registrate;
     private final TrackedType<V> type;
-    private final Supplier<Map<V, String>> tracked;
     private final Map<V, String> extraTracked = new HashMap<>();
-    private final List<Supplier<? extends V>> processed;
+    private final List<V> processed;
 
     public TrackedContext(Registrate registrate, TrackedType<V> type) {
+        this.registrate = registrate;
         this.type = type;
-        this.tracked = Lazy.of(() -> registrate.getTracked(type));
         this.processed = new ArrayList<>();
     }
 
     public Map<V, String> getTrackedMap() {
-        var ret = new HashMap<>(tracked.get());
+        var ret = new HashMap<>(registrate.getTracked(type));
         ret.putAll(extraTracked);
         return ret;
     }
@@ -43,10 +41,6 @@ public class TrackedContext<V> {
     }
 
     public void process(V obj) {
-        processed.add(() -> obj);
-    }
-
-    public void process(Supplier<? extends V> obj) {
         processed.add(obj);
     }
 
@@ -55,9 +49,7 @@ public class TrackedContext<V> {
     }
 
     public boolean postValidate() {
-        var processed = this.processed.stream()
-            .map($ -> (V) $.get())
-            .collect(Collectors.toSet());
+        var processed = this.processed.stream().collect(Collectors.toSet());
         var tracked = getTrackedMap();
 
         var missing = 0;

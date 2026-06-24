@@ -2,28 +2,23 @@ package org.shsts.tinycorelib.content.recipe;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
+import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SmartRecipe<C, R extends IRecipe<C>> implements Recipe<ContainerWrapper<C>> {
-    private final RecipeType<?> type;
-    private final RecipeSerializer<?> serializer;
-    private final ResourceLocation loc;
+    private final IRecipeType<R> type;
     public final R compose;
 
-    public SmartRecipe(RecipeType<?> type,
-        RecipeSerializer<SmartRecipe<C, R>> serializer,
-        ResourceLocation loc, R compose) {
+    public SmartRecipe(IRecipeType<R> type, R compose) {
         this.type = type;
-        this.serializer = serializer;
-        this.loc = loc;
         this.compose = compose;
     }
 
@@ -33,7 +28,7 @@ public class SmartRecipe<C, R extends IRecipe<C>> implements Recipe<ContainerWra
     }
 
     @Override
-    public ItemStack assemble(ContainerWrapper<C> pContainer) {
+    public ItemStack assemble(ContainerWrapper<C> input, HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
@@ -43,22 +38,17 @@ public class SmartRecipe<C, R extends IRecipe<C>> implements Recipe<ContainerWra
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public ResourceLocation getId() {
-        return loc;
-    }
-
-    @Override
     public RecipeSerializer<?> getSerializer() {
-        return serializer;
+        return type.getSerializer();
     }
 
     @Override
     public RecipeType<?> getType() {
-        return type;
+        return type.get();
     }
 }

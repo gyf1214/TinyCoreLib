@@ -2,12 +2,12 @@ package org.shsts.tinycorelib.api.network;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IPacket {
-    void serializeToBuf(FriendlyByteBuf buf);
+    void serializeToBuf(RegistryFriendlyByteBuf buf);
 
-    void deserializeFromBuf(FriendlyByteBuf buf);
+    void deserializeFromBuf(RegistryFriendlyByteBuf buf);
 }

@@ -1,12 +1,12 @@
-package org.shsts.tinycorelib.api.recipe;
+package org.shsts.tinycorelib.api.network;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 
-/**
- * Used to capture generic parameter.
- */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IRecipeBuilderBase<R extends IRecipe<?>> {
+public enum PacketDirection {
+    CLIENTBOUND,
+    SERVERBOUND,
+    BIDIRECTIONAL
 }
