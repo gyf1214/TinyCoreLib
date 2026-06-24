@@ -75,7 +75,6 @@ public class DataGen implements IDataGen {
 
     private final boolean failValidation;
 
-    @SuppressWarnings("deprecation")
     public DataGen(Registrate registrate, boolean failValidation) {
         this.registrate = registrate;
         this.modid = registrate.modid;
@@ -218,8 +217,8 @@ public class DataGen implements IDataGen {
     }
 
     @Override
-    public <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>> IRecipeFactory<R, B>
-        recipeFactory(IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory) {
+    public <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>> IRecipeFactory<R, B> recipeFactory(
+        IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory) {
         return new RecipeFactory<>(this, type, factory);
     }
 

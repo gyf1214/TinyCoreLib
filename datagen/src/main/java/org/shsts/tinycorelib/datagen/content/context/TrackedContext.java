@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -49,7 +49,7 @@ public class TrackedContext<V> {
     }
 
     public boolean postValidate() {
-        var processed = this.processed.stream().collect(Collectors.toSet());
+        var processed = new HashSet<>(this.processed);
         var tracked = getTrackedMap();
 
         var missing = 0;

@@ -110,8 +110,8 @@ public final class AllData {
             .beginSeconds(10)
             .build();
 
-        DATA_GEN.<ShapedRecipeBuilder>vanillaRecipe("craft/test_block3",
-            () -> ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TEST_BLOCK3.get()))
+        DATA_GEN.vanillaRecipe("craft/test_block3", () ->
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TEST_BLOCK3.get()))
             .pattern("###").pattern("#X#")
             .define('#', Items.BIRCH_PLANKS)
             .define('X', TEST_PARENT_TAG)
@@ -119,8 +119,8 @@ public final class AllData {
 
         DATA_GEN.nullRecipe(Items.OAK_PLANKS);
 
-        DATA_GEN.vanillaRecipe(mcLoc("birch_planks"),
-            () -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.BIRCH_PLANKS, 6))
+        DATA_GEN.vanillaRecipe(mcLoc("birch_planks"), () ->
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.BIRCH_PLANKS, 6))
             .requires(Items.BIRCH_LOG)
             .unlockedBy("has_birch", has(Items.BIRCH_LOG));
 
@@ -155,6 +155,7 @@ public final class AllData {
 
     private static void testBlockModel(IDataContext<BlockModelProvider> ctx) {
         ctx.provider().withExistingParent("test_block_model", mcLoc("block/block"))
+            .renderType(mcLoc("cutout"))
             .element()
             .from(0, 0, 0).to(16, 16, 16)
             .allFaces((dir, face) -> {
