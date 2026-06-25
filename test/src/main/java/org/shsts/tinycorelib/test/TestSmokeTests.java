@@ -10,7 +10,7 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class TestSmokeTests {
-    @GameTest
+    @GameTest(template = "empty_5x5x5")
     public static void smoke(GameTestHelper helper) {
         helper.succeed();
     }

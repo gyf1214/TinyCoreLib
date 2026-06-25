@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.shsts.tinycorelib.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "StructureTemplateManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

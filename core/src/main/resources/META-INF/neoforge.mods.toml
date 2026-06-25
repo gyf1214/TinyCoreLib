@@ -8,6 +8,9 @@ version = "${mod_version}"
 displayName = "Tiny Core Lib"
 authors = "Tiny"
 
+[[mixins]]
+config = "tinycorelib.mixins.json"
+
 [[dependencies.tinycorelib]]
 modId = "neoforge"
 type = "required"
