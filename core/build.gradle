@@ -2,6 +2,11 @@ base {
     archivesName = "tinycorelib"
 }
 
+checkSource {
+    topPackage 'org.shsts.tinycorelib'
+    banImport 'api', 'content'
+}
+
 configurations {
     api
 }

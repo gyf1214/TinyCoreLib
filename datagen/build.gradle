@@ -2,6 +2,11 @@ base {
     archivesName = "tinydatagen"
 }
 
+checkSource {
+    topPackage 'org.shsts.tinycorelib.datagen'
+    banImport 'api', 'content'
+}
+
 configurations {
     api
 }

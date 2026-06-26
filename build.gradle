@@ -21,23 +21,6 @@ subprojects {
         toolVersion = checkstyle_version
     }
 
-    checkSource {
-        topPackage([
-            core: 'org.shsts.tinycorelib',
-            datagen: 'org.shsts.tinycorelib.datagen',
-            test: 'org.shsts.tinycorelib.test',
-            'test-datagen': 'org.shsts.tinycorelib.test.datagen'
-        ][project.name])
-
-        if (project.name == 'core') {
-            banImport('api', 'content')
-        }
-
-        if (project.name == 'datagen') {
-            banImport('api', 'content')
-        }
-    }
-
     neoForge {
         version = neo_version
         parchment {
