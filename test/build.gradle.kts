@@ -1,5 +1,5 @@
 plugins {
-    id("org.shsts.tinycorelib.common-conventions")
+    id("tinycorelib-common")
 }
 
 base {

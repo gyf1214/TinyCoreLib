@@ -30,28 +30,26 @@ neoForge {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    options.release = 21
 }
 
-fun ProcessResources.expandModProperties() {
-    filesMatching("META-INF/neoforge.mods.toml") {
-        expand(
-            project.properties + mapOf(
-                "mod_version" to version,
-                "minecraft_version_range" to property("minecraft_version_range"),
-                "neo_version_range" to property("neo_version_range"),
-            ),
-        )
-    }
+val modMetadataProperties = mapOf(
+    "mod_version" to version,
+    "minecraft_version_range" to property("minecraft_version_range"),
+    "neo_version_range" to property("neo_version_range"),
+)
+
+val generateModMetadata by tasks.registering(ProcessResources::class) {
+    inputs.properties(modMetadataProperties)
+    expand(modMetadataProperties)
+    from("src/main/templates")
+    into(layout.buildDirectory.dir("generated/sources/modMetadata"))
 }
 
-tasks.named<ProcessResources>("processResources") {
-    expandModProperties()
+sourceSets.main {
+    resources.srcDir(generateModMetadata)
 }
 
-tasks.matching { it.name == "processTestResources" }.configureEach {
-    (this as ProcessResources).expandModProperties()
-}
+neoForge.ideSyncTask(generateModMetadata)
 
 publishing {
     repositories {

@@ -1,7 +1,7 @@
 import org.gradle.jvm.tasks.Jar
 
 plugins {
-    id("org.shsts.tinycorelib.common-conventions")
+    id("tinycorelib-common")
 }
 
 base {
