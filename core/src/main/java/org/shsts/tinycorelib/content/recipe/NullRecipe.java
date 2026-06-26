@@ -51,18 +51,18 @@ public enum NullRecipe implements CraftingRecipe {
     public static class Serializer implements RecipeSerializer<NullRecipe> {
         public static final Serializer INSTANCE = new Serializer();
 
-        private static final MapCodec<NullRecipe> Codec = MapCodec.unit(NullRecipe.INSTANCE);
-        private static final StreamCodec<RegistryFriendlyByteBuf, NullRecipe> StreamCodec =
-            net.minecraft.network.codec.StreamCodec.unit(NullRecipe.INSTANCE);
+        private static final MapCodec<NullRecipe> CODEC = MapCodec.unit(NullRecipe.INSTANCE);
+        private static final StreamCodec<RegistryFriendlyByteBuf, NullRecipe> STREAM_CODEC =
+            StreamCodec.unit(NullRecipe.INSTANCE);
 
         @Override
         public MapCodec<NullRecipe> codec() {
-            return Codec;
+            return CODEC;
         }
 
         @Override
         public StreamCodec<RegistryFriendlyByteBuf, NullRecipe> streamCodec() {
-            return StreamCodec;
+            return STREAM_CODEC;
         }
     }
 }

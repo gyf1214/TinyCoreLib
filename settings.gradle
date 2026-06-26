@@ -1,5 +1,9 @@
 pluginManagement {
     repositories {
+        maven {
+            name = "shsts"
+            url = "https://www.shsts.org/m2"
+        }
         gradlePluginPortal()
         mavenCentral()
         maven {

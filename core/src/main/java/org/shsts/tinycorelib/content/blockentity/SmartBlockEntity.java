@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.shsts.tinycorelib.content.CoreContents.CLIENT_LOAD;
 import static org.shsts.tinycorelib.content.CoreContents.CLIENT_TICK;
@@ -99,7 +100,7 @@ public class SmartBlockEntity extends BlockEntity implements IEventManager {
     }
 
     private ICapabilityContainer createContainer(
-        ResourceLocation loc, java.util.function.Function<BlockEntity, ICapabilityContainer> factory) {
+        ResourceLocation loc, Function<BlockEntity, ICapabilityContainer> factory) {
         try {
             var ret = factory.apply(this);
             if (ret == null) {
