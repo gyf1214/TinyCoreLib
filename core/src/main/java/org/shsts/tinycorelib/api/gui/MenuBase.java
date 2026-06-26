@@ -11,14 +11,8 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.api.network.IPacketType;
-import org.shsts.tinycorelib.content.gui.SimpleSyncSlotScheduler;
-import org.shsts.tinycorelib.content.gui.sync.MenuEventPacket;
-import org.shsts.tinycorelib.content.gui.sync.MenuSyncPacket;
-import org.shsts.tinycorelib.content.network.PacketPayloadType;
-import org.shsts.tinycorelib.content.registrate.handler.PayloadHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +30,7 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
     protected final BlockEntity blockEntity;
     protected final Player player;
     protected final Inventory inventory;
+    protected final IMenuHelper menuHelper;
 
     private class SyncSlot<P extends IPacket> {
         private final int index;
@@ -52,12 +47,8 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
         public void sync() {
             if (player instanceof ServerPlayer serverPlayer) {
                 if (scheduler.shouldSend()) {
-                    var packet = scheduler.createPacket();
-                    var type = PayloadHandler.<P, MenuSyncPacket<P>>requireType(
-                        scheduler.packetType());
-                    PayloadHandler.requirePayloadType(type, PacketPayloadType.MENU_SYNC);
-                    PacketDistributor.sendToPlayer(serverPlayer,
-                        new MenuSyncPacket<>(type, containerId, index, packet));
+                    menuHelper.sendSyncPacket(serverPlayer, containerId, index,
+                        scheduler.packetType(), scheduler.createPacket());
                 }
             }
         }
@@ -95,11 +86,12 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
 
     private final Map<IPacketType<?>, EventHandler<?>> eventHandlers = new HashMap<>();
 
-    public record Properties(MenuType<?> menuType, int id, Inventory inventory,
+    public record Properties(IMenuHelper menuHelper, MenuType<?> menuType, int id, Inventory inventory,
         @Nullable BlockEntity blockEntity) {}
 
     public MenuBase(Properties properties) {
         super(properties.menuType, properties.id);
+        this.menuHelper = properties.menuHelper;
         this.blockEntity = properties.blockEntity;
         this.inventory = properties.inventory;
         this.player = inventory.player;
@@ -147,22 +139,24 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
     }
 
     protected <P extends IPacket> int addSyncSlot(ISyncSlotScheduler<P> scheduler) {
+        menuHelper.requireMenuSyncPacket(scheduler.packetType());
         return createSyncSlot(scheduler).index;
     }
 
     protected <P extends IPacket> int addSyncSlot(IPacketType<P> type, Supplier<P> factory) {
-        return addSyncSlot(new SimpleSyncSlotScheduler<>(type, factory));
+        return addSyncSlot(menuHelper.simpleScheduler(type, factory));
     }
 
     protected <P extends IPacket> void addSyncSlot(String name, ISyncSlotScheduler<P> scheduler) {
         assert !syncSlotNames.containsKey(name);
+        menuHelper.requireMenuSyncPacket(scheduler.packetType());
         var slot = createSyncSlot(scheduler);
         syncSlotNames.put(name, slot);
     }
 
     protected <P extends IPacket> void addSyncSlot(String name, IPacketType<P> type,
         Supplier<P> factory) {
-        addSyncSlot(name, new SimpleSyncSlotScheduler<>(type, factory));
+        addSyncSlot(name, menuHelper.simpleScheduler(type, factory));
     }
 
     /**
@@ -201,7 +195,7 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
      * Callback added by Server.
      */
     protected <P extends IPacket> void onEventPacket(IPacketType<P> type, Consumer<P> cb) {
-        PayloadHandler.requirePayloadType(type, PacketPayloadType.MENU_EVENT);
+        menuHelper.requireMenuEventPacket(type);
         eventHandlers.put(type, new EventHandler<>(type, cb));
     }
 
@@ -209,9 +203,7 @@ public class MenuBase extends AbstractContainerMenu implements IMenuSyncHandler,
      * Trigger an event from Client.
      */
     public <P extends IPacket> void triggerEvent(IPacketType<P> type, Supplier<P> factory) {
-        var packetType = PayloadHandler.<P, MenuEventPacket<P>>requireType(type);
-        PayloadHandler.requirePayloadType(type, PacketPayloadType.MENU_EVENT);
-        PacketDistributor.sendToServer(new MenuEventPacket<>(packetType, containerId, factory.get()));
+        menuHelper.sendEventPacket(containerId, type, factory.get());
     }
 
     @Override

@@ -36,7 +36,8 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
 
     @Override
     public M create(int containerId, Inventory inventory) {
-        return factory.apply(new MenuBase.Properties(this, containerId, inventory, null));
+        return factory.apply(new MenuBase.Properties(MenuHelper.INSTANCE,
+            this, containerId, inventory, null));
     }
 
     private static BlockEntity getBlockEntityFromData(FriendlyByteBuf data) {
@@ -49,7 +50,8 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
     }
 
     private M create(int containerId, Inventory inventory, BlockEntity be) {
-        return factory.apply(new MenuBase.Properties(this, containerId, inventory, be));
+        return factory.apply(new MenuBase.Properties(MenuHelper.INSTANCE,
+            this, containerId, inventory, be));
     }
 
     @Override
