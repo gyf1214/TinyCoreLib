@@ -1,11 +1,4 @@
 pluginManagement {
-    val moddevVersion = providers.gradleProperty("moddev_version")
-
-    plugins {
-        id("net.neoforged.moddev") version moddevVersion
-        id("org.shsts.checksource") version "0.1.0"
-    }
-
     repositories {
         maven {
             name = "shsts"

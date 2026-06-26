@@ -1,3 +1,7 @@
+plugins {
+    id("org.shsts.tinycorelib.common-conventions")
+}
+
 base {
     archivesName = "tinydatagen_test"
 }
