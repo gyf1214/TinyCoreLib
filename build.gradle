@@ -30,8 +30,7 @@ subprojects {
         ][project.name])
 
         if (project.name == 'core') {
-            // TODO: Re-enable after MenuBase no longer imports content packages.
-            // banImport('api', 'content')
+            banImport('api', 'content')
         }
 
         if (project.name == 'datagen') {
