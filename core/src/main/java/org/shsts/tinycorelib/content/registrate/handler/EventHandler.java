@@ -1,8 +1,11 @@
 package org.shsts.tinycorelib.content.registrate.handler;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
@@ -11,10 +14,11 @@ import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import org.jetbrains.annotations.Nullable;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
+import org.shsts.tinycorelib.api.item.ICapabilityItem;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
+import org.shsts.tinycorelib.api.registrate.entry.IItemCapability;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 import org.shsts.tinycorelib.content.gui.SmartMenuType;
 
@@ -67,10 +71,21 @@ public class EventHandler<E> {
             addCallback(event -> registerBlockEntity(event, capability.get(), type, provider));
         }
 
-        private static <T, C extends @Nullable Object, BE extends SmartBlockEntity> void registerBlockEntity(
-            RegisterCapabilitiesEvent event, BlockCapability<T, C> capability,
+        public <T> void registerItem(Item item, IItemCapability<T> capability) {
+            addCallback(event -> event.registerItem(capability.get(),
+                (stack, $) -> getItemCapability(item, stack, capability), item));
+        }
+
+        private static <T, BE extends SmartBlockEntity> void registerBlockEntity(
+            RegisterCapabilitiesEvent event, BlockCapability<T, ?> capability,
             BlockEntityType<BE> type, Function<? super BE, T> provider) {
             event.registerBlockEntity(capability, type, (be, $) -> provider.apply(be));
+        }
+
+        @Nullable
+        private static <T> T getItemCapability(Item item, ItemStack stack, IItemCapability<T> capability) {
+            return item instanceof ICapabilityItem capabilityItem ?
+                capabilityItem.getCapability(stack, capability) : null;
         }
     }
 }

@@ -9,7 +9,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityBuilder;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
@@ -22,6 +21,7 @@ import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.SERVER_TICK;
 import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.TEST_COOKING_RECIPE;
+import static org.shsts.tinycorelib.test.All.TEST_ITEM_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
 import static org.shsts.tinycorelib.test.All.TICK_SECOND;
 import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
@@ -62,6 +62,8 @@ public class TestContainer implements ICapabilityContainer, IEventSubscriber, IT
     private void onTickSecond() {
         LOGGER.info("{}: tick second", this);
         seconds++;
+        var stack = itemHandler.getStackInSlot(0);
+        TEST_ITEM_CAPABILITY.tryGet(stack).ifPresent(ITestCapability::foo);
         blockEntity.setChanged();
     }
 
@@ -82,10 +84,7 @@ public class TestContainer implements ICapabilityContainer, IEventSubscriber, IT
             LOGGER.info("matched test recipe = {}", recipe.loc());
         }
         recipeManager.getRecipeFor(TEST_COOKING_RECIPE, blockEntity)
-            .ifPresent(recipe -> {
-                var itemHandler = (IItemHandlerModifiable) ITEM_HANDLER_CAPABILITY.get(blockEntity);
-                itemHandler.setStackInSlot(0, recipe.get().getResult());
-            });
+            .ifPresent(recipe -> itemHandler.setStackInSlot(0, recipe.get().getResult()));
     }
 
     @Override

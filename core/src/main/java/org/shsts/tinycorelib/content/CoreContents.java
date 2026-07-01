@@ -3,7 +3,6 @@ package org.shsts.tinycorelib.content;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.ITinyCoreLib;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
@@ -55,7 +54,7 @@ public final class CoreContents {
 
         EVENT_MANAGER = REGISTRATE.capability(EVENT_MANAGER_NAME, IEventManager.class);
         NULL_RECIPE_SERIALIZER = REGISTRATE.registryEntry(
-            REGISTRATE.getHandler(Registries.RECIPE_SERIALIZER, RecipeSerializer.class),
+            REGISTRATE.getHandler(Registries.RECIPE_SERIALIZER),
             NULL_RECIPE_NAME, () -> NullRecipe.Serializer.INSTANCE);
     }
 

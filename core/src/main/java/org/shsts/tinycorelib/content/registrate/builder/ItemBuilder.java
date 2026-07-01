@@ -13,6 +13,7 @@ import net.neoforged.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
 import org.shsts.tinycorelib.api.registrate.builder.IItemBuilder;
+import org.shsts.tinycorelib.api.registrate.entry.IItemCapability;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.entry.Entry;
 
@@ -31,8 +32,7 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
 
     public ItemBuilder(Registrate registrate, P parent, String id,
         Function<Item.Properties, U> factory) {
-        super(registrate, registrate.getHandler(Registries.ITEM, BuiltInRegistries.ITEM,
-            Item.class), parent, id);
+        super(registrate, registrate.getHandler(Registries.ITEM, BuiltInRegistries.ITEM), parent, id);
         this.factory = factory;
     }
 
@@ -60,15 +60,23 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
     }
 
     @Override
+    public IItemBuilder<U, P> capability(IItemCapability<?>... caps) {
+        for (var cap : caps) {
+            onCreateObject(item -> registrate.capabilityHandler.registerItem(item, cap));
+        }
+        return self();
+    }
+
+    @Override
     protected Entry<U> createEntry() {
         var tint = this.tint;
         if (tint != null) {
-            onCreateObject.add(item -> tint.runOnDist(Dist.CLIENT, () -> itemColor ->
+            onCreateObject(item -> tint.runOnDist(Dist.CLIENT, () -> itemColor ->
                 registrate.tintHandler.addItemColor(item, itemColor)));
         }
         var creativeTab = this.creativeTab;
         if (creativeTab != null) {
-            onCreateObject.add(item -> registrate.creativeTabHandler.setCreativeTab(() -> item, creativeTab));
+            onCreateObject(item -> registrate.creativeTabHandler.setCreativeTab(() -> item, creativeTab));
         }
         return super.createEntry();
     }

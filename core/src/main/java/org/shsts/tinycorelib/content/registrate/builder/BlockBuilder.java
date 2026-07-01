@@ -38,10 +38,9 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
 
     public BlockBuilder(Registrate registrate, P parent, String id,
         Function<BlockBehaviour.Properties, U> factory) {
-        super(registrate, registrate.getHandler(Registries.BLOCK, BuiltInRegistries.BLOCK,
-            Block.class), parent, id);
+        super(registrate, registrate.getHandler(Registries.BLOCK, BuiltInRegistries.BLOCK), parent, id);
         this.factory = factory;
-        onCreateObject.add(registrate::trackBlock);
+        onCreateObject(registrate::trackBlock);
     }
 
     @Override
@@ -117,7 +116,7 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     protected Entry<U> createEntry() {
         var tint = this.tint;
         if (tint != null) {
-            onCreateObject.add(block -> tint.runOnDist(Dist.CLIENT, () -> blockColor ->
+            onCreateObject(block -> tint.runOnDist(Dist.CLIENT, () -> blockColor ->
                 registrate.tintHandler.addBlockColor(block, blockColor)));
         }
         if (blockItemBuilder == null && !noBlockItem) {

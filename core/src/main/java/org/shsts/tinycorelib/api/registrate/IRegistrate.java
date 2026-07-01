@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
 import org.shsts.tinycorelib.api.gui.MenuBase;
@@ -26,6 +27,7 @@ import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IItemCapability;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
@@ -37,10 +39,10 @@ import java.util.function.Supplier;
 @MethodsReturnNonnullByDefault
 public interface IRegistrate {
     <V> IEntryHandler<V> getHandler(
-        ResourceKey<? extends Registry<V>> key, Registry<V> registry, Class<V> entryClass);
+        ResourceKey<? extends Registry<V>> key, Registry<V> registry);
 
     <V> IEntryHandler<V> getHandler(
-        ResourceKey<? extends Registry<V>> key, Class<?> entryClass);
+        ResourceKey<? extends Registry<V>> key);
 
     /**
      * Only use this when you are sure that the BlockEntityType is registered by this library.
@@ -136,6 +138,10 @@ public interface IRegistrate {
     <T> ICapability<T> capability(String id, Class<T> typeClass);
 
     <T> ICapability<T> capability(BlockCapability<T, ?> capability);
+
+    <T> IItemCapability<T> itemCapability(String id, Class<T> typeClass);
+
+    <T> IItemCapability<T> itemCapability(ItemCapability<T, ?> capability);
 
     <T, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory);

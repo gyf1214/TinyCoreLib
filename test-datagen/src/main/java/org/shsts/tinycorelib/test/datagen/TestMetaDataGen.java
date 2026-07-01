@@ -7,7 +7,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import org.shsts.tinycorelib.api.meta.IMetaConsumer;
 import org.shsts.tinycorelib.api.meta.MetaLoadingException;
 import org.slf4j.Logger;
@@ -26,7 +25,7 @@ public class TestMetaDataGen implements IMetaConsumer {
         LOGGER.info("accept meta loc={}, desc={}", loc, val);
 
         var id = jo.get("id").getAsString();
-        var item = REGISTRATE.getHandler(Registries.ITEM, BuiltInRegistries.ITEM, Item.class).getEntry(id);
+        var item = REGISTRATE.getHandler(Registries.ITEM, BuiltInRegistries.ITEM).getEntry(id);
         var tex = ResourceLocation.parse(jo.get("tex").getAsString());
         DATA_GEN.item(item)
             .model(ctx -> ctx.provider()

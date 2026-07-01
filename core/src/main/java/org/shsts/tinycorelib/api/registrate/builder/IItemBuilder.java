@@ -8,6 +8,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
+import org.shsts.tinycorelib.api.registrate.entry.IItemCapability;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -19,4 +20,6 @@ public interface IItemBuilder<U extends Item, P> extends IEntryBuilder<Item, U, 
     IItemBuilder<U, P> tint(DistLazy<ItemColor> color);
 
     IItemBuilder<U, P> tint(int... colors);
+
+    IItemBuilder<U, P> capability(IItemCapability<?>... caps);
 }

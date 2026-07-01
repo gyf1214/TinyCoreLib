@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -33,6 +34,7 @@ import org.shsts.tinycorelib.api.registrate.builder.IRegistryBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IItemCapability;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
@@ -51,6 +53,7 @@ import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
+import org.shsts.tinycorelib.content.registrate.entry.ItemCapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.CreativeTabHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
@@ -128,8 +131,7 @@ public class Registrate implements IRegistrate {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> EntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key,
-        Registry<V> registry, Class<V> entryClass) {
+    public <V> EntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key, Registry<V> registry) {
         return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
             $ -> new EntryHandler<>(this, key, registry));
     }
@@ -137,7 +139,7 @@ public class Registrate implements IRegistrate {
     @Override
     @SuppressWarnings("unchecked")
     public <V> EntryHandler<V> getHandler(
-        ResourceKey<? extends Registry<V>> key, Class<?> entryClass) {
+        ResourceKey<? extends Registry<V>> key) {
         return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
             $ -> new EntryHandler<>(this, key, () -> registryHandler.getRegistry(key)));
     }
@@ -269,6 +271,16 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
+    public <T> IItemCapability<T> itemCapability(String id, Class<T> typeClass) {
+        return new ItemCapabilityEntry<>(modid, id, typeClass);
+    }
+
+    @Override
+    public <T> IItemCapability<T> itemCapability(ItemCapability<T, ?> capability) {
+        return new ItemCapabilityEntry<>(capability);
+    }
+
+    @Override
     public <T, U extends T> IEntry<U> registryEntry(
         IEntryHandler<T> handler, String id, Supplier<U> factory) {
         return new SimpleEntryBuilder<>(this, (EntryHandler<T>) handler, this, id, factory)
@@ -276,7 +288,7 @@ public class Registrate implements IRegistrate {
     }
 
     private EntryHandler<IEvent<?>> getEventHandler() {
-        return getHandler(EVENT_REGISTRY_KEY, IEvent.class);
+        return getHandler(EVENT_REGISTRY_KEY);
     }
 
     @Override

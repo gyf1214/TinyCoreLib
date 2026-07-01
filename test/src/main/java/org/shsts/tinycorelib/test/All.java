@@ -1,7 +1,11 @@
 package org.shsts.tinycorelib.test;
 
+import com.mojang.serialization.Codec;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -17,6 +21,7 @@ import org.shsts.tinycorelib.api.network.PacketDirection;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
+import org.shsts.tinycorelib.api.registrate.entry.IItemCapability;
 import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
@@ -31,6 +36,10 @@ import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
 public final class All {
     public static final IMetaExecutor TEST_META;
 
+    public static final ICapability<ITestCapability> TEST_CAPABILITY;
+    public static final ICapability<IItemHandler> ITEM_HANDLER_CAPABILITY;
+    public static final IItemCapability<ITestCapability> TEST_ITEM_CAPABILITY;
+
     public static final IEntry<Block> TEST_BLOCK1;
     public static final IEntry<TestBlock> TEST_BLOCK2;
     public static final IEntry<TestEntityBlock> TEST_BLOCK3;
@@ -38,12 +47,12 @@ public final class All {
     public static final IBlockEntityType TEST_BLOCK_ENTITY;
     public static final IMenuType TEST_MENU;
 
-    public static final ICapability<ITestCapability> TEST_CAPABILITY;
-    public static final ICapability<IItemHandler> ITEM_HANDLER_CAPABILITY;
-
     public static final IEntryHandler<IEvent<?>> EVENTS;
     public static final IEntry<IEvent<Level>> SERVER_TICK;
     public static final IEntry<IEvent<Unit>> TICK_SECOND;
+
+    public static final IEntryHandler<DataComponentType<?>> DATA_COMPONENT;
+    public static final IEntry<DataComponentType<Integer>> TEST_ITEM_COMPONENT;
 
     public static final IPacketType<TestPacket> TEST_PACKET;
     public static final IPacketType<TestPacket> TEST_MENU_SYNC;
@@ -54,6 +63,12 @@ public final class All {
 
     static {
         TEST_META = CORE.registerMeta("test", new TestMetaConsumer());
+
+        TEST_CAPABILITY = REGISTRATE.capability("test_capability", ITestCapability.class);
+
+        ITEM_HANDLER_CAPABILITY = REGISTRATE.capability(Capabilities.ItemHandler.BLOCK);
+
+        TEST_ITEM_CAPABILITY = REGISTRATE.itemCapability("test_capability", ITestCapability.class);
 
         TEST_PACKET = REGISTRATE.packet("test_packet", TestPacket::new)
             .direction(PacketDirection.BIDIRECTIONAL)
@@ -80,13 +95,10 @@ public final class All {
             .register();
 
         TEST_ITEM = REGISTRATE.item("test_item", TestItem::new)
+            .capability(TEST_ITEM_CAPABILITY)
             .creativeTab(CreativeModeTabs.COMBAT)
             .tint(0xFFFFFF00)
             .register();
-
-        TEST_CAPABILITY = REGISTRATE.capability("test_capability", ITestCapability.class);
-
-        ITEM_HANDLER_CAPABILITY = REGISTRATE.capability(Capabilities.ItemHandler.BLOCK);
 
         TEST_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_block_entity")
             .validBlock(TEST_BLOCK3)
@@ -99,9 +111,15 @@ public final class All {
             .screen(() -> () -> TestScreen::new)
             .register();
 
-        EVENTS = REGISTRATE.getHandler(EVENT_REGISTRY_KEY, IEvent.class);
+        EVENTS = REGISTRATE.getHandler(EVENT_REGISTRY_KEY);
         SERVER_TICK = EVENTS.getEntry(SERVER_TICK_LOC);
         TICK_SECOND = REGISTRATE.event("tick_second");
+
+        DATA_COMPONENT = REGISTRATE.getHandler(Registries.DATA_COMPONENT_TYPE, BuiltInRegistries.DATA_COMPONENT_TYPE);
+        TEST_ITEM_COMPONENT = REGISTRATE.registryEntry(DATA_COMPONENT, "test_item_component", () -> DataComponentType
+            .<Integer>builder()
+            .persistent(Codec.INT)
+            .build());
 
         TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.class)
             .serializer(TestRecipe.CODEC)

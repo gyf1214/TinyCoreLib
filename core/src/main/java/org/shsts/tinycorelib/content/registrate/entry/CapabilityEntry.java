@@ -4,10 +4,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
-import org.jetbrains.annotations.Nullable;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 
 import java.util.Optional;
@@ -39,12 +37,8 @@ public class CapabilityEntry<T> extends Entry<BlockCapability<T, ?>>
         if (world == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(getCapability(world, get(), be.getBlockPos()));
-    }
-
-    @Nullable
-    private static <T, C extends @Nullable Object> T getCapability(
-        Level world, BlockCapability<T, C> cap, BlockPos pos) {
-        return world.getCapability(cap, pos, null);
+        BlockCapability<T, ?> cap = get();
+        BlockPos pos = be.getBlockPos();
+        return Optional.ofNullable(world.getCapability(cap, pos, null));
     }
 }

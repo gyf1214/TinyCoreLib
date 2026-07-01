@@ -40,12 +40,6 @@ public class BlockEntityTypeBuilder<P>
 
     public BlockEntityTypeBuilder(Registrate registrate, P parent, String id) {
         super(registrate, registrate.blockEntityTypeHandler, parent, id);
-        onCreateObject.add(type -> {
-            registerEventManager((SmartBlockEntityType) type);
-            for (var capability : capabilities) {
-                registerCapability((SmartBlockEntityType) type, capability);
-            }
-        });
     }
 
     @Override
@@ -89,27 +83,26 @@ public class BlockEntityTypeBuilder<P>
     @Override
     public IBlockEntityTypeBuilder<P> renderer(
         DistLazy<BlockEntityRendererProvider<BlockEntity>> renderer) {
-        onCreateObject.add(type -> renderer.runOnDist(Dist.CLIENT, () -> provider ->
+        onCreateObject(type -> renderer.runOnDist(Dist.CLIENT, () -> provider ->
             registrate.rendererHandler.setBlockEntityRenderer(type, provider)));
         return self();
     }
 
     @Override
     protected BlockEntityTypeEntry createEntry() {
+        onCreateObject(type -> {
+            var type1 = (SmartBlockEntityType) type;
+            registrate.capabilityHandler.register(type1, CoreContents.EVENT_MANAGER, be -> be);
+            for (var capability : capabilities) {
+                registrate.capabilityHandler.register(type1, capability);
+            }
+        });
         return ((BlockEntityTypeHandler) handler).registerType(this);
     }
 
     @Override
     public IBlockEntityType register() {
         return (IBlockEntityType) super.register();
-    }
-
-    private void registerEventManager(SmartBlockEntityType type) {
-        registrate.capabilityHandler.register(type, CoreContents.EVENT_MANAGER, be -> be);
-    }
-
-    private <T> void registerCapability(SmartBlockEntityType type, ICapability<T> capability) {
-        registrate.capabilityHandler.register(type, capability);
     }
 
     @Override
