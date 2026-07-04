@@ -4,11 +4,14 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.core.Transformer;
@@ -26,8 +29,6 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
     private final Function<Item.Properties, U> factory;
     private Transformer<Item.Properties> properties = $ -> $;
     @Nullable
-    private ResourceKey<CreativeModeTab> creativeTab = null;
-    @Nullable
     protected DistLazy<ItemColor> tint = null;
 
     public ItemBuilder(Registrate registrate, P parent, String id,
@@ -44,7 +45,13 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
 
     @Override
     public IItemBuilder<U, P> creativeTab(ResourceKey<CreativeModeTab> tab) {
-        creativeTab = tab;
+        onCreateObject(item -> registrate.itemExtensionHandler.addCreativeTabItem(tab, () -> item));
+        return self();
+    }
+
+    @Override
+    public IItemBuilder<U, P> creativeTab(ResourceKey<CreativeModeTab> tab, Function<U, ItemStack> stack) {
+        onCreateObject(item -> registrate.itemExtensionHandler.addCreativeTabStack(tab, () -> stack.apply(item)));
         return self();
     }
 
@@ -57,6 +64,18 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
     @Override
     public IItemBuilder<U, P> tint(int... colors) {
         return tint(() -> () -> ($, index) -> index < colors.length ? colors[index] : 0xFFFFFFFF);
+    }
+
+    @Override
+    public IItemBuilder<U, P> itemProperty(String id, DistLazy<ClampedItemPropertyFunction> property) {
+        return itemProperty(ResourceLocation.fromNamespaceAndPath(modid(), id), property);
+    }
+
+    @Override
+    public IItemBuilder<U, P> itemProperty(ResourceLocation loc, DistLazy<ClampedItemPropertyFunction> property) {
+        onCreateObject(item -> property.runOnDist(Dist.CLIENT, () -> propertyFunc ->
+            registrate.itemExtensionHandler.addItemProperty(item, loc, propertyFunc)));
+        return self();
     }
 
     @Override
@@ -73,10 +92,6 @@ public class ItemBuilder<U extends Item, P> extends EntryBuilder<Item, U, P, IIt
         if (tint != null) {
             onCreateObject(item -> tint.runOnDist(Dist.CLIENT, () -> itemColor ->
                 registrate.tintHandler.addItemColor(item, itemColor)));
-        }
-        var creativeTab = this.creativeTab;
-        if (creativeTab != null) {
-            onCreateObject(item -> registrate.creativeTabHandler.setCreativeTab(() -> item, creativeTab));
         }
         return super.createEntry();
     }

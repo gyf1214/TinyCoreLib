@@ -24,6 +24,7 @@ import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
 import org.shsts.tinycorelib.test.All;
+import org.shsts.tinycorelib.test.TestItem;
 import org.shsts.tinycorelib.test.TinyCoreLibTest;
 
 import java.util.List;
@@ -59,8 +60,15 @@ public final class AllData {
         DATA_GEN
             .blockModel(AllData::testBlockModel)
             .item(All.TEST_ITEM)
-            .model(ctx -> ctx.provider().withExistingParent(ctx.id(), "item/generated")
-                .texture("layer0", mcLoc("item/arrow")))
+            .model(ctx -> ctx.provider()
+                .withExistingParent(ctx.id(), "item/generated")
+                .texture("layer0", mcLoc("item/arrow"))
+                .override()
+                .model(ctx.provider()
+                    .withExistingParent(ctx.id() + "_1", "item/generated")
+                    .texture("layer0", mcLoc("item/bamboo")))
+                .predicate(modLoc(TestItem.PROPERTY), 0.5f)
+                .end())
             .tag(TEST_ITEM_TAG)
             .build()
             .tag(TEST_ITEM_TAG, TEST_PARENT_TAG)

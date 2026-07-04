@@ -9,6 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.MapColor;
@@ -34,11 +35,13 @@ import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public final class All {
-    public static final IMetaExecutor TEST_META;
-
     public static final ICapability<ITestCapability> TEST_CAPABILITY;
     public static final ICapability<IItemHandler> ITEM_HANDLER_CAPABILITY;
     public static final IItemCapability<ITestCapability> TEST_ITEM_CAPABILITY;
+    public static final IEntryHandler<DataComponentType<?>> DATA_COMPONENT;
+    public static final IEntry<DataComponentType<Integer>> TEST_ITEM_COMPONENT;
+
+    public static final IMetaExecutor TEST_META;
 
     public static final IEntry<Block> TEST_BLOCK1;
     public static final IEntry<TestBlock> TEST_BLOCK2;
@@ -51,9 +54,6 @@ public final class All {
     public static final IEntry<IEvent<Level>> SERVER_TICK;
     public static final IEntry<IEvent<Unit>> TICK_SECOND;
 
-    public static final IEntryHandler<DataComponentType<?>> DATA_COMPONENT;
-    public static final IEntry<DataComponentType<Integer>> TEST_ITEM_COMPONENT;
-
     public static final IPacketType<TestPacket> TEST_PACKET;
     public static final IPacketType<TestPacket> TEST_MENU_SYNC;
     public static final IPacketType<TestPacket> TEST_MENU_EVENT;
@@ -62,13 +62,17 @@ public final class All {
     public static final IRecipeType<TestCookingRecipe> TEST_COOKING_RECIPE;
 
     static {
-        TEST_META = CORE.registerMeta("test", new TestMetaConsumer());
-
         TEST_CAPABILITY = REGISTRATE.capability("test_capability", ITestCapability.class);
-
         ITEM_HANDLER_CAPABILITY = REGISTRATE.capability(Capabilities.ItemHandler.BLOCK);
-
         TEST_ITEM_CAPABILITY = REGISTRATE.itemCapability("test_capability", ITestCapability.class);
+
+        DATA_COMPONENT = REGISTRATE.getHandler(Registries.DATA_COMPONENT_TYPE, BuiltInRegistries.DATA_COMPONENT_TYPE);
+        TEST_ITEM_COMPONENT = REGISTRATE.registryEntry(DATA_COMPONENT, "test_item_component", () -> DataComponentType
+            .<Integer>builder()
+            .persistent(Codec.INT)
+            .build());
+
+        TEST_META = CORE.registerMeta("test", new TestMetaConsumer());
 
         TEST_PACKET = REGISTRATE.packet("test_packet", TestPacket::new)
             .direction(PacketDirection.BIDIRECTIONAL)
@@ -97,6 +101,13 @@ public final class All {
         TEST_ITEM = REGISTRATE.item("test_item", TestItem::new)
             .capability(TEST_ITEM_CAPABILITY)
             .creativeTab(CreativeModeTabs.COMBAT)
+            .creativeTab(CreativeModeTabs.COMBAT, item -> {
+                var ret = new ItemStack(item);
+                ret.set(TEST_ITEM_COMPONENT, 10);
+                return ret;
+            })
+            .itemProperty(TestItem.PROPERTY, () -> () -> (stack, $1, $2, $3) ->
+                stack.getOrDefault(TEST_ITEM_COMPONENT, 0) / 10f)
             .tint(0xFFFFFF00)
             .register();
 
@@ -114,12 +125,6 @@ public final class All {
         EVENTS = REGISTRATE.getHandler(EVENT_REGISTRY_KEY);
         SERVER_TICK = EVENTS.getEntry(SERVER_TICK_LOC);
         TICK_SECOND = REGISTRATE.event("tick_second");
-
-        DATA_COMPONENT = REGISTRATE.getHandler(Registries.DATA_COMPONENT_TYPE, BuiltInRegistries.DATA_COMPONENT_TYPE);
-        TEST_ITEM_COMPONENT = REGISTRATE.registryEntry(DATA_COMPONENT, "test_item_component", () -> DataComponentType
-            .<Integer>builder()
-            .persistent(Codec.INT)
-            .build());
 
         TEST_RECIPE = REGISTRATE.recipeType("test", TestRecipe.class)
             .serializer(TestRecipe.CODEC)

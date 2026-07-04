@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -55,9 +56,9 @@ import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.entry.ItemCapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
-import org.shsts.tinycorelib.content.registrate.handler.CreativeTabHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EventHandler;
+import org.shsts.tinycorelib.content.registrate.handler.ItemExtensionHandler;
 import org.shsts.tinycorelib.content.registrate.handler.MenuTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.PayloadHandler;
 import org.shsts.tinycorelib.content.registrate.handler.RecipeTypeHandler;
@@ -90,7 +91,7 @@ public class Registrate implements IRegistrate {
 
     // others
     public final EventHandler.Capability capabilityHandler;
-    public final CreativeTabHandler creativeTabHandler;
+    public final ItemExtensionHandler itemExtensionHandler;
     public final PayloadHandler payloadHandler;
 
     // client only
@@ -108,7 +109,7 @@ public class Registrate implements IRegistrate {
         this.menuTypeHandler = createEntryHandler(MenuTypeHandler::new);
         this.recipeTypeHandler = new RecipeTypeHandler(this);
         this.capabilityHandler = new EventHandler.Capability();
-        this.creativeTabHandler = new CreativeTabHandler();
+        this.itemExtensionHandler = new ItemExtensionHandler();
         this.payloadHandler = new PayloadHandler();
 
         this.tintHandler = new TintHandler();
@@ -182,7 +183,7 @@ public class Registrate implements IRegistrate {
         }
         recipeTypeHandler.addListener(modEventBus);
         modEventBus.addListener(RegisterCapabilitiesEvent.class, capabilityHandler::onEvent);
-        modEventBus.addListener(creativeTabHandler::onRegisterCreativeTabs);
+        modEventBus.addListener(itemExtensionHandler::onRegisterCreativeTabs);
         modEventBus.addListener(payloadHandler::onRegisterPayload);
     }
 
@@ -192,6 +193,7 @@ public class Registrate implements IRegistrate {
         modEventBus.addListener(tintHandler::onRegisterItemColors);
         modEventBus.addListener(EntityRenderersEvent.RegisterRenderers.class, rendererHandler::onEvent);
         modEventBus.addListener(RegisterMenuScreensEvent.class, menuScreenHandler::onEvent);
+        modEventBus.<FMLClientSetupEvent>addListener(e -> e.enqueueWork(itemExtensionHandler::onClientSetup));
     }
 
     @Override

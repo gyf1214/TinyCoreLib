@@ -18,6 +18,8 @@ import static org.shsts.tinycorelib.test.All.TEST_ITEM_COMPONENT;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class TestItem extends Item implements ICapabilityItem {
+    public static final String PROPERTY = "test_property";
+
     public TestItem(Properties properties) {
         super(properties);
     }
