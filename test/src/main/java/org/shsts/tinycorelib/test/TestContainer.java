@@ -17,6 +17,7 @@ import org.shsts.tinycorelib.api.blockentity.IEventSubscriber;
 import org.shsts.tinycorelib.api.blockentity.INBTUpdatable;
 import org.slf4j.Logger;
 
+import static org.shsts.tinycorelib.test.All.EVENT_MANAGER;
 import static org.shsts.tinycorelib.test.All.ITEM_HANDLER_CAPABILITY;
 import static org.shsts.tinycorelib.test.All.SERVER_TICK;
 import static org.shsts.tinycorelib.test.All.TEST_CAPABILITY;
@@ -35,7 +36,6 @@ public class TestContainer implements ICapabilityContainer, IEventSubscriber, IT
     private final BlockEntity blockEntity;
     private final ItemStackHandler itemHandler;
 
-    private IEventManager eventManager;
     private boolean isUpdateForced = true;
     private int ticks = 0;
     private int seconds = 0;
@@ -54,7 +54,7 @@ public class TestContainer implements ICapabilityContainer, IEventSubscriber, IT
     private void onTick(Level world) {
         ticks++;
         if (ticks >= 20) {
-            eventManager.invoke(TICK_SECOND.get());
+            EVENT_MANAGER.get(blockEntity).invoke(TICK_SECOND.get());
             ticks = 0;
         }
     }
@@ -125,7 +125,6 @@ public class TestContainer implements ICapabilityContainer, IEventSubscriber, IT
 
     @Override
     public void subscribeEvents(IEventManager eventManager) {
-        this.eventManager = eventManager;
         eventManager.subscribe(SERVER_TICK.get(), this::onTick);
         eventManager.subscribe(TICK_SECOND.get(), this::onTickSecond);
     }

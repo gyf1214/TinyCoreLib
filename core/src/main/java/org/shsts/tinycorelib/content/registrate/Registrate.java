@@ -54,6 +54,7 @@ import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
+import org.shsts.tinycorelib.content.registrate.entry.Entry;
 import org.shsts.tinycorelib.content.registrate.entry.ItemCapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
@@ -131,6 +132,11 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
+    public <U> IEntry<U> createEntry(ResourceLocation loc, U obj) {
+        return new Entry<>(loc, obj);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <V> EntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key, Registry<V> registry) {
         return (EntryHandler<V>) entryHandlers.computeIfAbsent(key.location(),
@@ -166,13 +172,43 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public IRecipeType<?> getRecipeType(ResourceLocation loc) {
+    public <R extends IRecipe<?>> IRecipeType<R> getRecipeType(ResourceLocation loc) {
         return recipeTypeHandler.getRecipeType(loc);
     }
 
     @Override
-    public IRecipeType<?> getRecipeType(String id) {
+    public <R extends IRecipe<?>> IRecipeType<R> getRecipeType(String id) {
         return recipeTypeHandler.getRecipeType(id);
+    }
+
+    @Override
+    public <T> ICapability<T> getCapability(BlockCapability<T, ?> capability) {
+        return new CapabilityEntry<>(capability);
+    }
+
+    @Override
+    public <T> ICapability<T> getCapability(ResourceLocation loc, Class<T> typeClass, Class<?> ctxClass) {
+        return new CapabilityEntry<>(loc, typeClass, ctxClass);
+    }
+
+    @Override
+    public <T> ICapability<T> getCapability(ResourceLocation loc, Class<T> typeClass) {
+        return new CapabilityEntry<>(loc, typeClass, Void.TYPE);
+    }
+
+    @Override
+    public <T> IItemCapability<T> getItemCapability(ItemCapability<T, ?> capability) {
+        return new ItemCapabilityEntry<>(capability);
+    }
+
+    @Override
+    public <T> IItemCapability<T> getItemCapability(ResourceLocation loc, Class<T> typeClass, Class<?> ctxClass) {
+        return new ItemCapabilityEntry<>(loc, typeClass, ctxClass);
+    }
+
+    @Override
+    public <T> IItemCapability<T> getItemCapability(ResourceLocation loc, Class<T> typeClass) {
+        return new ItemCapabilityEntry<>(loc, typeClass, Void.TYPE);
     }
 
     @Override
@@ -268,18 +304,8 @@ public class Registrate implements IRegistrate {
     }
 
     @Override
-    public <T> ICapability<T> capability(BlockCapability<T, ?> capability) {
-        return new CapabilityEntry<>(capability);
-    }
-
-    @Override
     public <T> IItemCapability<T> itemCapability(String id, Class<T> typeClass) {
         return new ItemCapabilityEntry<>(modid, id, typeClass);
-    }
-
-    @Override
-    public <T> IItemCapability<T> itemCapability(ItemCapability<T, ?> capability) {
-        return new ItemCapabilityEntry<>(capability);
     }
 
     @Override

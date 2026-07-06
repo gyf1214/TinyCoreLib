@@ -30,8 +30,9 @@ public class RecipeTypeHandler extends EntryHandler<RecipeType<?>> {
         super(registrate, Registries.RECIPE_TYPE, BuiltInRegistries.RECIPE_TYPE);
     }
 
-    public IRecipeType<?> getRecipeType(ResourceLocation loc) {
-        return new RecipeTypeEntry<>(loc, () -> {
+    @SuppressWarnings("unchecked")
+    public <R extends IRecipe<?>> IRecipeType<R> getRecipeType(ResourceLocation loc) {
+        return (IRecipeType<R>) new RecipeTypeEntry<>(loc, () -> {
             var type = BuiltInRegistries.RECIPE_TYPE.get(loc);
             if (type == null) {
                 throw new NoSuchElementException();
@@ -40,7 +41,7 @@ public class RecipeTypeHandler extends EntryHandler<RecipeType<?>> {
         });
     }
 
-    public IRecipeType<?> getRecipeType(String id) {
+    public <R extends IRecipe<?>> IRecipeType<R> getRecipeType(String id) {
         return getRecipeType(ResourceLocation.fromNamespaceAndPath(modid, id));
     }
 

@@ -38,11 +38,11 @@ import java.util.function.Supplier;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IRegistrate {
-    <V> IEntryHandler<V> getHandler(
-        ResourceKey<? extends Registry<V>> key, Registry<V> registry);
+    <U> IEntry<U> createEntry(ResourceLocation loc, U obj);
 
-    <V> IEntryHandler<V> getHandler(
-        ResourceKey<? extends Registry<V>> key);
+    <V> IEntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key, Registry<V> registry);
+
+    <V> IEntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key);
 
     /**
      * Only use this when you are sure that the BlockEntityType is registered by this library.
@@ -64,27 +64,35 @@ public interface IRegistrate {
      */
     IMenuType getMenuType(String id);
 
-    IRecipeType<?> getRecipeType(ResourceLocation loc);
+    <R extends IRecipe<?>> IRecipeType<R> getRecipeType(ResourceLocation loc);
 
-    IRecipeType<?> getRecipeType(String id);
+    <R extends IRecipe<?>> IRecipeType<R> getRecipeType(String id);
+
+    <T> ICapability<T> getCapability(BlockCapability<T, ?> capability);
+
+    <T> ICapability<T> getCapability(ResourceLocation loc, Class<T> typeClass, Class<?> ctxClass);
+
+    <T> ICapability<T> getCapability(ResourceLocation loc, Class<T> typeClass);
+
+    <T> IItemCapability<T> getItemCapability(ItemCapability<T, ?> capability);
+
+    <T> IItemCapability<T> getItemCapability(ResourceLocation loc, Class<T> typeClass, Class<?> ctxClass);
+
+    <T> IItemCapability<T> getItemCapability(ResourceLocation loc, Class<T> typeClass);
 
     void register(IEventBus modEventBus);
 
     void registerClient(IEventBus modEventBus);
 
-    <V, P> IRegistryBuilder<V, P> registry(
-        P parent, String id, Class<V> entryClass);
+    <V, P> IRegistryBuilder<V, P> registry(P parent, String id, Class<V> entryClass);
 
-    <V, P> IRegistryBuilder<V, P> genericRegistry(
-        P parent, String id, Class<?> entryClass);
+    <V, P> IRegistryBuilder<V, P> genericRegistry(P parent, String id, Class<?> entryClass);
 
-    default <V> IRegistryBuilder<V, IRegistrate> registry(
-        String id, Class<V> entryClass) {
+    default <V> IRegistryBuilder<V, IRegistrate> registry(String id, Class<V> entryClass) {
         return registry(this, id, entryClass);
     }
 
-    default <V> IRegistryBuilder<V, IRegistrate> genericRegistry(
-        String id, Class<?> entryClass) {
+    default <V> IRegistryBuilder<V, IRegistrate> genericRegistry(String id, Class<?> entryClass) {
         return genericRegistry(this, id, entryClass);
     }
 
@@ -137,14 +145,9 @@ public interface IRegistrate {
 
     <T> ICapability<T> capability(String id, Class<T> typeClass);
 
-    <T> ICapability<T> capability(BlockCapability<T, ?> capability);
-
     <T> IItemCapability<T> itemCapability(String id, Class<T> typeClass);
 
-    <T> IItemCapability<T> itemCapability(ItemCapability<T, ?> capability);
-
-    <T, U extends T> IEntry<U> registryEntry(
-        IEntryHandler<T> handler, String id, Supplier<U> factory);
+    <T, U extends T> IEntry<U> registryEntry(IEntryHandler<T> handler, String id, Supplier<U> factory);
 
     <A> IEntry<IEvent<A>> event(String id);
 

@@ -20,6 +20,10 @@ public class ItemCapabilityEntry<T> extends Entry<ItemCapability<T, ?>> implemen
         super(loc, () -> ItemCapability.createVoid(loc, typeClass));
     }
 
+    public ItemCapabilityEntry(ResourceLocation loc, Class<T> typeClass, Class<?> ctxClass) {
+        super(loc, () -> ItemCapability.create(loc, typeClass, ctxClass));
+    }
+
     public ItemCapabilityEntry(ItemCapability<T, ?> cap) {
         super(cap.name(), cap);
     }

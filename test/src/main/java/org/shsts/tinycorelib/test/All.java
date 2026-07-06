@@ -16,6 +16,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
+import org.shsts.tinycorelib.api.blockentity.IEventManager;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.api.network.PacketDirection;
@@ -27,6 +28,7 @@ import org.shsts.tinycorelib.api.registrate.entry.IMenuType;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
 import org.shsts.tinycorelib.api.registrate.handler.IEntryHandler;
 
+import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_MANAGER_LOC;
 import static org.shsts.tinycorelib.api.CoreLibKeys.EVENT_REGISTRY_KEY;
 import static org.shsts.tinycorelib.api.CoreLibKeys.SERVER_TICK_LOC;
 import static org.shsts.tinycorelib.test.TinyCoreLibTest.CORE;
@@ -35,6 +37,7 @@ import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public final class All {
+    public static final ICapability<IEventManager> EVENT_MANAGER;
     public static final ICapability<ITestCapability> TEST_CAPABILITY;
     public static final ICapability<IItemHandler> ITEM_HANDLER_CAPABILITY;
     public static final IItemCapability<ITestCapability> TEST_ITEM_CAPABILITY;
@@ -62,8 +65,9 @@ public final class All {
     public static final IRecipeType<TestCookingRecipe> TEST_COOKING_RECIPE;
 
     static {
+        EVENT_MANAGER = REGISTRATE.getCapability(EVENT_MANAGER_LOC, IEventManager.class);
         TEST_CAPABILITY = REGISTRATE.capability("test_capability", ITestCapability.class);
-        ITEM_HANDLER_CAPABILITY = REGISTRATE.capability(Capabilities.ItemHandler.BLOCK);
+        ITEM_HANDLER_CAPABILITY = REGISTRATE.getCapability(Capabilities.ItemHandler.BLOCK);
         TEST_ITEM_CAPABILITY = REGISTRATE.itemCapability("test_capability", ITestCapability.class);
 
         DATA_COMPONENT = REGISTRATE.getHandler(Registries.DATA_COMPONENT_TYPE, BuiltInRegistries.DATA_COMPONENT_TYPE);

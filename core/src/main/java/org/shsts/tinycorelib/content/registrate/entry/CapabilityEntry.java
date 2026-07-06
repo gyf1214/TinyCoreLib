@@ -22,6 +22,10 @@ public class CapabilityEntry<T> extends Entry<BlockCapability<T, ?>>
         super(loc, () -> BlockCapability.createVoid(loc, typeClass));
     }
 
+    public CapabilityEntry(ResourceLocation loc, Class<T> typeClass, Class<?> ctxClass) {
+        super(loc, () -> BlockCapability.create(loc, typeClass, ctxClass));
+    }
+
     public CapabilityEntry(BlockCapability<T, ?> cap) {
         super(cap.name(), cap);
     }
@@ -39,6 +43,6 @@ public class CapabilityEntry<T> extends Entry<BlockCapability<T, ?>>
         }
         BlockCapability<T, ?> cap = get();
         BlockPos pos = be.getBlockPos();
-        return Optional.ofNullable(world.getCapability(cap, pos, null));
+        return Optional.ofNullable(world.getCapability(cap, pos, null, be, null));
     }
 }
