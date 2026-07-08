@@ -38,8 +38,6 @@ import java.util.function.Supplier;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public interface IRegistrate {
-    <U> IEntry<U> createEntry(ResourceLocation loc, U obj);
-
     <V> IEntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key, Registry<V> registry);
 
     <V> IEntryHandler<V> getHandler(ResourceKey<? extends Registry<V>> key);

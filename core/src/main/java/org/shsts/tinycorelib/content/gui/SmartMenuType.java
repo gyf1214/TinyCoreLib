@@ -15,7 +15,6 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.extensions.IPlayerExtension;
 import org.shsts.tinycorelib.api.gui.MenuBase;
 
 import java.util.function.Function;
@@ -82,7 +81,7 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
                 return create(containerId, inventory, be);
             }
         };
-        ((IPlayerExtension) player).openMenu(provider, buf -> {
+        player.openMenu(provider, buf -> {
             buf.writeBoolean(true);
             buf.writeBlockPos(pos);
         });
@@ -101,6 +100,6 @@ public class SmartMenuType<M extends MenuBase> extends MenuType<M> {
                 return create(containerId, inventory);
             }
         };
-        ((IPlayerExtension) player).openMenu(provider, buf -> buf.writeBoolean(false));
+        player.openMenu(provider, buf -> buf.writeBoolean(false));
     }
 }

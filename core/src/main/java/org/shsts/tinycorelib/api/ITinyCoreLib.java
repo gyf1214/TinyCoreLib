@@ -2,6 +2,7 @@ package org.shsts.tinycorelib.api;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.meta.IMetaConsumer;
@@ -10,6 +11,7 @@ import org.shsts.tinycorelib.api.network.IPacket;
 import org.shsts.tinycorelib.api.network.IPacketType;
 import org.shsts.tinycorelib.api.recipe.IRecipeManager;
 import org.shsts.tinycorelib.api.registrate.IRegistrate;
+import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 
 import java.util.function.Supplier;
 
@@ -20,6 +22,8 @@ public interface ITinyCoreLib {
     String PROVIDER_CLASS = "org.shsts.tinycorelib.TinyCoreLibProvider";
 
     IRegistrate registrate(String modid);
+
+    <U> IEntry<U> createEntry(ResourceLocation loc, U obj);
 
     IMetaExecutor registerMeta(String folder, IMetaConsumer consumer);
 

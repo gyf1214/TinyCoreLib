@@ -8,43 +8,35 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class RecipeHandler extends DataHandler<RecipeProvider> {
-    private final List<Consumer<RecipeOutput>> callbacks = new ArrayList<>();
-
+public class RecipeHandler extends DataHandler<RecipeHandler.Provider> {
     public RecipeHandler(DataGen dataGen) {
         super(dataGen);
     }
 
-    private class Provider extends RecipeProvider {
+    public class Provider extends RecipeProvider {
+        private RecipeOutput recipeOutput;
+
         public Provider(GatherDataEvent event) {
             super(event.getGenerator().getPackOutput(), event.getLookupProvider());
         }
 
         @Override
         protected void buildRecipes(RecipeOutput output, HolderLookup.Provider holderLookup) {
-            RecipeHandler.this.register(output);
+            recipeOutput = output;
+            register(this);
         }
     }
 
     @Override
-    public RecipeProvider createProvider(GatherDataEvent event) {
+    public RecipeHandler.Provider createProvider(GatherDataEvent event) {
         return new Provider(event);
     }
 
     public void registerRecipe(Consumer<RecipeOutput> recipe) {
-        callbacks.add(recipe);
-    }
-
-    private void register(RecipeOutput output) {
-        for (var callback : callbacks) {
-            callback.accept(output);
-        }
-        callbacks.clear();
+        addCallback(prov -> recipe.accept(prov.recipeOutput));
     }
 }

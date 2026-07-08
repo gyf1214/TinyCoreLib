@@ -14,8 +14,7 @@ import java.util.List;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
-
+public class TagsHandler<T> extends DataHandler<TagsHandler<T>.Provider> {
     private final Registry<T> registry;
     private final ResourceKey<? extends Registry<T>> registryKey;
 
@@ -25,7 +24,7 @@ public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
         this.registryKey = registry.key();
     }
 
-    private class Provider extends TagsProvider<T> {
+    public class Provider extends TagsProvider<T> {
         public Provider(GatherDataEvent event) {
             super(event.getGenerator().getPackOutput(), TagsHandler.this.registryKey,
                 event.getLookupProvider(),
@@ -65,7 +64,7 @@ public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
         }
         for (var tag : tags) {
             validateTag(tag);
-            callbacks.add(prov -> ((Provider) prov).addTag(tag, object));
+            callbacks.add(prov -> prov.addTag(tag, object));
         }
     }
 
@@ -76,11 +75,11 @@ public class TagsHandler<T> extends DataHandler<TagsProvider<T>> {
     public void addTag(TagKey<T> object, TagKey<T> tag) {
         validateTag(object);
         validateTag(tag);
-        callbacks.add(prov -> ((Provider) prov).addTag(tag, object));
+        callbacks.add(prov -> prov.addTag(tag, object));
     }
 
     @Override
-    public TagsProvider<T> createProvider(GatherDataEvent event) {
+    public Provider createProvider(GatherDataEvent event) {
         return new Provider(event);
     }
 }

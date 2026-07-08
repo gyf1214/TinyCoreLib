@@ -54,7 +54,6 @@ import org.shsts.tinycorelib.content.registrate.builder.RecipeTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.builder.RegistryBuilderWrapper;
 import org.shsts.tinycorelib.content.registrate.builder.SimpleEntryBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.CapabilityEntry;
-import org.shsts.tinycorelib.content.registrate.entry.Entry;
 import org.shsts.tinycorelib.content.registrate.entry.ItemCapabilityEntry;
 import org.shsts.tinycorelib.content.registrate.handler.BlockEntityTypeHandler;
 import org.shsts.tinycorelib.content.registrate.handler.EntryHandler;
@@ -129,11 +128,6 @@ public class Registrate implements IRegistrate {
         var handler = factory.apply(this);
         entryHandlers.put(handler.registryKey().location(), handler);
         return handler;
-    }
-
-    @Override
-    public <U> IEntry<U> createEntry(ResourceLocation loc, U obj) {
-        return new Entry<>(loc, obj);
     }
 
     @Override
