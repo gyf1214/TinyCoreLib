@@ -11,20 +11,20 @@ authors = "Tiny"
 [[dependencies.tinycorelib_test]]
 modId = "neoforge"
 type = "required"
-versionRange = "${neo_version_range}"
+versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.tinycorelib_test]]
 modId = "minecraft"
 type = "required"
-versionRange = "${minecraft_version_range}"
+versionRange = "[1.21.1]"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.tinycorelib_test]]
 modId = "tinycorelib"
 type = "required"
-versionRange = "${mod_version}"
+versionRange = "[0,)"
 ordering = "NONE"
 side = "BOTH"

@@ -1,9 +1,5 @@
 pluginManagement {
     repositories {
-        maven {
-            name = "shsts"
-            url = uri("https://www.shsts.org/m2")
-        }
         gradlePluginPortal()
         mavenCentral()
         maven {
@@ -17,6 +13,10 @@ pluginManagement {
         maven {
             name = "ParchmentMC"
             url = uri("https://maven.parchmentmc.org")
+        }
+        maven {
+            name = "shsts"
+            url = uri("https://www.shsts.org/m2")
         }
     }
 }

@@ -14,13 +14,13 @@ config = "tinycorelib.mixins.json"
 [[dependencies.tinycorelib]]
 modId = "neoforge"
 type = "required"
-versionRange = "${neo_version_range}"
+versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.tinycorelib]]
 modId = "minecraft"
 type = "required"
-versionRange = "${minecraft_version_range}"
+versionRange = "[1.21.1]"
 ordering = "NONE"
 side = "BOTH"

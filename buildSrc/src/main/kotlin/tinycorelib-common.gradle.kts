@@ -1,6 +1,3 @@
-import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.language.jvm.tasks.ProcessResources
-
 plugins {
     checkstyle
     eclipse
@@ -34,8 +31,6 @@ tasks.withType<JavaCompile>().configureEach {
 
 val modMetadataProperties = mapOf(
     "mod_version" to version,
-    "minecraft_version_range" to property("minecraft_version_range"),
-    "neo_version_range" to property("neo_version_range"),
 )
 
 val generateModMetadata by tasks.registering(ProcessResources::class) {
