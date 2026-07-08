@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.test.datagen;
+package org.shsts.tinycorelib.datagen.test;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -29,12 +29,12 @@ import org.shsts.tinycorelib.test.TinyCoreLibTest;
 
 import java.util.List;
 
+import static org.shsts.tinycorelib.datagen.test.TinyDataGenTest.CORE;
+import static org.shsts.tinycorelib.datagen.test.TinyDataGenTest.DATA_GEN;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK2;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
 import static org.shsts.tinycorelib.test.All.TEST_COOKING_RECIPE;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
-import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.CORE;
-import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -44,7 +44,7 @@ public final class AllData {
     private static final TagKey<Item> TEST_PARENT_TAG = itemTag("test_parent_item_tag");
 
     public static final IMetaExecutor TEST_META_DATAGEN;
-    public static IDataHandler<TestResourceProvider> TEST_RESOURCES;
+    public static IDataHandler<TestResourceProvider> TEST_RESOURCE;
     public static ResourceLocation TEST_RESOURCE1;
     public static ResourceLocation TEST_RESOURCE2;
 
@@ -132,13 +132,13 @@ public final class AllData {
             .requires(Items.BIRCH_LOG)
             .unlockedBy("has_birch", has(Items.BIRCH_LOG));
 
-        TEST_RESOURCES = DATA_GEN.createHandler(TestResourceProvider::new);
+        TEST_RESOURCE = DATA_GEN.createHandler(TestResourceProvider::new);
 
-        TEST_RESOURCE1 = TEST_RESOURCES.builder("test1", TestResourceBuilder::factory)
+        TEST_RESOURCE1 = TEST_RESOURCE.builder("test1", TestResourceBuilder::factory)
             .name("foo")
             .register();
 
-        TEST_RESOURCE2 = TEST_RESOURCES.builder("test2", TestResourceBuilder::factory)
+        TEST_RESOURCE2 = TEST_RESOURCE.builder("test2", TestResourceBuilder::factory)
             .name("bar")
             .reference(TEST_RESOURCE1)
             .register();

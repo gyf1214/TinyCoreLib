@@ -25,5 +25,3 @@ rootProject.name = "TinyCoreLib"
 
 include("core")
 include("datagen")
-include("test")
-include("test-datagen")

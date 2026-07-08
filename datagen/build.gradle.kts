@@ -4,26 +4,66 @@ plugins {
     id("tinycorelib-common")
 }
 
-base {
-    archivesName = "tinydatagen"
+evaluationDependsOn(":core")
+
+neoForge {
+    mods {
+        create("tinycorelib") {
+            sourceSet(project(":core").sourceSets.main.get())
+        }
+
+        create("tinycorelib_test") {
+            sourceSet(project(":core").sourceSets.test.get())
+        }
+
+        create("tinydatagen") {
+            sourceSet(sourceSets.main.get())
+        }
+
+        create("tinydatagen_test") {
+            sourceSet(sourceSets.test.get())
+        }
+    }
+
+    runs {
+        create("data") {
+            data()
+            gameDirectory = rootProject.file("run/data")
+
+            programArguments.addAll(
+                "--mod",
+                "tinydatagen_test",
+                "--all",
+                "--output",
+                rootProject.project(":core").file("src/generated/resources/").absolutePath,
+            )
+            programArguments.addAll(
+                "--existing",
+                rootProject.project(":core").file("src/test/resources/").absolutePath,
+            )
+            programArguments.addAll(
+                "--existing",
+                file("src/test/resources/").absolutePath,
+            )
+        }
+    }
+}
+
+dependencies {
+    compileOnly(project(":core"))
+
+    testImplementation(project(":core"))
+    testImplementation(rootProject.project(":core").sourceSets.test.get().output)
 }
 
 checkSource {
     topPackage("org.shsts.tinycorelib.datagen")
     banImport("api", "content")
+    includeTest()
 }
 
 configurations {
     maybeCreate("api")
-}
-
-neoForge {
-    mods {
-        create("tinydatagen") {
-            sourceSet(sourceSets.main.get())
-            sourceSet(project(":core").sourceSets.main.get())
-        }
-    }
 }
 
 val apiJar by tasks.registering(Jar::class) {
@@ -32,22 +72,12 @@ val apiJar by tasks.registering(Jar::class) {
     from(sourceSets.main.get().output)
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.classes)
-    archiveClassifier = "sources"
-    from(sourceSets.main.get().allSource)
-}
-
 artifacts {
     add("api", apiJar)
 }
 
-dependencies {
-    compileOnly(project(path = ":core"))
-}
-
 tasks.build {
-    dependsOn(apiJar, sourcesJar)
+    dependsOn(apiJar)
 }
 
 publishing {
@@ -55,7 +85,7 @@ publishing {
         create<MavenPublication>("maven") {
             artifact(tasks.jar)
             artifact(apiJar)
-            artifact(sourcesJar)
+            artifact(tasks.sourcesJar)
         }
     }
 }

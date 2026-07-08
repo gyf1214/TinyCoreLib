@@ -31,5 +31,5 @@ repositories {
 
 dependencies {
     implementation("net.neoforged:moddev-gradle:${rootProperties.getProperty("moddev_version")}")
-    implementation("org.shsts.checksource:plugin:0.1.0")
+    implementation("org.shsts.checksource:plugin:${rootProperties.getProperty("checksource_version")}")
 }

@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.test.datagen;
+package org.shsts.tinycorelib.datagen.test;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

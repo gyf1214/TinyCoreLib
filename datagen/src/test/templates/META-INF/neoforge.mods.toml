@@ -5,7 +5,7 @@ license = "All rights reserved"
 [[mods]]
 modId = "tinydatagen_test"
 version = "${mod_version}"
-displayName = "Tiny Core Lib test datagen"
+displayName = "Tiny DataGen Lib test"
 authors = "Tiny"
 
 [[dependencies.tinydatagen_test]]

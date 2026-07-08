@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.test.datagen;
+package org.shsts.tinycorelib.datagen.test;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

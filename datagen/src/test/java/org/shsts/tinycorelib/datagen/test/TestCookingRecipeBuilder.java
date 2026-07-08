@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.test.datagen;
+package org.shsts.tinycorelib.datagen.test;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -19,7 +19,7 @@ import org.shsts.tinycorelib.test.TestCookingRecipe;
 @MethodsReturnNonnullByDefault
 public class TestCookingRecipeBuilder
     extends Builder<TestCookingRecipe, IRecipeFactory<TestCookingRecipe, TestCookingRecipeBuilder>,
-        TestCookingRecipeBuilder> {
+    TestCookingRecipeBuilder> {
     @Nullable
     private Ingredient ingredient = null;
     @Nullable

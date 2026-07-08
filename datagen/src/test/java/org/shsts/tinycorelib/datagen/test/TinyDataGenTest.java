@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.test.datagen;
+package org.shsts.tinycorelib.datagen.test;
 
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;

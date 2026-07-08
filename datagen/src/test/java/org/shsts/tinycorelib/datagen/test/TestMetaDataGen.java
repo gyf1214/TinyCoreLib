@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.test.datagen;
+package org.shsts.tinycorelib.datagen.test;
 
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
@@ -11,8 +11,8 @@ import org.shsts.tinycorelib.api.meta.IMetaConsumer;
 import org.shsts.tinycorelib.api.meta.MetaLoadingException;
 import org.slf4j.Logger;
 
+import static org.shsts.tinycorelib.datagen.test.TinyDataGenTest.DATA_GEN;
 import static org.shsts.tinycorelib.test.TinyCoreLibTest.REGISTRATE;
-import static org.shsts.tinycorelib.test.datagen.TinyDataGenTest.DATA_GEN;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault

@@ -1,4 +1,4 @@
-package org.shsts.tinycorelib.test.datagen;
+package org.shsts.tinycorelib.datagen.test;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 @MethodsReturnNonnullByDefault
 public class TestResourceProvider implements DataProvider {
     public static final ExistingFileHelper.ResourceType RESOURCE_TYPE =
-        new ExistingFileHelper.ResourceType(PackType.SERVER_DATA, ".json", "test_resources");
+        new ExistingFileHelper.ResourceType(PackType.SERVER_DATA, ".json", "test_resource");
 
     private final String modid;
     private final IDataHandler<TestResourceProvider> handler;
@@ -34,7 +34,7 @@ public class TestResourceProvider implements DataProvider {
         this.modid = dataGen.modid();
         this.handler = handler;
         this.pathProvider = event.getGenerator().getPackOutput()
-            .createPathProvider(PackOutput.Target.DATA_PACK, "test_resources");
+            .createPathProvider(PackOutput.Target.DATA_PACK, "test_resource");
         this.existingFileHelper = event.getExistingFileHelper();
     }
 

@@ -8,21 +8,50 @@ base {
     archivesName = "tinycorelib"
 }
 
-checkSource {
-    topPackage("org.shsts.tinycorelib")
-    banImport("api", "content")
-}
-
-configurations {
-    maybeCreate("api")
-}
-
 neoForge {
     mods {
         create("tinycorelib") {
             sourceSet(sourceSets.main.get())
         }
+
+        create("tinycorelib_test") {
+            sourceSet(sourceSets.test.get())
+        }
     }
+
+    runs {
+        create("client") {
+            client()
+            gameDirectory = rootProject.file("run/client")
+        }
+
+        create("server") {
+            server()
+            gameDirectory = rootProject.file("run/server")
+        }
+
+        create("gameTestServer") {
+            type = "gameTestServer"
+            gameDirectory = rootProject.file("run/gameTestServer")
+        }
+    }
+}
+
+sourceSets.test {
+    resources {
+        srcDir("src/generated/resources")
+        exclude(".cache/")
+    }
+}
+
+checkSource {
+    topPackage("org.shsts.tinycorelib")
+    banImport("api", "content")
+    includeTest()
+}
+
+configurations {
+    maybeCreate("api")
 }
 
 val apiJar by tasks.registering(Jar::class) {
@@ -31,18 +60,12 @@ val apiJar by tasks.registering(Jar::class) {
     from(sourceSets.main.get().output)
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.classes)
-    archiveClassifier = "sources"
-    from(sourceSets.main.get().allSource)
-}
-
 artifacts {
     add("api", apiJar)
 }
 
 tasks.build {
-    dependsOn(apiJar, sourcesJar)
+    dependsOn(apiJar)
 }
 
 publishing {
@@ -50,7 +73,7 @@ publishing {
         create<MavenPublication>("maven") {
             artifact(tasks.jar)
             artifact(apiJar)
-            artifact(sourcesJar)
+            artifact(tasks.sourcesJar)
         }
     }
 }
