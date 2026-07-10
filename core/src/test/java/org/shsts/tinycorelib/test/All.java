@@ -93,9 +93,7 @@ public final class All {
         TEST_BLOCK2 = REGISTRATE.block("test_block2", TestBlock::new)
             .properties(p -> p.mapColor(MapColor.STONE).strength(5f).requiresCorrectToolForDrops())
             .tint(0xFF00FFFF)
-            .blockItem()
             .creativeTab(CreativeModeTabs.BUILDING_BLOCKS)
-            .end()
             .register();
 
         TEST_BLOCK3 = REGISTRATE.block("test_block3", TestEntityBlock::new)

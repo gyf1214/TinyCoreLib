@@ -7,8 +7,11 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.api.distmarker.Dist;
@@ -92,6 +95,16 @@ public class BlockBuilder<U extends Block, P> extends EntryBuilder<Block, U, P, 
     @Override
     public IItemBuilder<BlockItem, IBlockBuilder<U, P>> blockItem() {
         return blockItemBuilder != null ? blockItemBuilder : blockItem(BlockItem::new);
+    }
+
+    @Override
+    public IBlockBuilder<U, P> creativeTab(ResourceKey<CreativeModeTab> tab) {
+        return blockItem().creativeTab(tab).end();
+    }
+
+    @Override
+    public IBlockBuilder<U, P> creativeTab(ResourceKey<CreativeModeTab> tab, Function<BlockItem, ItemStack> stack) {
+        return blockItem().creativeTab(tab, stack).end();
     }
 
     @Override
