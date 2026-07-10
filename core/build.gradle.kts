@@ -33,6 +33,7 @@ neoForge {
         create("gameTestServer") {
             type = "gameTestServer"
             gameDirectory = rootProject.file("run/gameTestServer")
+            systemProperty("tinycorelib.gameTest.defaultTemplate", "empty_1x1x1")
         }
     }
 }
