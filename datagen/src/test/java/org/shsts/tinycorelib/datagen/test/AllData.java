@@ -82,6 +82,7 @@ public final class AllData {
                     ctx.id(), mcLoc("block/birch_planks")));
             }).tag(blockTag("test_block_tag"))
             .drop(Items.BIRCH_PLANKS)
+            .drop(Items.SAND)
             .build()
             .block(All.TEST_BLOCK2)
             .blockState(ctx -> {

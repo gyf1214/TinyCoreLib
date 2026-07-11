@@ -36,6 +36,7 @@ import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -48,7 +49,7 @@ public class LootTableHandler extends DataHandler<LootTableHandler.Provider> {
         super(dataGen);
     }
 
-    private record LootEntry(ResourceLocation loc, Function<HolderLookup.Provider, LootTable.Builder> factory) {}
+    private record LootEntry(ResourceLocation loc, Function<HolderLookup.Provider, LootPool.Builder> factory) {}
 
     public class Provider extends LootTableProvider {
         private final Multimap<LootContextParamSet, LootEntry> entries = ArrayListMultimap.create();
@@ -57,21 +58,24 @@ public class LootTableHandler extends DataHandler<LootTableHandler.Provider> {
             super(output, Set.of(), List.of(), registries);
         }
 
-        public void addBlock(ResourceLocation loc, Function<HolderLookup.Provider, LootTable.Builder> factory) {
+        public void addBlock(ResourceLocation loc, Function<HolderLookup.Provider, LootPool.Builder> factory) {
             entries.put(LootContextParamSets.BLOCK, new LootEntry(loc.withPrefix("blocks/"), factory));
         }
 
-        public void addBlock(ResourceLocation loc, LootTable.Builder builder) {
-            addBlock(loc, $ -> builder);
+        public void addBlock(ResourceLocation loc, LootPool.Builder pool) {
+            addBlock(loc, $ -> pool);
         }
 
         private SubProviderEntry createTable(LootContextParamSet paramSet) {
             var tableEntries = entries.get(paramSet);
             return new LootTableProvider.SubProviderEntry(provider -> output -> {
+                var tables = new LinkedHashMap<ResourceLocation, LootTable.Builder>();
                 for (var entry : tableEntries) {
-                    output.accept(ResourceKey.create(Registries.LOOT_TABLE, entry.loc),
-                        entry.factory.apply(provider));
+                    tables.computeIfAbsent(entry.loc, $ -> LootTable.lootTable())
+                        .withPool(entry.factory.apply(provider));
                 }
+                tables.forEach((loc, table) -> output.accept(
+                    ResourceKey.create(Registries.LOOT_TABLE, loc), table));
             }, paramSet);
         }
 
@@ -89,42 +93,42 @@ public class LootTableHandler extends DataHandler<LootTableHandler.Provider> {
         return new Provider(event.getGenerator().getPackOutput(), event.getLookupProvider());
     }
 
-    private static LootTable.Builder dropTable(ItemLike item, float chance) {
+    private static LootPool.Builder dropPool(ItemLike item, float chance) {
         var pool = LootPool.lootPool()
             .when(ExplosionCondition.survivesExplosion())
             .add(LootItem.lootTableItem(item));
         if (chance < 1f) {
             pool.when(LootItemRandomChanceCondition.randomChance(chance));
         }
-        return LootTable.lootTable().withPool(pool);
+        return pool;
     }
 
     public void drop(ResourceLocation loc, ItemLike item, float chance) {
-        addCallback($ -> $.addBlock(loc, dropTable(item, chance)));
+        addCallback($ -> $.addBlock(loc, dropPool(item, chance)));
     }
 
-    private static LootTable.Builder dropOnStateTable(ItemLike item, Block block,
+    private static LootPool.Builder dropOnStatePool(ItemLike item, Block block,
         StatePropertiesPredicate.Builder predicate) {
-        return LootTable.lootTable().withPool(LootPool.lootPool()
+        return LootPool.lootPool()
             .when(ExplosionCondition.survivesExplosion())
             .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
                 .setProperties(predicate))
-            .add(LootItem.lootTableItem(item)));
+            .add(LootItem.lootTableItem(item));
     }
 
     public <V extends Comparable<V> & StringRepresentable> void dropOnState(
         ResourceLocation loc, ItemLike item, Block block, Property<V> prop, V value) {
-        addCallback($ -> $.addBlock(loc, dropOnStateTable(item, block,
+        addCallback($ -> $.addBlock(loc, dropOnStatePool(item, block,
             StatePropertiesPredicate.Builder.properties().hasProperty(prop, value))));
     }
 
     public void dropOnState(ResourceLocation loc, ItemLike item,
         Block block, BooleanProperty prop, boolean value) {
-        addCallback($ -> $.addBlock(loc, dropOnStateTable(item, block,
+        addCallback($ -> $.addBlock(loc, dropOnStatePool(item, block,
             StatePropertiesPredicate.Builder.properties().hasProperty(prop, value))));
     }
 
-    private static LootTable.Builder dropOnToolTable(HolderLookup.Provider holderLookup,
+    private static LootPool.Builder dropOnToolPool(HolderLookup.Provider holderLookup,
         ItemLike item, TagKey<Item> tool) {
         var silkTouch = holderLookup.lookupOrThrow(Registries.ENCHANTMENT)
             .getOrThrow(Enchantments.SILK_TOUCH);
@@ -136,10 +140,10 @@ public class LootTableHandler extends DataHandler<LootTableHandler.Provider> {
                             new EnchantmentPredicate(silkTouch,
                                 MinMaxBounds.Ints.atLeast(1))))))))
             .add(LootItem.lootTableItem(item));
-        return LootTable.lootTable().withPool(pool);
+        return pool;
     }
 
     public void dropOnTool(ResourceLocation loc, ItemLike item, TagKey<Item> tool) {
-        addCallback($ -> $.addBlock(loc, holderLookup -> dropOnToolTable(holderLookup, item, tool)));
+        addCallback($ -> $.addBlock(loc, holderLookup -> dropOnToolPool(holderLookup, item, tool)));
     }
 }
