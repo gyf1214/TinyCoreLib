@@ -5,6 +5,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -62,8 +63,10 @@ public interface IDataGen {
 
     IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons);
 
-    <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>> IRecipeFactory<R, B>
-        recipeFactory(IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory);
+    <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>> IRecipeFactory<R, B> recipeFactory(
+        IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory);
+
+    IDataGen vanillaRecipe(Consumer<RecipeOutput> cons);
 
     <B extends RecipeBuilder> B vanillaRecipe(String id, Supplier<B> factory);
 

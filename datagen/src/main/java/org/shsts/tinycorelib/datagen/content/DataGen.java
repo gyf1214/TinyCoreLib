@@ -7,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -220,6 +221,12 @@ public class DataGen implements IDataGen {
     public <R extends IRecipe<?>, B extends IBuilder<R, IRecipeFactory<R, B>, B>> IRecipeFactory<R, B> recipeFactory(
         IRecipeType<R> type, Function<IRecipeFactory<R, B>, B> factory) {
         return new RecipeFactory<>(this, type, factory);
+    }
+
+    @Override
+    public IDataGen vanillaRecipe(Consumer<RecipeOutput> cons) {
+        recipeHandler.registerRecipe(cons);
+        return this;
     }
 
     @Override
