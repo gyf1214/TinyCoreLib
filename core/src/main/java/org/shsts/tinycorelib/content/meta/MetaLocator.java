@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModList;
 import org.shsts.tinycorelib.api.meta.MetaLoadingException;
@@ -79,7 +80,7 @@ public class MetaLocator {
                         try {
                             var loc = ResourceLocation.fromNamespaceAndPath(namespace, path3);
                             allFiles.add(new MetaFile(folder, loc, path));
-                        } catch (IllegalArgumentException e) {
+                        } catch (ResourceLocationException e) {
                             LOGGER.error("invalid meta file path {}, skip", path, e);
                         }
                     });
