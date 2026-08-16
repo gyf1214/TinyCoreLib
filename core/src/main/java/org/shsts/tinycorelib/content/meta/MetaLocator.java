@@ -1,7 +1,5 @@
 package org.shsts.tinycorelib.content.meta;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -20,6 +18,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -29,13 +31,20 @@ public class MetaLocator {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String ROOT_FOLDER = "meta";
     private static final String SUFFIX = ".json";
+    private static final String DELETE_KEY = "tinycorelib:delete";
 
     private final CompletableFuture<Void> future = new CompletableFuture<>();
     private final Gson gson = new Gson();
 
     private record MetaFile(String folder, ResourceLocation loc, Path path) {}
 
-    private final Multimap<String, MetaContent> allMeta = ArrayListMultimap.create();
+    private enum MetaOperation {
+        CONTENT,
+        DELETE,
+        INVALID
+    }
+
+    private final Map<String, Map<ResourceLocation, MetaContent>> allMeta = new HashMap<>();
 
     private void unsafeScanFiles() throws IOException {
         var mods = ModList.get().getModFiles();
@@ -67,8 +76,12 @@ public class MetaLocator {
                         var folder = path1.getName(1).toString();
                         var path2 = path1.subpath(2, path1.getNameCount()).toString();
                         var path3 = path2.substring(0, path2.length() - SUFFIX.length());
-                        var loc = ResourceLocation.fromNamespaceAndPath(namespace, path3);
-                        allFiles.add(new MetaFile(folder, loc, path));
+                        try {
+                            var loc = ResourceLocation.fromNamespaceAndPath(namespace, path3);
+                            allFiles.add(new MetaFile(folder, loc, path));
+                        } catch (IllegalArgumentException e) {
+                            LOGGER.error("invalid meta file path {}, skip", path, e);
+                        }
                     });
             }
         }
@@ -79,14 +92,58 @@ public class MetaLocator {
             try (var is = Files.newInputStream(file.path);
                 var reader = new InputStreamReader(is)) {
                 var jo = gson.fromJson(reader, JsonObject.class);
-                allMeta.put(file.folder, new MetaContent(file.loc, jo));
-            } catch (JsonParseException e) {
+                if (jo == null) {
+                    LOGGER.error("meta file {} does not contain an object, skip", file.path);
+                    continue;
+                }
+
+                var operation = getOperation(file, jo);
+                if (operation == MetaOperation.CONTENT) {
+                    putContent(file, jo);
+                } else if (operation == MetaOperation.DELETE) {
+                    deleteContent(file);
+                }
+            } catch (IOException | JsonParseException e) {
                 LOGGER.error("unable to parse meta file {}, skip", file.path, e);
             }
         }
 
         LOGGER.debug("finish processing meta, total folders={}, total meta={}",
-            allMeta.keySet().size(), allMeta.size());
+            allMeta.size(), allMeta.values().stream().mapToInt(Map::size).sum());
+    }
+
+    private MetaOperation getOperation(MetaFile file, JsonObject jo) {
+        var delete = jo.get(DELETE_KEY);
+        if (delete == null) {
+            return MetaOperation.CONTENT;
+        }
+        if (jo.size() != 1 || !delete.isJsonPrimitive() ||
+            !delete.getAsJsonPrimitive().isBoolean() || !delete.getAsBoolean()) {
+            LOGGER.error("invalid delete marker in meta file {}, skip", file.path);
+            return MetaOperation.INVALID;
+        }
+        return MetaOperation.DELETE;
+    }
+
+    private void putContent(MetaFile file, JsonObject jo) {
+        var metas = allMeta.computeIfAbsent(file.folder, $ -> new LinkedHashMap<>());
+        var previous = metas.remove(file.loc);
+        metas.put(file.loc, new MetaContent(file.loc, jo));
+        var operation = previous == null ? "add" : "replace";
+        LOGGER.debug("meta {} key={}/{} source={}", operation, file.folder, file.loc, file.path);
+    }
+
+    private void deleteContent(MetaFile file) {
+        var metas = allMeta.get(file.folder);
+        if (metas == null || metas.remove(file.loc) == null) {
+            LOGGER.debug("meta delete missing key={}/{} source={}", file.folder, file.loc,
+                file.path);
+            return;
+        }
+        if (metas.isEmpty()) {
+            allMeta.remove(file.folder);
+        }
+        LOGGER.debug("meta delete key={}/{} source={}", file.folder, file.loc, file.path);
     }
 
     public void scanFiles() {
@@ -107,6 +164,7 @@ public class MetaLocator {
     }
 
     public Collection<MetaContent> getFolder(String folder) {
-        return allMeta.get(folder);
+        var metas = allMeta.get(folder);
+        return metas == null ? Collections.emptyList() : metas.values();
     }
 }
