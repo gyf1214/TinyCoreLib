@@ -72,13 +72,13 @@ public class TinyCoreLib implements ITinyCoreLib {
 
     @Override
     public IRecipeManager recipeManager(Level world) {
-        return new SmartRecipeManager(world.getRecipeManager());
+        return new SmartRecipeManager(world);
     }
 
     @Override
     public IRecipeManager clientRecipeManager() {
-        var connection = Minecraft.getInstance().getConnection();
-        assert connection != null;
-        return new SmartRecipeManager(connection.getRecipeManager());
+        var world = Minecraft.getInstance().level;
+        assert world != null;
+        return new SmartRecipeManager(world);
     }
 }

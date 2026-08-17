@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.recipe.IRecipeManager;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
@@ -20,10 +21,14 @@ import java.util.Optional;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SmartRecipeManager implements IRecipeManager {
-    private final RecipeManager manager;
+    private final Level world;
 
-    public SmartRecipeManager(RecipeManager manager) {
-        this.manager = manager;
+    public SmartRecipeManager(Level world) {
+        this.world = world;
+    }
+
+    private RecipeManager manager() {
+        return world.getRecipeManager();
     }
 
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
@@ -37,18 +42,16 @@ public class SmartRecipeManager implements IRecipeManager {
     }
 
     @Override
-    @SuppressWarnings("DataFlowIssue")
     public <C, R extends IRecipe<C>> Optional<IEntry<R>> getRecipeFor(
         IRecipeType<R> type, C container) {
-        return manager.getRecipeFor(getType(type), new ContainerWrapper<>(container), null)
+        return manager().getRecipeFor(getType(type), new ContainerWrapper<>(container), world)
             .map(this::unwrap);
     }
 
     @Override
-    @SuppressWarnings("DataFlowIssue")
     public <C, R extends IRecipe<C>> List<IEntry<R>> getRecipesFor(
         IRecipeType<R> type, C container) {
-        return manager.getRecipesFor(getType(type), new ContainerWrapper<>(container), null)
+        return manager().getRecipesFor(getType(type), new ContainerWrapper<>(container), world)
             .stream().map(this::unwrap)
             .toList();
     }
@@ -64,7 +67,7 @@ public class SmartRecipeManager implements IRecipeManager {
     public List<IEntry<? extends IRecipe<?>>> getRawRecipesFor(IRecipeType<?> type) {
         var ret = new ArrayList<IEntry<? extends IRecipe<?>>>();
         var recipeType = (SmartRecipeType<Object, IRecipe<Object>>) type.get();
-        for (var recipe : manager.getAllRecipesFor(recipeType)) {
+        for (var recipe : manager().getAllRecipesFor(recipeType)) {
             ret.add(unwrap(recipe));
         }
         return ret;
@@ -75,7 +78,7 @@ public class SmartRecipeManager implements IRecipeManager {
     public <R extends IRecipe<?>> Optional<IEntry<R>> byLoc(
         IRecipeType<R> type, ResourceLocation loc) {
         var clazz = type.recipeClass();
-        return manager.byKey(loc)
+        return manager().byKey(loc)
             .flatMap($ -> $.value() instanceof SmartRecipe<?, ?> smartRecipe &&
                 smartRecipe.getType() == type.get() ?
                 Optional.of(new Entry<>(loc, clazz.cast(smartRecipe.compose))) : Optional.empty());
@@ -83,7 +86,7 @@ public class SmartRecipeManager implements IRecipeManager {
 
     @Override
     public Optional<IEntry<? extends IRecipe<?>>> byLoc(ResourceLocation loc) {
-        return manager.byKey(loc)
+        return manager().byKey(loc)
             .flatMap($ -> $.value() instanceof SmartRecipe<?, ?> smartRecipe ?
                 Optional.of(new Entry<>(loc, smartRecipe.compose)) : Optional.empty());
     }
