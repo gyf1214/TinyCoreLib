@@ -3,7 +3,6 @@ package org.shsts.tinycorelib;
 import com.mojang.logging.LogUtils;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -77,8 +76,6 @@ public class TinyCoreLib implements ITinyCoreLib {
 
     @Override
     public IRecipeManager clientRecipeManager() {
-        var world = Minecraft.getInstance().level;
-        assert world != null;
-        return new SmartRecipeManager(world);
+        return TinyCoreLibClient.clientRecipeManager();
     }
 }
