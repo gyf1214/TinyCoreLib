@@ -20,6 +20,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import org.shsts.tinycorelib.api.meta.IMetaExecutor;
 import org.shsts.tinycorelib.datagen.api.IDataHandler;
 import org.shsts.tinycorelib.datagen.api.context.IDataContext;
@@ -100,7 +101,7 @@ public final class AllData {
             .build();
 
         DATA_GEN.recipeFactory(TEST_RECIPE, TestRecipeBuilder::new)
-            .recipe("test_recipe1")
+            .recipe("test_recipe1", new ModLoadedCondition(TinyCoreLibTest.ID))
             .range(0, 10)
             .displayItem(Items.GLASS)
             .build();

@@ -4,6 +4,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.shsts.tinycorelib.api.core.IBuilder;
 import org.shsts.tinycorelib.api.recipe.IRecipe;
 import org.shsts.tinycorelib.api.registrate.entry.IRecipeType;
@@ -29,15 +30,15 @@ public class RecipeFactory<R extends IRecipe<?>, B extends IBuilder<R, IRecipeFa
     }
 
     @Override
-    public B recipe(String id) {
-        return recipe(ResourceLocation.fromNamespaceAndPath(dataGen.modid, id));
+    public B recipe(String id, ICondition... conditions) {
+        return recipe(ResourceLocation.fromNamespaceAndPath(dataGen.modid, id), conditions);
     }
 
     @Override
-    public B recipe(ResourceLocation loc) {
+    public B recipe(ResourceLocation loc, ICondition... conditions) {
         var builder = factory.apply(this);
         builder.onCreateObject(recipe -> dataGen.recipeHandler.registerRecipe(output ->
-            output.accept(loc, createRecipe(recipe), null)));
+            output.accept(loc, createRecipe(recipe), null, conditions)));
         builder.onBuild(builder::buildObject);
         return builder;
     }
