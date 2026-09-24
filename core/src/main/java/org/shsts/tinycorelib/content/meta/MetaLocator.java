@@ -12,6 +12,7 @@ import net.neoforged.fml.ModList;
 import org.shsts.tinycorelib.api.meta.MetaLoadingException;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -76,7 +77,8 @@ public class MetaLocator {
                         var namespace = path1.getName(0).toString();
                         var folder = path1.getName(1).toString();
                         var path2 = path1.subpath(2, path1.getNameCount()).toString();
-                        var path3 = path2.substring(0, path2.length() - SUFFIX.length());
+                        var path3 = path2.substring(0, path2.length() - SUFFIX.length())
+                            .replace(File.separator, "/");
                         try {
                             var loc = ResourceLocation.fromNamespaceAndPath(namespace, path3);
                             allFiles.add(new MetaFile(folder, loc, path));
