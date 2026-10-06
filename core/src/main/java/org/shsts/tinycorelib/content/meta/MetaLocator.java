@@ -33,18 +33,12 @@ public class MetaLocator {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String ROOT_FOLDER = "meta";
     private static final String SUFFIX = ".json";
-    private static final String DELETE_KEY = "tinycorelib:delete";
+    private static final String CONDITIONS_KEY = "neoforge:conditions";
 
     private final CompletableFuture<Void> future = new CompletableFuture<>();
     private final Gson gson = new Gson();
 
     private record MetaFile(String folder, ResourceLocation loc, Path path) {}
-
-    private enum MetaOperation {
-        CONTENT,
-        DELETE,
-        INVALID
-    }
 
     private final Map<String, Map<ResourceLocation, MetaContent>> allMeta = new HashMap<>();
 
@@ -100,12 +94,23 @@ public class MetaLocator {
                     continue;
                 }
 
-                var operation = getOperation(file, jo);
-                if (operation == MetaOperation.CONTENT) {
-                    putContent(file, jo);
-                } else if (operation == MetaOperation.DELETE) {
-                    deleteContent(file);
+                var conditions = jo.get(CONDITIONS_KEY);
+                if (conditions != null) {
+                    boolean matches;
+                    try {
+                        matches = MetaConditionDecoder.conditionsMatch(conditions);
+                    } catch (JsonParseException e) {
+                        LOGGER.error("invalid conditions in meta file {}, skip", file.path, e);
+                        continue;
+                    }
+                    if (!matches) {
+                        removeContent(file);
+                        continue;
+                    }
+                    jo.remove(CONDITIONS_KEY);
                 }
+
+                putContent(file, jo);
             } catch (IOException | JsonParseException e) {
                 LOGGER.error("unable to parse meta file {}, skip", file.path, e);
             }
@@ -113,19 +118,6 @@ public class MetaLocator {
 
         LOGGER.debug("finish processing meta, total folders={}, total meta={}",
             allMeta.size(), allMeta.values().stream().mapToInt(Map::size).sum());
-    }
-
-    private MetaOperation getOperation(MetaFile file, JsonObject jo) {
-        var delete = jo.get(DELETE_KEY);
-        if (delete == null) {
-            return MetaOperation.CONTENT;
-        }
-        if (jo.size() != 1 || !delete.isJsonPrimitive() ||
-            !delete.getAsJsonPrimitive().isBoolean() || !delete.getAsBoolean()) {
-            LOGGER.error("invalid delete marker in meta file {}, skip", file.path);
-            return MetaOperation.INVALID;
-        }
-        return MetaOperation.DELETE;
     }
 
     private void putContent(MetaFile file, JsonObject jo) {
@@ -136,17 +128,18 @@ public class MetaLocator {
         LOGGER.debug("meta {} key={}/{} source={}", operation, file.folder, file.loc, file.path);
     }
 
-    private void deleteContent(MetaFile file) {
+    private void removeContent(MetaFile file) {
         var metas = allMeta.get(file.folder);
         if (metas == null || metas.remove(file.loc) == null) {
-            LOGGER.debug("meta delete missing key={}/{} source={}", file.folder, file.loc,
+            LOGGER.debug("meta false condition missing key={}/{} source={}", file.folder, file.loc,
                 file.path);
             return;
         }
         if (metas.isEmpty()) {
             allMeta.remove(file.folder);
         }
-        LOGGER.debug("meta delete key={}/{} source={}", file.folder, file.loc, file.path);
+        LOGGER.debug("meta false condition removed key={}/{} source={}", file.folder, file.loc,
+            file.path);
     }
 
     public void scanFiles() {
