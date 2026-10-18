@@ -11,12 +11,11 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
 import org.shsts.tinycorelib.api.blockentity.IBlockEntityContainer;
+import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IEventManager;
 import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
@@ -36,12 +35,8 @@ public class SmartBlockEntity extends BlockEntity implements IEventManager {
         this.container = container;
     }
 
-    public static SmartBlockEntity create(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        var smartType = (SmartBlockEntityType) type;
-        var container = new BlockEntityContainer(smartType);
-        var ret = new SmartBlockEntity(type, pos, state, container);
-        container.initContainers(ret);
-        return ret;
+    public IBlockEntityContainer tinyCoreContainer() {
+        return container;
     }
 
     @Nullable
@@ -92,20 +87,10 @@ public class SmartBlockEntity extends BlockEntity implements IEventManager {
         super.setRemoved();
     }
 
-    private void onTick(Level world) {
-        container.tick(world);
-    }
-
     @Override
     public void onLoad() {
         super.onLoad();
         container.onLoad();
-    }
-
-    public static <T extends BlockEntity> void ticker(Level world, T be) {
-        if (be instanceof SmartBlockEntity sbe) {
-            sbe.onTick(world);
-        }
     }
 
     @Override

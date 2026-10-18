@@ -8,12 +8,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
+import org.shsts.tinycorelib.api.blockentity.IBlockEntityContainer;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.registrate.builder.IBlockEntityTypeBuilder;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.content.CoreContents;
+import org.shsts.tinycorelib.content.blockentity.BlockEntityContainer;
+import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 import org.shsts.tinycorelib.content.blockentity.SmartBlockEntityType;
 import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;
@@ -37,6 +40,9 @@ public class BlockEntityTypeBuilder<P>
     private final Set<ICapability<?>> capabilities = new HashSet<>();
     private final Map<ResourceLocation, Function<BlockEntity, ICapabilityContainer>> containers =
         new HashMap<>();
+    private IBlockEntityType.Factory<BlockEntity> factory = SmartBlockEntity::new;
+    private Function<BlockEntity, IBlockEntityContainer> containerAccessor =
+        be -> ((SmartBlockEntity) be).tinyCoreContainer();
 
     public BlockEntityTypeBuilder(Registrate registrate, P parent, String id) {
         super(registrate, registrate.blockEntityTypeHandler, parent, id);
@@ -61,6 +67,16 @@ public class BlockEntityTypeBuilder<P>
                 throw new IllegalArgumentException("Duplicate capability declaration " + cap.loc());
             }
         }
+        return self();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends BlockEntity> IBlockEntityTypeBuilder<P> factory(
+        IBlockEntityType.Factory<T> factory,
+        Function<? super T, ? extends IBlockEntityContainer> containerAccessor) {
+        this.factory = factory::create;
+        this.containerAccessor = be -> containerAccessor.apply((T) be);
         return self();
     }
 
@@ -90,14 +106,24 @@ public class BlockEntityTypeBuilder<P>
 
     @Override
     protected BlockEntityTypeEntry createEntry() {
+        var entry = ((BlockEntityTypeHandler) handler).registerType(this);
+        entry.setTicker((world, be) -> containerAccessor.apply(be).tick(world));
         onCreateObject(type -> {
             var type1 = (SmartBlockEntityType) type;
-            registrate.capabilityHandler.register(type1, CoreContents.EVENT_MANAGER, be -> be);
+            var accessor = containerAccessor;
+            registrate.capabilityHandler.register(type1, CoreContents.EVENT_MANAGER,
+                be -> accessor.apply(be));
             for (var capability : capabilities) {
-                registrate.capabilityHandler.register(type1, capability);
+                registerCapability(type1, capability, accessor);
             }
         });
-        return ((BlockEntityTypeHandler) handler).registerType(this);
+        return entry;
+    }
+
+    private <T> void registerCapability(SmartBlockEntityType type, ICapability<T> capability,
+        Function<BlockEntity, IBlockEntityContainer> accessor) {
+        registrate.capabilityHandler.register(type, capability,
+            be -> accessor.apply(be).getCapability(capability).orElse(null));
     }
 
     @Override
@@ -112,6 +138,18 @@ public class BlockEntityTypeBuilder<P>
         var validBlocks = this.validBlocks.stream()
             .map($ -> (Block) $.get())
             .collect(Collectors.toSet());
-        return new SmartBlockEntityType(entry1::create, validBlocks, containers);
+        var factory = this.factory;
+        var containerAccessor = this.containerAccessor;
+        return new SmartBlockEntityType((pos, state) -> {
+            var type = (SmartBlockEntityType) entry1.get();
+            var container = new BlockEntityContainer(type);
+            var blockEntity = factory.create(type, pos, state, container);
+            if (containerAccessor.apply(blockEntity) == null) {
+                throw new IllegalStateException(
+                    "Block entity container accessor returned null for " + entry1.loc());
+            }
+            container.initContainers(blockEntity);
+            return blockEntity;
+        }, validBlocks, containers);
     }
 }

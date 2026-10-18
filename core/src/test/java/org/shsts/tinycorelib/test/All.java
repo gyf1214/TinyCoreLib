@@ -49,8 +49,10 @@ public final class All {
     public static final IEntry<Block> TEST_BLOCK1;
     public static final IEntry<TestBlock> TEST_BLOCK2;
     public static final IEntry<TestEntityBlock> TEST_BLOCK3;
+    public static final IEntry<TestEntityBlock> TEST_BLOCK4;
     public static final IEntry<TestItem> TEST_ITEM;
     public static final IBlockEntityType TEST_BLOCK_ENTITY;
+    public static final IBlockEntityType TEST_CUSTOM_BLOCK_ENTITY;
     public static final IMenuType TEST_MENU;
 
     public static final IEntryHandler<IEvent<?>> EVENTS;
@@ -63,6 +65,18 @@ public final class All {
 
     public static final IRecipeType<TestRecipe> TEST_RECIPE;
     public static final IRecipeType<TestCookingRecipe> TEST_COOKING_RECIPE;
+
+    private static Block testBlock3() {
+        return TEST_BLOCK3.get();
+    }
+
+    private static Block testBlock4() {
+        return TEST_BLOCK4.get();
+    }
+
+    private static IMenuType testMenu() {
+        return TEST_MENU;
+    }
 
     static {
         EVENT_MANAGER = REGISTRATE.getCapability(EVENT_MANAGER_LOC, IEventManager.class);
@@ -96,10 +110,6 @@ public final class All {
             .creativeTab(CreativeModeTabs.BUILDING_BLOCKS)
             .register();
 
-        TEST_BLOCK3 = REGISTRATE.block("test_block3", TestEntityBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE))
-            .register();
-
         TEST_ITEM = REGISTRATE.item("test_item", TestItem::new)
             .capability(TEST_ITEM_CAPABILITY)
             .creativeTab(CreativeModeTabs.COMBAT)
@@ -114,9 +124,26 @@ public final class All {
             .register();
 
         TEST_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_block_entity")
-            .validBlock(TEST_BLOCK3)
+            .validBlock(All::testBlock3)
             .capability(TEST_CAPABILITY, ITEM_HANDLER_CAPABILITY)
             .container("test_capability", TestContainer::new)
+            .register();
+
+        TEST_CUSTOM_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_custom_block_entity")
+            .validBlock(All::testBlock4)
+            .factory(TestBlockEntity::new, TestBlockEntity::tinyCoreContainer)
+            .capability(TEST_CAPABILITY, ITEM_HANDLER_CAPABILITY)
+            .container("test_capability", TestContainer::new)
+            .register();
+
+        TEST_BLOCK3 = REGISTRATE.block("test_block3", properties ->
+            new TestEntityBlock(properties, TEST_BLOCK_ENTITY, testMenu()))
+            .properties(p -> p.mapColor(MapColor.STONE))
+            .register();
+
+        TEST_BLOCK4 = REGISTRATE.block("test_block4", properties ->
+            new TestEntityBlock(properties, TEST_CUSTOM_BLOCK_ENTITY, null))
+            .properties(p -> p.mapColor(MapColor.STONE))
             .register();
 
         TEST_MENU = REGISTRATE.menu("test_menu", TestMenu::new)

@@ -19,7 +19,6 @@ import org.shsts.tinycorelib.api.gui.client.IMenuScreenFactory;
 import org.shsts.tinycorelib.api.item.ICapabilityItem;
 import org.shsts.tinycorelib.api.registrate.entry.ICapability;
 import org.shsts.tinycorelib.api.registrate.entry.IItemCapability;
-import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 import org.shsts.tinycorelib.content.gui.SmartMenuType;
 
 import java.util.ArrayList;
@@ -60,12 +59,7 @@ public class EventHandler<E> {
     }
 
     public static class Capability extends EventHandler<RegisterCapabilitiesEvent> {
-        public <T, BE extends SmartBlockEntity> void register(
-            BlockEntityType<BE> type, ICapability<T> capability) {
-            register(type, capability, be -> be.getCapability(capability));
-        }
-
-        public <T, BE extends SmartBlockEntity> void register(
+        public <T, BE extends BlockEntity> void register(
             BlockEntityType<BE> type, ICapability<T> capability,
             Function<? super BE, T> provider) {
             addCallback(event -> registerBlockEntity(event, capability.get(), type, provider));
@@ -76,7 +70,7 @@ public class EventHandler<E> {
                 (stack, $) -> getItemCapability(item, stack, capability), item));
         }
 
-        private static <T, BE extends SmartBlockEntity> void registerBlockEntity(
+        private static <T, BE extends BlockEntity> void registerBlockEntity(
             RegisterCapabilitiesEvent event, BlockCapability<T, ?> capability,
             BlockEntityType<BE> type, Function<? super BE, T> provider) {
             event.registerBlockEntity(capability, type, (be, $) -> provider.apply(be));

@@ -10,15 +10,21 @@ import org.shsts.tinycorelib.content.registrate.Registrate;
 import org.shsts.tinycorelib.content.registrate.builder.BlockEntityTypeBuilder;
 import org.shsts.tinycorelib.content.registrate.entry.BlockEntityTypeEntry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class BlockEntityTypeHandler extends EntryHandler<BlockEntityType<?>> {
+    private final Map<ResourceLocation, BlockEntityTypeEntry> typeEntries = new HashMap<>();
+
     public BlockEntityTypeHandler(Registrate registrate) {
         super(registrate, Registries.BLOCK_ENTITY_TYPE, BuiltInRegistries.BLOCK_ENTITY_TYPE);
     }
 
     public BlockEntityTypeEntry getTypeEntry(ResourceLocation loc) {
-        return new BlockEntityTypeEntry(loc, () -> getEntry(loc).get());
+        return typeEntries.computeIfAbsent(loc,
+            key -> new BlockEntityTypeEntry(key, () -> getEntry(key).get()));
     }
 
     public BlockEntityTypeEntry getTypeEntry(String id) {
@@ -27,6 +33,6 @@ public class BlockEntityTypeHandler extends EntryHandler<BlockEntityType<?>> {
 
     public BlockEntityTypeEntry registerType(BlockEntityTypeBuilder<?> builder) {
         builders.add(builder);
-        return new BlockEntityTypeEntry(builder.loc());
+        return getTypeEntry(builder.loc());
     }
 }

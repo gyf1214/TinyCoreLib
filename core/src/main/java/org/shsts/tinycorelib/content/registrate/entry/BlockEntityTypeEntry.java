@@ -10,14 +10,16 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
-import org.shsts.tinycorelib.content.blockentity.SmartBlockEntity;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class BlockEntityTypeEntry extends Entry<BlockEntityType<?>> implements IBlockEntityType {
+    private BiConsumer<Level, BlockEntity> ticker = (world, blockEntity) -> {};
+
     public BlockEntityTypeEntry(ResourceLocation loc) {
         super(loc);
     }
@@ -34,13 +36,17 @@ public class BlockEntityTypeEntry extends Entry<BlockEntityType<?>> implements I
         return Optional.empty();
     }
 
+    public void setTicker(BiConsumer<Level, BlockEntity> ticker) {
+        this.ticker = ticker;
+    }
+
     @Override
-    public SmartBlockEntity create(BlockPos pos, BlockState state) {
-        return SmartBlockEntity.create(get(), pos, state);
+    public BlockEntity create(BlockPos pos, BlockState state) {
+        return get().create(pos, state);
     }
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> ticker() {
-        return (world, pos, state, be) -> SmartBlockEntity.ticker(world, be);
+        return (world, pos, state, be) -> ticker.accept(world, be);
     }
 }

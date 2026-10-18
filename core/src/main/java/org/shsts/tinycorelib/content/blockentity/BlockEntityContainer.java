@@ -16,9 +16,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.shsts.tinycorelib.api.blockentity.IBlockEntityContainer;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityBuilder;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
-import org.shsts.tinycorelib.api.blockentity.IBlockEntityContainer;
 import org.shsts.tinycorelib.api.blockentity.IEvent;
 import org.shsts.tinycorelib.api.blockentity.IEventSubscriber;
 import org.shsts.tinycorelib.api.blockentity.INBTUpdatable;
@@ -63,7 +63,7 @@ public class BlockEntityContainer implements IBlockEntityContainer {
         this.type = type;
     }
 
-    void initContainers(BlockEntity blockEntity) {
+    public void initContainers(BlockEntity blockEntity) {
         if (this.blockEntity != null) {
             throw new IllegalStateException("Block entity container is already initialized");
         }

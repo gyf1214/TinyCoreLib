@@ -14,11 +14,11 @@ import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SmartBlockEntityType extends BlockEntityType<SmartBlockEntity> {
+public class SmartBlockEntityType extends BlockEntityType<BlockEntity> {
     private final Map<ResourceLocation, Function<BlockEntity, ICapabilityContainer>> containers;
 
     @SuppressWarnings("DataFlowIssue")
-    public SmartBlockEntityType(BlockEntitySupplier<SmartBlockEntity> factory,
+    public SmartBlockEntityType(BlockEntitySupplier<BlockEntity> factory,
         Set<Block> validBlocks,
         Map<ResourceLocation, Function<BlockEntity, ICapabilityContainer>> containers) {
         super(factory, validBlocks, null);

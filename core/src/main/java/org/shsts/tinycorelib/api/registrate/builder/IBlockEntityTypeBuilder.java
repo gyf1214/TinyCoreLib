@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import org.shsts.tinycorelib.api.blockentity.IBlockEntityContainer;
 import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
 import org.shsts.tinycorelib.api.core.DistLazy;
 import org.shsts.tinycorelib.api.registrate.entry.IBlockEntityType;
@@ -25,6 +26,10 @@ public interface IBlockEntityTypeBuilder<P>
     IBlockEntityTypeBuilder<P> validBlock(List<Supplier<? extends Block>> blocks);
 
     IBlockEntityTypeBuilder<P> capability(ICapability<?>... caps);
+
+    <T extends BlockEntity> IBlockEntityTypeBuilder<P> factory(
+        IBlockEntityType.Factory<T> factory,
+        Function<? super T, ? extends IBlockEntityContainer> containerAccessor);
 
     IBlockEntityTypeBuilder<P> container(
         ResourceLocation loc, Function<BlockEntity, ICapabilityContainer> factory);
