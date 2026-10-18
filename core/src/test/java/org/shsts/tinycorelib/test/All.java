@@ -131,18 +131,18 @@ public final class All {
 
         TEST_CUSTOM_BLOCK_ENTITY = REGISTRATE.blockEntityType("test_custom_block_entity")
             .validBlock(All::testBlock4)
-            .factory(TestBlockEntity::new, TestBlockEntity::tinyCoreContainer)
+            .factory(TestBlockEntity::new, TestBlockEntity::container)
             .capability(TEST_CAPABILITY, ITEM_HANDLER_CAPABILITY)
             .container("test_capability", TestContainer::new)
             .register();
 
         TEST_BLOCK3 = REGISTRATE.block("test_block3", properties ->
-            new TestEntityBlock(properties, TEST_BLOCK_ENTITY, testMenu()))
+                new TestEntityBlock(properties, TEST_BLOCK_ENTITY, testMenu()))
             .properties(p -> p.mapColor(MapColor.STONE))
             .register();
 
         TEST_BLOCK4 = REGISTRATE.block("test_block4", properties ->
-            new TestEntityBlock(properties, TEST_CUSTOM_BLOCK_ENTITY, null))
+                new TestEntityBlock(properties, TEST_CUSTOM_BLOCK_ENTITY, null))
             .properties(p -> p.mapColor(MapColor.STONE))
             .register();
 

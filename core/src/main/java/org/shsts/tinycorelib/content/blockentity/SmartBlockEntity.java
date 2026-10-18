@@ -10,23 +10,14 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.shsts.tinycorelib.api.blockentity.IBlockEntityContainer;
-import org.shsts.tinycorelib.api.blockentity.ICapabilityContainer;
-import org.shsts.tinycorelib.api.blockentity.IEvent;
-import org.shsts.tinycorelib.api.blockentity.IEventManager;
-import org.shsts.tinycorelib.api.blockentity.IReturnEvent;
-import org.shsts.tinycorelib.api.registrate.entry.ICapability;
-
-import java.util.Optional;
-import java.util.function.Consumer;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SmartBlockEntity extends BlockEntity implements IEventManager {
+public class SmartBlockEntity extends BlockEntity {
     private final IBlockEntityContainer container;
 
     public SmartBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state,
@@ -35,44 +26,8 @@ public class SmartBlockEntity extends BlockEntity implements IEventManager {
         this.container = container;
     }
 
-    public IBlockEntityContainer tinyCoreContainer() {
+    public IBlockEntityContainer container() {
         return container;
-    }
-
-    @Nullable
-    public <T> T getCapability(ICapability<T> capability) {
-        return container.getCapability(capability).orElse(null);
-    }
-
-    @Override
-    public <T extends ICapabilityContainer> T getContainer(ResourceLocation loc, Class<T> clazz) {
-        return container.getContainer(loc, clazz);
-    }
-
-    @Override
-    public <T extends ICapabilityContainer> Optional<T> tryGetContainer(
-        ResourceLocation loc, Class<T> clazz) {
-        return container.tryGetContainer(loc, clazz);
-    }
-
-    @Override
-    public <A> void invoke(IEvent<A> event, A arg) {
-        container.invoke(event, arg);
-    }
-
-    @Override
-    public <A, R> R invokeReturn(IReturnEvent<A, R> event, A arg) {
-        return container.invokeReturn(event, arg);
-    }
-
-    @Override
-    public <A> void subscribe(IEvent<A> event, Consumer<A> handler) {
-        container.subscribe(event, handler);
-    }
-
-    @Override
-    public <A, R> void subscribe(IReturnEvent<A, R> event, IReturnEvent.Handler<A, R> handler) {
-        container.subscribe(event, handler);
     }
 
     @Override

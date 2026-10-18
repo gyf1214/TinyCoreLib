@@ -34,6 +34,7 @@ import static org.shsts.tinycorelib.datagen.test.TinyDataGenTest.CORE;
 import static org.shsts.tinycorelib.datagen.test.TinyDataGenTest.DATA_GEN;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK2;
 import static org.shsts.tinycorelib.test.All.TEST_BLOCK3;
+import static org.shsts.tinycorelib.test.All.TEST_BLOCK4;
 import static org.shsts.tinycorelib.test.All.TEST_COOKING_RECIPE;
 import static org.shsts.tinycorelib.test.All.TEST_RECIPE;
 
@@ -98,6 +99,10 @@ public final class AllData {
             .block(TEST_BLOCK3)
             .blockState(ctx -> ctx.provider().simpleBlock(ctx.object(),
                 ctx.provider().models().cubeAll(ctx.id(), mcLoc("block/nether_bricks"))))
+            .build()
+            .block(TEST_BLOCK4)
+            .blockState(ctx -> ctx.provider().simpleBlock(ctx.object(),
+                ctx.provider().models().cubeAll(ctx.id(), mcLoc("block/bricks"))))
             .build();
 
         DATA_GEN.recipeFactory(TEST_RECIPE, TestRecipeBuilder::new)

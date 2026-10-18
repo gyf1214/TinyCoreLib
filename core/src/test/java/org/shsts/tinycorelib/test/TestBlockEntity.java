@@ -18,69 +18,69 @@ import org.shsts.tinycorelib.api.blockentity.IBlockEntityContainer;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class TestBlockEntity extends BlockEntity {
-    private final IBlockEntityContainer tinyCore;
+    private final IBlockEntityContainer container;
 
     public TestBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state,
-        IBlockEntityContainer tinyCore) {
+        IBlockEntityContainer container) {
         super(type, pos, state);
-        this.tinyCore = tinyCore;
+        this.container = container;
     }
 
-    public IBlockEntityContainer tinyCoreContainer() {
-        return tinyCore;
+    public IBlockEntityContainer container() {
+        return container;
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        tinyCore.onLoad();
+        container.onLoad();
     }
 
     @Override
     public void onChunkUnloaded() {
         super.onChunkUnloaded();
-        tinyCore.onChunkUnloaded();
+        container.onChunkUnloaded();
     }
 
     @Override
     public void setRemoved() {
-        tinyCore.onRemoved();
+        container.onRemoved();
         super.setRemoved();
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        tinyCore.loadAdditional(tag, registries);
+        container.loadAdditional(tag, registries);
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tinyCore.saveAdditional(tag, registries);
+        container.saveAdditional(tag, registries);
     }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         var tag = super.getUpdateTag(registries);
-        tinyCore.writeUpdateTag(tag, true, registries);
+        container.writeUpdateTag(tag, true, registries);
         return tag;
     }
 
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
-        return tinyCore.createUpdatePacket(super::getUpdateTag).orElse(null);
+        return container.createUpdatePacket(super::getUpdateTag).orElse(null);
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        tinyCore.handleUpdateTag(tag, registries);
+        container.handleUpdateTag(tag, registries);
     }
 
     @Override
     public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet,
         HolderLookup.Provider registries) {
-        tinyCore.handleUpdateTag(packet.getTag(), registries);
+        container.handleUpdateTag(packet.getTag(), registries);
     }
 }

@@ -42,7 +42,7 @@ public class BlockEntityTypeBuilder<P>
         new HashMap<>();
     private IBlockEntityType.Factory<BlockEntity> factory = SmartBlockEntity::new;
     private Function<BlockEntity, IBlockEntityContainer> containerAccessor =
-        be -> ((SmartBlockEntity) be).tinyCoreContainer();
+        be -> ((SmartBlockEntity) be).container();
 
     public BlockEntityTypeBuilder(Registrate registrate, P parent, String id) {
         super(registrate, registrate.blockEntityTypeHandler, parent, id);
@@ -109,19 +109,17 @@ public class BlockEntityTypeBuilder<P>
         var entry = ((BlockEntityTypeHandler) handler).registerType(this);
         entry.setTicker((world, be) -> containerAccessor.apply(be).tick(world));
         onCreateObject(type -> {
-            var type1 = (SmartBlockEntityType) type;
             var accessor = containerAccessor;
-            registrate.capabilityHandler.register(type1, CoreContents.EVENT_MANAGER,
-                be -> accessor.apply(be));
+            registrate.capabilityHandler.register(type, CoreContents.EVENT_MANAGER, accessor::apply);
             for (var capability : capabilities) {
-                registerCapability(type1, capability, accessor);
+                registerCapability(type, capability, accessor);
             }
         });
         return entry;
     }
 
-    private <T> void registerCapability(SmartBlockEntityType type, ICapability<T> capability,
-        Function<BlockEntity, IBlockEntityContainer> accessor) {
+    private <T, BE extends BlockEntity> void registerCapability(BlockEntityType<BE> type,
+        ICapability<T> capability, Function<BlockEntity, IBlockEntityContainer> accessor) {
         registrate.capabilityHandler.register(type, capability,
             be -> accessor.apply(be).getCapability(capability).orElse(null));
     }
@@ -139,15 +137,10 @@ public class BlockEntityTypeBuilder<P>
             .map($ -> (Block) $.get())
             .collect(Collectors.toSet());
         var factory = this.factory;
-        var containerAccessor = this.containerAccessor;
         return new SmartBlockEntityType((pos, state) -> {
             var type = (SmartBlockEntityType) entry1.get();
             var container = new BlockEntityContainer(type);
             var blockEntity = factory.create(type, pos, state, container);
-            if (containerAccessor.apply(blockEntity) == null) {
-                throw new IllegalStateException(
-                    "Block entity container accessor returned null for " + entry1.loc());
-            }
             container.initContainers(blockEntity);
             return blockEntity;
         }, validBlocks, containers);
