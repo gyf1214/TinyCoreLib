@@ -59,6 +59,12 @@ public interface IDataGen {
 
     <T> IDataGen tag(TagKey<T> object, TagKey<T> tag);
 
+    /** Adds an optional registry object reference to a tag. */
+    <T> IDataGen optionalTag(ResourceKey<T> object, TagKey<T> tag);
+
+    /** Adds an optional nested-tag reference to a tag. */
+    <T> IDataGen optionalTag(TagKey<T> object, TagKey<T> tag);
+
     IDataGen blockModel(Consumer<IDataContext<BlockModelProvider>> cons);
 
     IDataGen itemModel(Consumer<IDataContext<ItemModelProvider>> cons);

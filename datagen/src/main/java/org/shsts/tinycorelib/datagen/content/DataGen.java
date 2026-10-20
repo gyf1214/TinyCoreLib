@@ -206,6 +206,18 @@ public class DataGen implements IDataGen {
     }
 
     @Override
+    public <T> IDataGen optionalTag(ResourceKey<T> object, TagKey<T> tag) {
+        tagsHandler(object.registryKey()).addOptionalTag(object, tag);
+        return this;
+    }
+
+    @Override
+    public <T> IDataGen optionalTag(TagKey<T> object, TagKey<T> tag) {
+        tagsHandler(object.registry()).addOptionalTag(object, tag);
+        return this;
+    }
+
+    @Override
     public IDataGen blockModel(Consumer<IDataContext<BlockModelProvider>> cons) {
         blockStateHandler.addBlockModelCallback(cons);
         return this;

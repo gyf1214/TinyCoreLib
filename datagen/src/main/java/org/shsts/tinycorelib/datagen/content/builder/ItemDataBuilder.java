@@ -44,14 +44,34 @@ public class ItemDataBuilder<U extends Item, P> extends EntryDataBuilder<Item, U
     }
 
     @Override
+    public IItemDataBuilder<U, P> optional() {
+        markOptional();
+        return self();
+    }
+
+    @Override
     public IItemDataBuilder<U, P> tag(List<TagKey<Item>> tags) {
-        callbacks.add(() -> dataGen.tag(key, tags));
+        var isOptional = optional;
+        callbacks.add(() -> {
+            if (isOptional) {
+                tags.forEach(tag -> dataGen.optionalTag(key, tag));
+            } else {
+                dataGen.tag(key, tags);
+            }
+        });
         return self();
     }
 
     @Override
     public IItemDataBuilder<U, P> tag(TagKey<Item> tag) {
-        callbacks.add(() -> dataGen.tag(key, tag));
+        var isOptional = optional;
+        callbacks.add(() -> {
+            if (isOptional) {
+                dataGen.optionalTag(key, tag);
+            } else {
+                dataGen.tag(key, tag);
+            }
+        });
         return self();
     }
 

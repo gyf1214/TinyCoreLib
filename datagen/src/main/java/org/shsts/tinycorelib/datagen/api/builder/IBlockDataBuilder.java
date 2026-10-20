@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 
@@ -27,6 +28,12 @@ public interface IBlockDataBuilder<U extends Block, P>
 
     <U1 extends BlockItem> IBlockDataBuilder<U, P> itemModel(
         Consumer<IEntryDataContext<U1, ItemModelProvider>> cons);
+
+    /** Makes subsequent tag declarations optional. */
+    IBlockDataBuilder<U, P> optional();
+
+    /** Adds loot-table root conditions and makes subsequent tag declarations optional. */
+    IBlockDataBuilder<U, P> conditions(ICondition... conditions);
 
     IBlockDataBuilder<U, P> tag(List<TagKey<Block>> tags);
 

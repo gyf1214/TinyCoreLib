@@ -20,6 +20,11 @@ public abstract class EntryDataBuilder<T, U extends T, P, S extends IDataBuilder
     protected final TrackedContext<T> trackedCtx;
     protected final U object;
     protected final List<Runnable> callbacks = new ArrayList<>();
+    protected boolean optional = false;
+
+    protected void markOptional() {
+        optional = true;
+    }
 
     public EntryDataBuilder(DataGen dataGen, P parent,
         ResourceKey<? extends Registry<T>> registryKey, IEntry<U> entry,

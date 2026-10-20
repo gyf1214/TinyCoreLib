@@ -72,9 +72,11 @@ public final class AllData {
                 .predicate(modLoc(TestItem.PROPERTY), 0.5f)
                 .end())
             .tag(TEST_ITEM_TAG)
+            .optional()
+            .tag(TEST_ITEM_TAG2)
             .build()
-            .tag(TEST_ITEM_TAG, TEST_PARENT_TAG)
-            .tag(itemKey(Items.GLASS), TEST_ITEM_TAG)
+            .optionalTag(TEST_PARENT_TAG, TEST_ITEM_TAG)
+            .optionalTag(itemKey(Items.GLASS), TEST_ITEM_TAG)
             .tag(itemKey(Items.SAND), List.of(TEST_ITEM_TAG, TEST_ITEM_TAG2))
             .block(All.TEST_BLOCK1)
             .blockState(ctx -> {
@@ -82,7 +84,8 @@ public final class AllData {
                 var models = prov.models();
                 prov.simpleBlock(ctx.object(), models.cubeAll(
                     ctx.id(), mcLoc("block/birch_planks")));
-            }).tag(blockTag("test_block_tag"))
+            }).conditions(new ModLoadedCondition(TinyCoreLibTest.ID))
+            .tag(blockTag("test_block_tag"))
             .drop(Items.BIRCH_PLANKS)
             .drop(Items.SAND)
             .build()
@@ -95,6 +98,9 @@ public final class AllData {
             }).itemModel(ctx -> ctx.provider()
                 .withExistingParent(ctx.id(), modLoc("block/test_block_model")))
             .tag(List.of(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL))
+            .optional()
+            .tag(blockTag("test_optional_block_tag"))
+            .itemTag(TEST_ITEM_TAG2)
             .build()
             .block(TEST_BLOCK3)
             .blockState(ctx -> ctx.provider().simpleBlock(ctx.object(),

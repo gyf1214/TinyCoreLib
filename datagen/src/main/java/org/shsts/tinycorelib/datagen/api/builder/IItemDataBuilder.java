@@ -15,6 +15,9 @@ import java.util.function.Consumer;
 public interface IItemDataBuilder<U extends Item, P> extends IDataBuilder<P, IItemDataBuilder<U, P>> {
     IItemDataBuilder<U, P> model(Consumer<IEntryDataContext<U, ItemModelProvider>> cons);
 
+    /** Makes subsequent tag declarations optional. */
+    IItemDataBuilder<U, P> optional();
+
     IItemDataBuilder<U, P> tag(List<TagKey<Item>> tags);
 
     IItemDataBuilder<U, P> tag(TagKey<Item> tag);

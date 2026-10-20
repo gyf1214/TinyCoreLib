@@ -18,12 +18,14 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.shsts.tinycorelib.api.registrate.entry.IEntry;
 import org.shsts.tinycorelib.datagen.api.builder.IBlockDataBuilder;
 import org.shsts.tinycorelib.datagen.api.context.IEntryDataContext;
 import org.shsts.tinycorelib.datagen.content.DataGen;
 import org.shsts.tinycorelib.datagen.content.handler.LootTableHandler;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -35,6 +37,8 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
     private Consumer<IEntryDataContext<U, BlockStateProvider>> blockState = null;
     @Nullable
     private Consumer<IEntryDataContext<?, ItemModelProvider>> itemModel = null;
+    @Nullable
+    private List<ICondition> conditions = null;
     private boolean hasDrop = false;
 
     public BlockDataBuilder(DataGen dataGen, P parent, IEntry<U> block) {
@@ -66,26 +70,72 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
     }
 
     @Override
+    public IBlockDataBuilder<U, P> optional() {
+        markOptional();
+        return self();
+    }
+
+    @Override
+    public IBlockDataBuilder<U, P> conditions(ICondition... conditions) {
+        var newConditions = List.copyOf(Arrays.asList(conditions.clone()));
+        if (this.conditions != null && !this.conditions.equals(newConditions)) {
+            throw new IllegalArgumentException("Conflicting loot table conditions for " + loc);
+        }
+        this.conditions = newConditions;
+        markOptional();
+        return self();
+    }
+
+    @Override
     public IBlockDataBuilder<U, P> tag(List<TagKey<Block>> tags) {
-        callbacks.add(() -> dataGen.tag(key, tags));
+        var isOptional = optional;
+        callbacks.add(() -> {
+            if (isOptional) {
+                tags.forEach(tag -> dataGen.optionalTag(key, tag));
+            } else {
+                dataGen.tag(key, tags);
+            }
+        });
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> tag(TagKey<Block> tag) {
-        callbacks.add(() -> dataGen.tag(key, tag));
+        var isOptional = optional;
+        callbacks.add(() -> {
+            if (isOptional) {
+                dataGen.optionalTag(key, tag);
+            } else {
+                dataGen.tag(key, tag);
+            }
+        });
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> itemTag(List<TagKey<Item>> tags) {
-        callbacks.add(() -> dataGen.tag(itemKey(), tags));
+        var isOptional = optional;
+        callbacks.add(() -> {
+            if (isOptional) {
+                var key = itemKey();
+                tags.forEach(tag -> dataGen.optionalTag(key, tag));
+            } else {
+                dataGen.tag(itemKey(), tags);
+            }
+        });
         return self();
     }
 
     @Override
     public IBlockDataBuilder<U, P> itemTag(TagKey<Item> tag) {
-        callbacks.add(() -> dataGen.tag(itemKey(), tag));
+        var isOptional = optional;
+        callbacks.add(() -> {
+            if (isOptional) {
+                dataGen.optionalTag(itemKey(), tag);
+            } else {
+                dataGen.tag(itemKey(), tag);
+            }
+        });
         return self();
     }
 
@@ -173,6 +223,9 @@ public class BlockDataBuilder<U extends Block, P> extends EntryDataBuilder<Block
         }
         if (!hasDrop) {
             dropSelf();
+        }
+        if (conditions != null) {
+            dataGen.lootTableHandler.conditions(loc, conditions);
         }
         dataGen.blockStateHandler.addBlockStateCallback(loc, object, blockState);
         dataGen.itemModelHandler.addBlockItemCallback(loc, object, ctx -> itemModel.accept(ctx));

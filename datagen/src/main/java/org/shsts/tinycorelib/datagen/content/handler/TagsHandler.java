@@ -39,6 +39,14 @@ public class TagsHandler<T> extends DataHandler<TagsHandler<T>.Provider> {
             tag(key).addTag(object);
         }
 
+        public void addOptionalTag(TagKey<T> key, ResourceKey<T> object) {
+            tag(key).addOptional(object.location());
+        }
+
+        public void addOptionalTag(TagKey<T> key, TagKey<T> object) {
+            tag(key).addOptionalTag(object.location());
+        }
+
         @Override
         protected void addTags(HolderLookup.Provider provider) {
             TagsHandler.this.register(this);
@@ -76,6 +84,21 @@ public class TagsHandler<T> extends DataHandler<TagsHandler<T>.Provider> {
         validateTag(object);
         validateTag(tag);
         callbacks.add(prov -> prov.addTag(tag, object));
+    }
+
+    public void addOptionalTag(ResourceKey<T> object, TagKey<T> tag) {
+        if (!object.isFor(registryKey)) {
+            throw new IllegalArgumentException(
+                "Object %s does not match registry %s".formatted(object, registryKey.location()));
+        }
+        validateTag(tag);
+        callbacks.add(prov -> prov.addOptionalTag(tag, object));
+    }
+
+    public void addOptionalTag(TagKey<T> object, TagKey<T> tag) {
+        validateTag(object);
+        validateTag(tag);
+        callbacks.add(prov -> prov.addOptionalTag(tag, object));
     }
 
     @Override
