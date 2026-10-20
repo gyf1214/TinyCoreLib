@@ -4,7 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonWriter;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -204,7 +203,7 @@ public class LootTableHandler extends DataHandler<LootTableHandler.Provider> {
         ItemLike item, TagKey<Item> tool) {
         var silkTouch = holderLookup.lookupOrThrow(Registries.ENCHANTMENT)
             .getOrThrow(Enchantments.SILK_TOUCH);
-        var pool = LootPool.lootPool()
+        return LootPool.lootPool()
             .when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(tool))
                 .or(MatchTool.toolMatches(ItemPredicate.Builder.item()
                     .withSubPredicate(ItemSubPredicates.ENCHANTMENTS,
@@ -212,7 +211,6 @@ public class LootTableHandler extends DataHandler<LootTableHandler.Provider> {
                             new EnchantmentPredicate(silkTouch,
                                 MinMaxBounds.Ints.atLeast(1))))))))
             .add(LootItem.lootTableItem(item));
-        return pool;
     }
 
     public void dropOnTool(ResourceLocation loc, ItemLike item, TagKey<Item> tool) {
